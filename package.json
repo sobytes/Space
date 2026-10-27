@@ -19,7 +19,9 @@
     "verify:depth": "vitest run src/view/core/depth.test.ts",
     "visual": "node scripts/visual/capture.mjs",
     "verify:invariants": "vitest run src/view/core/invariants.test.ts",
-    "verify:propagate": "vitest run src/engine/propagate.test.ts"
+    "verify:propagate": "vitest run src/engine/propagate.test.ts",
+    "verify:asteroid": "vitest run src/engine/scenarios",
+    "check": "bash scripts/check.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "1.3.0",

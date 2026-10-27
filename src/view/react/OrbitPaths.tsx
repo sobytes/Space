@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
-import { BufferAttribute, BufferGeometry, Group, LineBasicMaterial, LineLoop } from "three";
+import { useEffect, useMemo } from "react";
+import { BufferAttribute, BufferGeometry, LineBasicMaterial, LineLoop } from "three";
 import { BODY_CONTRACTS, BODY_IDS, type BodyId } from "@/engine/bodies/registry";
 import { SHORT_SPAN, type PlanetId } from "@/engine/data/planets";
 import { heliocentricPosition } from "@/engine/kepler";
 import { J2000_JD, jdTdb } from "@/engine/time";
 import type { ViewportSnapshot } from "../core/viewport";
-import { useViewport, useViewportValue } from "./ViewportContext";
+import { useViewportValue } from "./ViewportContext";
 
 const SAMPLES = 512;
 
@@ -55,9 +55,7 @@ function buildOrbit(planet: PlanetId, colour: string): LineLoop {
 const selectFocus = (s: ViewportSnapshot) => s.focus;
 
 export function OrbitPaths() {
-  const viewport = useViewport();
   const focus = useViewportValue(selectFocus);
-  const root = useRef<Group>(null);
 
   const orbits = useMemo(() => {
     const built: { id: BodyId; line: LineLoop }[] = [];
@@ -68,11 +66,6 @@ export function OrbitPaths() {
     }
     return built;
   }, []);
-
-  useEffect(() => {
-    if (!root.current) return;
-    return viewport.attachHeliocentricRoot(root.current);
-  }, [viewport]);
 
   useEffect(
     () => () => {
@@ -85,12 +78,12 @@ export function OrbitPaths() {
   );
 
   return (
-    <group ref={root}>
+    <>
       {orbits.map(({ id, line }) => (
         // r3f's piercing props set the material declaratively, so the focused orbit brightens
         // without anyone mutating an object a hook owns.
         <primitive key={id} object={line} material-opacity={id === focus ? 0.95 : 0.4} />
       ))}
-    </group>
+    </>
   );
 }

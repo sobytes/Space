@@ -67,6 +67,9 @@ describe("the float64 to float32 boundary", () => {
       "unit direction vectors on a sphere, so magnitude never exceeds one",
     "src/view/react/BodyMarkers.tsx":
       "allocates the empty buffers the viewport writes into, and per-body colours",
+    "src/view/workers/asteroid.worker.ts":
+      "builds the trajectory buffer transferred to the main thread, in heliocentric metres, " +
+      "which the heliocentric group then absorbs the floating origin for",
   };
 
   it("only declared files import the conversion module, whatever spelling they use", () => {
@@ -98,10 +101,20 @@ describe("the float64 to float32 boundary", () => {
     ).toEqual([]);
   });
 
-  it("every declared writer still exists and still carries a reason", () => {
+  it("every declared writer still exists, still writes, and still carries a reason", () => {
+    const writesTransform =
+      /\.position\.set\(|\.position\.copy\(|\.scale\.setScalar\(|new Float32Array\(|setXYZ\(/;
+
     for (const [path, reason] of Object.entries(DECLARED_WRITERS)) {
-      expect(FILES.some((f) => f.path === path), `${path} is declared but missing`).toBe(true);
+      const file = FILES.find((f) => f.path === path);
+      expect(file, `${path} is declared but missing`).toBeDefined();
       expect(reason.length, `${path} needs a real justification`).toBeGreaterThan(40);
+      // A stale declaration is worse than none: it makes the list stop meaning
+      // "these are the writers" and quietly pre-authorises a file that no longer qualifies.
+      expect(
+        writesTransform.test(file!.text),
+        `${path} is declared as a writer but no longer writes one; remove it`,
+      ).toBe(true);
     }
   });
 });

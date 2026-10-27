@@ -61,7 +61,10 @@ const BODY_VISIBLE_THRESHOLD = STARFIELD_ONLY_BASELINE * 1.5;
 const settle = (ms) => page.waitForTimeout(ms);
 
 console.log(`opening ${BASE}`);
-await page.goto(BASE, { waitUntil: "networkidle", timeout: 60_000 });
+// domcontentloaded rather than networkidle: the propagation Web Worker keeps a module
+// request open, so the network never goes idle and networkidle times out every time. The
+// scene readiness poll below is the real wait anyway.
+await page.goto(BASE, { waitUntil: "domcontentloaded", timeout: 60_000 });
 
 await page.waitForSelector("canvas", { timeout: 30_000 });
 
@@ -200,11 +203,58 @@ for (const name of bodies) {
   await shot(`body-${name.toLowerCase().replace(/\s+/g, "-")}`, `focused on ${name}`);
 }
 
+/**
+ * Exercises the asteroid feature end to end: open the panel, launch, wait for the worker, and
+ * read the result out of the DOM. A propagation that silently never returns would otherwise
+ * look identical to one that did.
+ */
+async function exerciseAsteroid() {
+  const open = page.locator('button:has-text("Launch an asteroid")');
+  if ((await open.count()) === 0) {
+    console.log("  asteroid: panel trigger not found");
+    return false;
+  }
+  await open.click();
+  await settle(400);
+
+  const launchButton = page.locator('aside button:has-text("Launch")').first();
+  await launchButton.click();
+
+  // The worker runs tens of thousands of adaptive steps; wait for the summary to appear.
+  try {
+    await page.waitForFunction(
+      () => document.body.innerText.includes("Integrator steps"),
+      undefined,
+      { timeout: 90_000 },
+    );
+  } catch {
+    console.log("  asteroid: FAILED, no result after 90s");
+    return false;
+  }
+
+  const summary = await page.evaluate(() => {
+    const aside = [...document.querySelectorAll("aside")].find((el) =>
+      el.innerText.includes("Integrator steps"),
+    );
+    return aside ? aside.innerText.replace(/\s+/g, " ").slice(0, 400) : null;
+  });
+
+  await page.screenshot({ path: `${OUT}/asteroid.png` });
+  const stats = await analyseSceneRegion(`${OUT}/asteroid.png`);
+  shots.push({ name: "asteroid", note: "propagated trajectory", file: `${OUT}/asteroid.png`, ...stats, litFraction: stats.sceneLitFraction, meanLuminance: stats.sceneMeanLuminance });
+
+  console.log(`  asteroid: ${summary}`);
+  return true;
+}
+
+const asteroidWorked = await exerciseAsteroid();
+
 const report = {
   url: BASE,
   capturedAt: new Date().toISOString(),
   shots,
   focusFailures,
+  asteroidWorked,
   starfieldOnlyBaseline: STARFIELD_ONLY_BASELINE,
   consoleErrors,
   failedRequests,
@@ -234,4 +284,8 @@ if (focusFailures.length) {
   console.log(`\nFAIL: focused body was not centred in ${focusFailures.length} shots: ${focusFailures.join(", ")}`);
   process.exit(1);
 }
-console.log("\nevery shot shows a body in frame, and the focused body is centred in each");
+if (!asteroidWorked) {
+  console.log("\nFAIL: the asteroid propagation did not return a result");
+  process.exit(1);
+}
+console.log("\nevery shot shows a body in frame, the focused body is centred, and the asteroid propagated");
