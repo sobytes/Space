@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import type { PerspectiveCamera } from "three";
 import { createViewport, type Viewport, type ViewportSnapshot } from "../core/viewport";
@@ -41,23 +48,21 @@ export function ViewportBinding() {
 }
 
 /**
- * Reads a slice of viewport state for the UI. The viewport publishes at 10 Hz rather than per
- * frame, which is why a date label does not force sixty React renders a second.
+ * Reads a slice of viewport state for the UI.
+ *
+ * `useSyncExternalStore` rather than a ref plus effect, because the viewport is exactly the
+ * external store React means. The selectors here all return primitives, so the snapshot
+ * allocation inside `getSnapshot` never causes a re-render loop.
+ *
+ * The viewport publishes at 10 Hz, not per frame. That is the rule that keeps a date label from
+ * forcing sixty React renders a second while the scene runs at full rate.
  */
 export function useViewportValue<T>(select: (snapshot: ViewportSnapshot) => T): T {
   const viewport = useViewport();
-  const [value, setValue] = useState(() => select(viewport.snapshot()));
-  const selectRef = useRef(select);
-  selectRef.current = select;
-
-  useEffect(
-    () =>
-      viewport.subscribe((snapshot) => {
-        const next = selectRef.current(snapshot);
-        setValue((previous) => (Object.is(previous, next) ? previous : next));
-      }),
+  const subscribe = useCallback(
+    (onChange: () => void) => viewport.subscribe(() => onChange()),
     [viewport],
   );
-
-  return value;
+  const getSnapshot = useCallback(() => select(viewport.snapshot()), [viewport, select]);
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }

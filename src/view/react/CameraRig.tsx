@@ -5,6 +5,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { CameraControls } from "@react-three/drei";
 import type CameraControlsImpl from "camera-controls";
 import { BODY_CONTRACTS } from "@/engine/bodies/registry";
+import type { ViewportSnapshot } from "../core/viewport";
 import { useViewport, useViewportValue } from "./ViewportContext";
 
 /**
@@ -18,10 +19,12 @@ import { useViewport, useViewportValue } from "./ViewportContext";
  * surface and no closer, and no further than a thousand body radii before a focus change makes
  * more sense than more dolly.
  */
+const selectFocus = (s: ViewportSnapshot) => s.focus;
+
 export function CameraRig() {
   const controls = useRef<CameraControlsImpl>(null);
   const viewport = useViewport();
-  const focus = useViewportValue((s) => s.focus);
+  const focus = useViewportValue(selectFocus);
   const size = useThree((s) => s.size);
 
   useEffect(() => {

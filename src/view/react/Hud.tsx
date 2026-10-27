@@ -10,7 +10,14 @@ import { AU_IN_METRES, SPEED_OF_LIGHT_M_S } from "@/engine/units";
 import { heliocentricPositionOf } from "@/engine/bodies/position";
 import { length, sub } from "@/engine/vec";
 import { RATE_PRESETS } from "../core/clock";
+import type { ViewportSnapshot } from "../core/viewport";
 import { useViewport, useViewportValue } from "./ViewportContext";
+
+/** Hoisted so `useSyncExternalStore` is not handed a new selector identity every render. */
+const selectEpoch = (s: ViewportSnapshot) => s.epoch;
+const selectRate = (s: ViewportSnapshot) => s.secondsPerSecond;
+const selectRunning = (s: ViewportSnapshot) => s.running;
+const selectFocus = (s: ViewportSnapshot) => s.focus;
 
 function formatEpoch(epoch: JdTdb): string {
   const ms = epochMsFromJdUtc(utcFromTdb(epoch));
@@ -43,7 +50,7 @@ function Provenance({ children }: { children: React.ReactNode }) {
 }
 
 function BodyPanel({ epoch }: { epoch: JdTdb }) {
-  const focus = useViewportValue((s) => s.focus);
+  const focus = useViewportValue(selectFocus);
   const contract = BODY_CONTRACTS[focus];
 
   const derived = useMemo(() => {
@@ -151,9 +158,9 @@ function BodyPanel({ epoch }: { epoch: JdTdb }) {
 
 function TimeBar() {
   const viewport = useViewport();
-  const epoch = useViewportValue((s) => s.epoch);
-  const rate = useViewportValue((s) => s.secondsPerSecond);
-  const running = useViewportValue((s) => s.running);
+  const epoch = useViewportValue(selectEpoch);
+  const rate = useViewportValue(selectRate);
+  const running = useViewportValue(selectRunning);
 
   const presetIndex = Math.max(
     0,
@@ -212,7 +219,7 @@ function TimeBar() {
 
 function BodyList() {
   const viewport = useViewport();
-  const focus = useViewportValue((s) => s.focus);
+  const focus = useViewportValue(selectFocus);
 
   return (
     <nav className="pointer-events-auto flex flex-wrap gap-1.5 rounded-xl border border-white/10 bg-black/70 px-3 py-2 backdrop-blur-md">
@@ -236,7 +243,7 @@ function BodyList() {
 }
 
 export function Hud() {
-  const epoch = useViewportValue((s) => s.epoch);
+  const epoch = useViewportValue(selectEpoch);
 
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-4">

@@ -1,16 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { useLoader } from "@react-three/fiber";
-import {
-  AdditiveBlending,
-  BackSide,
-  DoubleSide,
-  Group,
-  SRGBColorSpace,
-  TextureLoader,
-  type Texture,
-} from "three";
+import { useTexture } from "@react-three/drei";
+import { AdditiveBlending, BackSide, DoubleSide, Group, type Texture } from "three";
 import { BODY_CONTRACTS, type BodyId } from "@/engine/bodies/registry";
 import { useViewport } from "./ViewportContext";
 
@@ -23,12 +15,17 @@ function textureUrl(id: string): string {
   return `/textures/${id}.${extension}`;
 }
 
-function useSrgbTexture(id: string | undefined): Texture | null {
-  const loaded = useLoader(TextureLoader, id ? textureUrl(id) : "/textures/sun.jpg");
-  useEffect(() => {
-    if (loaded) loaded.colorSpace = SRGBColorSpace;
-  }, [loaded]);
-  return id ? loaded : null;
+/**
+ * drei's loader sets the colour space from the file rather than leaving it at the default,
+ * which matters: a planet texture sampled as linear reads washed out and slightly wrong, and
+ * it is the kind of error that looks like a lighting problem for an hour.
+ *
+ * A body with no cloud or ring map still has to call the hook, so an absent id loads the Sun
+ * and the result is discarded. Hooks cannot be conditional, and the texture is cached anyway.
+ */
+function useOptionalTexture(id: string | undefined): Texture | null {
+  const loaded = useTexture(id ? textureUrl(id) : "/textures/sun.jpg");
+  return id ? (loaded as Texture) : null;
 }
 
 /**
@@ -44,9 +41,9 @@ export function Body({ id, segments = 96 }: { id: BodyId; segments?: number }) {
   const group = useRef<Group>(null);
   const contract = BODY_CONTRACTS[id];
 
-  const albedo = useSrgbTexture(contract.appearance.albedoTextureId);
-  const clouds = useSrgbTexture(contract.appearance.cloudTextureId);
-  const ring = useSrgbTexture(contract.appearance.ringSystem?.textureId);
+  const albedo = useOptionalTexture(contract.appearance.albedoTextureId);
+  const clouds = useOptionalTexture(contract.appearance.cloudTextureId);
+  const ring = useOptionalTexture(contract.appearance.ringSystem?.textureId);
 
   useEffect(() => {
     if (!group.current) return;

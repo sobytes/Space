@@ -55,3 +55,6 @@ next-env.d.ts
 # Downloaded planetary textures. The manifest and fetch script are the artifact, not the
 # bytes; run `npm run assets 1` to restore them. Tier 2 and 3 run to several GB.
 /public/textures/
+
+# Visual verification output. Regenerate with `npm run visual`.
+/artifacts/
