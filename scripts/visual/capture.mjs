@@ -295,7 +295,85 @@ async function exerciseAsk() {
   return true;
 }
 
+/**
+ * Flies close to the Moon and checks that surface relief actually appears.
+ *
+ * The numeric half of predicate P10 is gated in core/tiles.test.ts. This is the other half:
+ * at low altitude the frame has to contain visible shading variation, not a flat disc. A
+ * normal map that failed to load, or loaded with the wrong byte order, would still render a
+ * lit sphere, so the check is on local contrast rather than on brightness.
+ */
+async function exerciseCraters() {
+  const moon = page.locator('nav button:has-text("The Moon")').first();
+  if ((await moon.count()) === 0) return false;
+  await moon.click();
+  await settle(2_500);
+
+  // Dolly right down to the surface. camera-controls clamps at 1.02 radii.
+  await page.evaluate(async () => {
+    const viewport = window.__solar;
+    const controls = document.querySelector("canvas");
+    void controls;
+    void viewport;
+  });
+  for (let i = 0; i < 22; i++) {
+    await page.mouse.move(700, 500);
+    await page.mouse.wheel(0, -500);
+    await settle(120);
+  }
+  await settle(4_000);
+
+  const altitudeKm = await page.evaluate(
+    () => window.__solar.snapshot().distanceToFocus / 1000,
+  );
+
+  await page.screenshot({ path: `${OUT}/craters.png` });
+
+  /**
+   * Local contrast, not brightness. A flat lit sphere is bright and featureless; relief
+   * shows up as neighbouring pixels differing. Measured on the centre of the frame where
+   * the surface fills the view.
+   */
+  const meta = await sharp(`${OUT}/craters.png`).metadata();
+  const patch = `${OUT}/craters-patch.png`;
+  await sharp(`${OUT}/craters.png`)
+    .extract({
+      left: Math.round(meta.width * 0.35),
+      top: Math.round(meta.height * 0.3),
+      width: Math.round(meta.width * 0.3),
+      height: Math.round(meta.height * 0.4),
+    })
+    .greyscale()
+    .toFile(patch);
+
+  const { data, info } = await sharp(patch).raw().toBuffer({ resolveWithObject: true });
+  let differences = 0;
+  let count = 0;
+  for (let y = 0; y < info.height; y++) {
+    for (let x = 1; x < info.width; x++) {
+      const i = y * info.width + x;
+      differences += Math.abs(data[i] - data[i - 1]);
+      count += 1;
+    }
+  }
+  const contrast = differences / count;
+
+  console.log(
+    `  craters: altitude ${altitudeKm.toFixed(0)} km, mean neighbour contrast ${contrast.toFixed(2)}`,
+  );
+  shots.push({
+    name: "craters",
+    note: `surface relief at ${altitudeKm.toFixed(0)} km`,
+    file: `${OUT}/craters.png`,
+    altitudeKm,
+    surfaceContrast: contrast,
+  });
+
+  return contrast > 1.5;
+}
+
 const asteroidWorked = await exerciseAsteroid();
+const cratersVisible = await exerciseCraters();
 const askWorked = await exerciseAsk();
 
 const report = {
@@ -304,6 +382,7 @@ const report = {
   shots,
   focusFailures,
   asteroidWorked,
+  cratersVisible,
   askWorked,
   starfieldOnlyBaseline: STARFIELD_ONLY_BASELINE,
   consoleErrors,

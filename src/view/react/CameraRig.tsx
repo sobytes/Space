@@ -42,8 +42,34 @@ export function CameraRig() {
     instance.dollySpeed = 0.6;
     instance.truckSpeed = 0;
     void instance.setTarget(0, 0, 0, false);
-    void instance.dollyTo(isSystemView ? 1.6e12 : radius * 6, true);
-  }, [focus]);
+
+    /**
+     * Approach from the lit side.
+     *
+     * Flying to a body and arriving over its night side is a black screen and reads as a bug.
+     * The floating origin puts the focused body at the render origin, so the Sun's direction
+     * from it is just the normalised negative of the origin, which the viewport publishes.
+     * The camera is placed along that direction and lifted slightly out of the ecliptic so the
+     * terminator is visible rather than edge-on.
+     */
+    const { sunDirection } = viewport.snapshot();
+    const distance = isSystemView ? 1.6e12 : radius * 6;
+    void instance.setLookAt(
+      sunDirection.x * distance,
+      sunDirection.y * distance + distance * 0.25,
+      sunDirection.z * distance,
+      0,
+      0,
+      0,
+      true,
+    );
+  }, [focus, viewport]);
+
+  useEffect(() => {
+    // Inspection hook for the visual harness, alongside window.__solar. Flying to a precise
+    // altitude from a test is far more reliable than synthesising wheel events.
+    (window as unknown as { __controls?: unknown }).__controls = controls.current;
+  });
 
   useFrame(() => {
     const instance = controls.current;

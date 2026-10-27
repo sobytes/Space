@@ -58,3 +58,7 @@ next-env.d.ts
 
 # Visual verification output. Regenerate with `npm run visual`.
 /artifacts/
+
+# Generated terrain pyramids. Rebuild with `npm run terrain` after downloading the source
+# elevation model named in public/terrain/<body>/manifest.json.
+/public/terrain/

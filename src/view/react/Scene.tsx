@@ -57,8 +57,8 @@ export function Scene() {
             ))}
           </Suspense>
           <CameraRig />
+          <PickLayer />
         </Canvas>
-        <PickLayer />
         <Hud />
         <AsteroidPanel asteroid={asteroid} />
         <AskPanel />

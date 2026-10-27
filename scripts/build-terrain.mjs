@@ -26,9 +26,14 @@ const arg = (name, fallback) => {
 };
 
 /**
- * LOLA LDEM_64: simple cylindrical, 64 pixels per degree, 16-bit signed integers, big-endian
- * as PDS publishes them. Elevation in metres is the sample times the scaling factor, measured
- * from a 1737400 m reference sphere.
+ * LOLA LDEM_64: simple cylindrical, 64 pixels per degree, 16-bit signed integers, measured
+ * from a 1737400 m reference sphere with elevation equal to the sample times the scaling factor.
+ *
+ * Byte order was determined by reading the file rather than assumed. Interpreted big-endian a
+ * mid-latitude row spans exactly -16384 to +16384, a power of two, which is the signature of
+ * byte-swapped noise. Interpreted little-endian the same row spans -3979 to +8746 m, inside the
+ * published lunar range of about -9150 to +10780. A wrong guess here produces a normal map that
+ * looks like plausible terrain and is entirely fictional.
  */
 const SOURCES = {
   moon: {
@@ -37,7 +42,7 @@ const SOURCES = {
     height: 11_520,
     scalingFactor: 0.5,
     referenceRadiusM: 1_737_400,
-    bigEndian: true,
+    bigEndian: false,
     source:
       "LRO LOLA GDR, https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/img/ldem_64.img",
   },
@@ -116,6 +121,32 @@ async function downsample(targetWidth, targetHeight) {
   }
   process.stdout.write(`\r  downsampling 100%      \n`);
   return grid;
+}
+
+/** Averages an in-memory grid down to a smaller one. */
+function boxDownsample(grid, fromWidth, fromHeight, toWidth, toHeight) {
+  const out = new Float32Array(toWidth * toHeight);
+  const xRatio = fromWidth / toWidth;
+  const yRatio = fromHeight / toHeight;
+
+  for (let y = 0; y < toHeight; y++) {
+    const y0 = Math.floor(y * yRatio);
+    const y1 = Math.min(fromHeight, Math.max(y0 + 1, Math.floor((y + 1) * yRatio)));
+    for (let x = 0; x < toWidth; x++) {
+      const x0 = Math.floor(x * xRatio);
+      const x1 = Math.min(fromWidth, Math.max(x0 + 1, Math.floor((x + 1) * xRatio)));
+      let sum = 0;
+      let count = 0;
+      for (let sy = y0; sy < y1; sy++) {
+        for (let sx = x0; sx < x1; sx++) {
+          sum += grid[sy * fromWidth + sx];
+          count += 1;
+        }
+      }
+      out[y * toWidth + x] = count ? sum / count : 0;
+    }
+  }
+  return out;
 }
 
 /**
@@ -204,10 +235,12 @@ for (let level = 0; level <= PYRAMID_LEVELS; level++) {
   const levelWidth = tilesX * TILE_SIZE;
   const levelHeight = tilesY * TILE_SIZE;
 
+  // Coarser levels come from the working grid rather than from the file. Re-reading 530 MB
+  // once per level would be four extra full passes for data already in memory.
   const levelGrid =
     levelWidth === GLOBAL_WIDTH && levelHeight === GLOBAL_HEIGHT
       ? grid
-      : await downsample(levelWidth, levelHeight);
+      : boxDownsample(grid, GLOBAL_WIDTH, GLOBAL_HEIGHT, levelWidth, levelHeight);
 
   const { rgb: levelRgb } = normalMapFrom(
     levelGrid,

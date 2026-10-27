@@ -505,8 +505,9 @@ export const BODY_CONTRACTS: Readonly<Record<BodyId, BodyContract>> = {
       oneLine: "Tidally locked, so its rotation period exactly equals its orbital period.",
       whyItMatters:
         "The Moon is the test case for tidal locking, and the reason you can only ever see one " +
-        "face. It is also where real elevation data makes craters visible, because the LOLA " +
-        "survey mapped it at 118 m per pixel.",
+        "face. It is also where real elevation data makes craters visible: the surface relief " +
+        "here is built from the LRO LOLA elevation model at 64 pixels per degree, which is " +
+        "about 474 m per sample at the equator.",
       facts: [
         "Its 27.321582 day rotation and orbit are equal by construction of tidal locking, and this contract asserts they match.",
         "Libration means about 59% of the surface is visible from Earth over time, not 50%.",

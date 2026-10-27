@@ -18,6 +18,7 @@ const selectEpoch = (s: ViewportSnapshot) => s.epoch;
 const selectRate = (s: ViewportSnapshot) => s.secondsPerSecond;
 const selectRunning = (s: ViewportSnapshot) => s.running;
 const selectFocus = (s: ViewportSnapshot) => s.focus;
+const selectAltitude = (s: ViewportSnapshot) => s.distanceToFocus;
 
 function formatEpoch(epoch: JdTdb): string {
   const ms = epochMsFromJdUtc(utcFromTdb(epoch));
@@ -49,8 +50,23 @@ function Provenance({ children }: { children: React.ReactNode }) {
   return <p className="mt-2 text-[11px] leading-relaxed text-zinc-500">{children}</p>;
 }
 
+/**
+ * Surface relief comes from an elevation model with a finite sample spacing, so there is an
+ * altitude below which the screen out-resolves the data and the ground goes smooth. Saying so
+ * is better than letting someone conclude the Moon is flat.
+ */
+const SURFACE_DATA = {
+  moon: {
+    metresPerSample: 474,
+    smoothBelowKm: 1_000,
+    source: "LRO LOLA at 64 pixels per degree",
+    finer: "the 8.49 GB LOLA 118 m model",
+  },
+} as const;
+
 function BodyPanel({ epoch }: { epoch: JdTdb }) {
   const focus = useViewportValue(selectFocus);
+  const altitudeM = useViewportValue(selectAltitude);
   const contract = BODY_CONTRACTS[focus];
 
   const derived = useMemo(() => {
@@ -143,6 +159,16 @@ function BodyPanel({ epoch }: { epoch: JdTdb }) {
             </div>
           ))}
         </div>
+      ) : null}
+
+      {focus in SURFACE_DATA && altitudeM < SURFACE_DATA.moon.smoothBelowKm * 1000 ? (
+        <p className="mt-3 rounded-lg border border-sky-500/20 bg-sky-500/5 p-2.5 text-[11px] leading-relaxed text-sky-200/70">
+          Below about {SURFACE_DATA.moon.smoothBelowKm.toLocaleString()} km the screen resolves
+          finer than the elevation data, so the ground smooths out. That is{" "}
+          {SURFACE_DATA.moon.source} running out at {SURFACE_DATA.moon.metresPerSample} m per
+          sample, not a flat Moon. Craters read best between about 1,000 and 5,000 km. Closer
+          detail would need {SURFACE_DATA.moon.finer}.
+        </p>
       ) : null}
 
       <Provenance>

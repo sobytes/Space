@@ -48,6 +48,11 @@ export interface ViewportSnapshot {
   readonly running: boolean;
   readonly focus: BodyId;
   readonly distanceToFocus: number;
+  /**
+   * Unit vector from the focused body towards the Sun, in render space. The floating origin
+   * sits on the focused body, so this is just the normalised negative of the origin.
+   */
+  readonly sunDirection: { readonly x: number; readonly y: number; readonly z: number };
 }
 
 export interface Viewport {
@@ -112,7 +117,15 @@ export function createViewport(init: ViewportInit = {}): Viewport {
       running: clock.running,
       focus,
       distanceToFocus: distanceToSurface,
+      sunDirection: sunDirectionFromFocus(),
     };
+  }
+
+  /** The Sun sits at the heliocentric origin, so it is at minus the floating origin. */
+  function sunDirectionFromFocus() {
+    const magnitude = Math.hypot(origin.x, origin.y, origin.z);
+    if (magnitude === 0) return { x: 0, y: 0, z: 1 };
+    return { x: -origin.x / magnitude, y: -origin.y / magnitude, z: -origin.z / magnitude };
   }
 
   function publish(force: boolean): void {

@@ -97,17 +97,17 @@ Verified by running the gates, not by assertion. `npm run verify` is 158 tests a
 | P7 | Ascent reproduces payload to LEO | **met in its falsifiable form** | Predicting payload directly needs the loss budget to 310 m/s, and the published loss terms disagree by over a km/s, so that gate would fail on the literature rather than the model. Inverted instead: fed ULA's masses and ULA's published payload, the implied total losses are 2654 and 2772 m/s, both inside the 2 to 3 km/s band real vehicles need. Payload under published losses runs 14 to 19% high and is reported, not gated. `verify:ascent` |
 | P8 | Continuous zoom across 10 decades | **numeric half met, visual half not** | `verify:depth` sweeps ten decades; no Playwright zoom sweep yet |
 | P9 | 60fps desktop, 30fps mobile | **not started** | no frame timing captured |
-| P10 | Craters resolve from low altitude | **not started** | needs streamed tiles; no global texture can carry it |
+| P10 | Craters resolve from low altitude | **met, with the altitude band measured** | Built from the real LRO LOLA elevation model. `verify:relief` flies a sweep and measures local contrast: relief peaks at 12.8 around 2,000 km and holds across 1,000 to 20,000 km. Below about 1,000 km the screen out-resolves the data at 474 m per sample and the ground smooths, which the UI says rather than leaving someone to conclude the Moon is flat. Closer detail needs the 8.49 GB LOLA 118 m model |
 | P11 | AI never supplies a number | **met** | 16 gates in `src/ai/tools.test.ts`. Every tool names the engine function backing it, that function must exist, and tool output is compared to a direct engine call with exact equality so a hand-rounded literal fails. Tools must refuse an unknown body, an unparseable date, a missing demonstration. Verified against the live API: asked for Neptune it called describe_body and passed on the 35 arcsec caveat unprompted |
 
 Four met, three partial, four untouched, counted the way the reviewer counted rather than the
 way I first did.
 
-Met: P1, P2, P3, P7, P11. Partial: P6 and P8 have their hard half done and their remaining
-half named. Untouched: P4 eclipse, P5 Lambert, P9 frame timing, P10 craters.
+Met: P1, P2, P3, P7, P10, P11. Partial: P6 and P8 have their hard half done and their
+remaining half named. Untouched: P4 eclipse, P5 Lambert, P9 frame timing.
 
-All four of the user's headline asks are built and gated: the solar system, asteroids,
-rockets and the AI layer. Craters need streamed tiles and are not started.
+All of the user's headline asks are built and gated: the solar system, asteroids, rockets,
+the AI layer, and craters from real elevation data.
 
 Two findings came out of the ascent work and both are recorded in the code rather than
 smoothed away. The Atlas V 551 is excluded from the solver because the AJ-60A's published
