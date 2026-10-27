@@ -40,6 +40,8 @@ describe("every tool is a real wrapper over the engine", () => {
       "src/engine/rotation.ts",
       "src/engine/demonstrations/registry.ts",
       "src/engine/scenarios/asteroid.ts",
+      "src/engine/launch/ascent.ts",
+      "src/engine/launch/vehicles.ts",
     ]
       .map((path) => readFileSync(path, "utf8"))
       .join("\n");

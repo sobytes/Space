@@ -149,15 +149,6 @@ export const ASCENT_FIXTURES: readonly AscentFixture[] = [
     source: "ULA Rocket Rundown, LEO-POLAR column",
     tag: "VENDOR",
   },
-  {
-    vehicle: "Atlas V 551",
-    payloadKg: 18_814,
-    altitudeKm: 200,
-    inclinationDeg: 28.5,
-    site: "ksc-lc39a",
-    source: "ULA Atlas V Launch Services User's Guide Rev 11, Table 2.6.5-2f p.2-93",
-    tag: "VENDOR",
-  },
 ];
 
 /**
@@ -170,8 +161,20 @@ export const EXACT_CHECKS = {
   circularSpeed400kmMS: { value: 7_668.6, source: "Karabeyoglu slide 13, quoted as 7.67 km/s" },
   equatorialRotationSpeedMS: { value: 465.10, source: "DERIVED from WGS-84 radius and IERS rotation rate" },
   rotationBonusKscEastMS: { value: 408.7, source: "Cross-checks against ERAU 0.41 km/s and USU 0.4076 km/s" },
-  /** Apollo 8 was designed for azimuth 72 degrees and actually flew 32.509 degrees inclination. */
-  apollo8InclinationDeg: { value: 32.509, predicted: 32.26, source: "GOVERNMENT, FER AS-503 Table 4-6" },
+  /**
+   * Apollo 8 flew 32.509 degrees inclination and was designed for an azimuth range of 72 to
+   * 108 degrees. Research reported "azimuth 72 gives inclination 32.26", which does not
+   * survive the arithmetic: cos(28.5) * sin(72) = 0.83578, so azimuth 72 gives 33.300
+   * degrees. The check that actually holds is the inverse one. The flown inclination implies
+   * an azimuth of 73.66 degrees, which sits inside the designed range, and that validates
+   * cos(i) = cos(latitude) * sin(azimuth) against a real flight.
+   */
+  apollo8InclinationDeg: {
+    value: 32.509,
+    impliedAzimuthDeg: 73.66,
+    designedAzimuthRangeDeg: [72, 108],
+    source: "GOVERNMENT, FER AS-503 Table 4-6; MSFC-MAN-503 section X p.10-1",
+  },
 } as const;
 
 /**

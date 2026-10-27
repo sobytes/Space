@@ -24,6 +24,9 @@ import { SHORT_SPAN } from "@/engine/data/planets";
 import { jdTdb, jdUtcFromEpochMs, tdbFromUtc, type JdTdb } from "@/engine/time";
 import { AU_IN_METRES, SPEED_OF_LIGHT_M_S } from "@/engine/units";
 import { length, sub } from "@/engine/vec";
+import { azimuthFor, maximumPayload, siteById } from "@/engine/launch/ascent";
+import { VEHICLES } from "@/engine/launch/vehicles";
+import { LAUNCH_SITES } from "@/engine/launch/reference-data";
 
 export interface ToolDefinition {
   readonly name: string;
@@ -246,6 +249,56 @@ export const TOOLS: readonly ToolDefinition[] = [
           "Perturbing planet positions come from the Standish tables, whose error reaches about " +
           "20 arcseconds for Earth, roughly 14,000 km at one au. Fate is reliable; a flyby " +
           "distance to the kilometre is not.",
+      };
+    },
+  },
+  {
+    name: "compute_launch",
+    description:
+      "Works out what a launch vehicle can lift to a given orbit from a given site, and the " +
+      "full delta-v budget behind it: orbital speed, the climb, gravity and drag losses, and " +
+      "the Earth-rotation bonus, which is negative for a retrograde or sun-synchronous launch. " +
+      "Use this for any question about rockets, payload to orbit, or launch azimuth.",
+    input_schema: {
+      type: "object",
+      properties: {
+        vehicle: { type: "string", enum: VEHICLES.map((v) => v.id) },
+        site: { type: "string", enum: LAUNCH_SITES.map((s) => s.id) },
+        altitudeKm: { type: "number" },
+        inclinationDeg: { type: "number" },
+      },
+      required: ["altitudeKm", "inclinationDeg"],
+      additionalProperties: false,
+    },
+    backedBy: "maximumPayload, ascentBudget, earthRotationBonus, azimuthFor",
+    run: (input) => {
+      const vehicle =
+        VEHICLES.find((v) => v.id === input.vehicle) ?? VEHICLES[0];
+      const site = siteById(typeof input.site === "string" ? input.site : "ksc-lc39a");
+      const target = {
+        altitudeKm: Number(input.altitudeKm),
+        inclinationDeg: Number(input.inclinationDeg),
+        site,
+      };
+
+      const result = maximumPayload(vehicle, target);
+      return {
+        vehicle: result.vehicle,
+        site: site.name,
+        orbit: `${target.altitudeKm} km circular at ${target.inclinationDeg} degrees`,
+        launchAzimuthDeg: azimuthFor(site, target.inclinationDeg),
+        payloadKg: result.payloadKg,
+        liftoffThrustToWeight: result.launchTWR,
+        budget: result.budget,
+        perStageDeltaV: result.perStage,
+        caveat:
+          "The budget uses published loss figures, and the published loss terms disagree by " +
+          "more than a kilometre per second between sources. Fed this vehicle's real masses " +
+          "and its published payload the model implies 2,654 m/s of losses, inside the 2 to 3 " +
+          "km/s band real vehicles need, but the payload it predicts under the published " +
+          "figures runs about 14% high. Only the Atlas V 401 is modelled; the 551 is excluded " +
+          "because its booster's published thrust, specific impulse, burn time and gross mass " +
+          "are mutually inconsistent.",
       };
     },
   },

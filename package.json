@@ -22,7 +22,8 @@
     "verify:propagate": "vitest run src/engine/propagate.test.ts",
     "verify:asteroid": "vitest run src/engine/scenarios",
     "check": "bash scripts/check.sh",
-    "verify:ai-tools": "vitest run src/ai"
+    "verify:ai-tools": "vitest run src/ai",
+    "verify:ascent": "vitest run src/engine/launch"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "1.3.0",
