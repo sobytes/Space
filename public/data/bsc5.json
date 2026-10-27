@@ -1,0 +1,21 @@
+{
+  "source": "https://cdsarc.cds.unistra.fr/ftp/V/50/catalog.gz",
+  "catalogue": "Yale Bright Star Catalogue, 5th Revised Edition (Hoffleit & Warren 1991), VizieR V/50",
+  "epoch": "J2000",
+  "generatedAt": "2026-10-27T00:43:14.961Z",
+  "count": 9096,
+  "stride": 4,
+  "layout": [
+    "rightAscensionRad",
+    "declinationRad",
+    "visualMagnitude",
+    "colourIndexBV"
+  ],
+  "brightestMagnitude": -1.46,
+  "faintestMagnitude": 7.96,
+  "bytes": 145536,
+  "skipped": {
+    "noPosition": 0,
+    "novaOrCluster": 14
+  }
+}

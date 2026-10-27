@@ -186,10 +186,6 @@ function stateFrom(el: EvaluatedElements): StateVector {
   return { position, velocity: scale(rateNode, 1 / SECONDS_PER_JULIAN_CENTURY) };
 }
 
-function resolveModel(jd: JdTdb, override?: EphemerisModel): EphemerisModel {
-  return override ?? modelForYear(approximateJulianYear(jd));
-}
-
 /** Heliocentric position in metres, J2000 ecliptic. */
 export function heliocentricPosition(
   planet: PlanetId,
@@ -208,12 +204,16 @@ export function heliocentricVelocity(
   return heliocentricState(planet, jd, model).velocity;
 }
 
+/**
+ * Heliocentric position and velocity, metres and metres per second, J2000 ecliptic. Without
+ * `model` the element table is chosen by the year, so a caller that needs one table across a
+ * span crossing 1800 or 2050 must pass it, since the two tables disagree at the seam.
+ */
 export function heliocentricState(
   planet: PlanetId,
   jd: JdTdb,
   model?: EphemerisModel,
 ): StateVector {
-  const resolved = resolveModel(jd, model);
-  const centuries = julianCenturiesSinceJ2000(jd);
-  return stateFrom(evaluateElements(resolved.elements[planet], centuries));
+  const resolved = model ?? modelForYear(approximateJulianYear(jd));
+  return stateFrom(evaluateElements(resolved.elements[planet], julianCenturiesSinceJ2000(jd)));
 }

@@ -17,7 +17,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { PLANET_IDS, SHORT_SPAN, modelForYear, type PlanetId } from "./data/planets";
 import { heliocentricPosition, heliocentricState } from "./kepler";
 import { approximateJulianYear, jdTdb, type JdTdb } from "./time";
-import { metresToKm } from "./units";
+import { metresToKm, normalizeAngleSigned } from "./units";
 import { length, sub, vec3, type Vec3 } from "./vec";
 
 const ARCSEC_PER_RADIAN = 648_000 / Math.PI;
@@ -90,14 +90,6 @@ function loadFixture(body: PlanetId): readonly HorizonsSample[] {
 const eclipticLongitude = (v: Vec3): number => Math.atan2(v.y, v.x);
 const eclipticLatitude = (v: Vec3): number => Math.asin(v.z / length(v));
 
-/** Wraps to [-pi, pi) so a longitude difference across the 0/2pi seam is not a full turn. */
-function signedAngleDifference(a: number, b: number): number {
-  const diff = (a - b) % (2 * Math.PI);
-  if (diff >= Math.PI) return diff - 2 * Math.PI;
-  if (diff < -Math.PI) return diff + 2 * Math.PI;
-  return diff;
-}
-
 interface SampleError {
   readonly sample: HorizonsSample;
   readonly longitudeArcsec: number;
@@ -112,22 +104,34 @@ function measure(sample: HorizonsSample): SampleError {
     sample,
     longitudeArcsec:
       Math.abs(
-        signedAngleDifference(
-          eclipticLongitude(computed.position),
-          eclipticLongitude(sample.position),
+        normalizeAngleSigned(
+          eclipticLongitude(computed.position) - eclipticLongitude(sample.position),
         ),
       ) * ARCSEC_PER_RADIAN,
     latitudeArcsec:
       Math.abs(eclipticLatitude(computed.position) - eclipticLatitude(sample.position)) *
       ARCSEC_PER_RADIAN,
-    distanceKm: Math.abs(metresToKm(length(computed.position)) - metresToKm(length(sample.position))),
+    distanceKm: Math.abs(
+      metresToKm(length(computed.position)) - metresToKm(length(sample.position)),
+    ),
     velocityErrorMPerS: length(sub(computed.velocity, sample.velocity)),
   };
 }
 
-const MEASUREMENTS: ReadonlyMap<PlanetId, readonly SampleError[]> = new Map(
-  PLANET_IDS.map((body) => [body, loadFixture(body).map(measure)]),
-);
+const measureFixture = (body: PlanetId): readonly SampleError[] =>
+  loadFixture(body).map(measure);
+
+/** Spelled out per body so the compiler, not a cast, proves every `PlanetId` is covered. */
+const MEASUREMENTS: Readonly<Record<PlanetId, readonly SampleError[]>> = {
+  mercury: measureFixture("mercury"),
+  venus: measureFixture("venus"),
+  embary: measureFixture("embary"),
+  mars: measureFixture("mars"),
+  jupiter: measureFixture("jupiter"),
+  saturn: measureFixture("saturn"),
+  uranus: measureFixture("uranus"),
+  neptune: measureFixture("neptune"),
+};
 
 const percentOfAllowance = (actual: number, allowed: number): string =>
   `${((100 * actual) / allowed).toFixed(1)}%`;
@@ -139,7 +143,7 @@ describe("Standish Keplerian ephemeris versus JPL Horizons", () => {
 
     for (const body of PLANET_IDS) {
       const allowed = SHORT_SPAN.quotedError[body];
-      const errors = MEASUREMENTS.get(body) ?? [];
+      const errors = MEASUREMENTS[body];
       let worst = 0;
       let worstEpoch = "";
       let worstQuantity = "";
@@ -187,10 +191,10 @@ describe("Standish Keplerian ephemeris versus JPL Horizons", () => {
 
   it.each(PLANET_IDS)("%s stays inside JPL's quoted error at every epoch", (body) => {
     const allowed = SHORT_SPAN.quotedError[body];
-    const errors = MEASUREMENTS.get(body);
+    const errors = MEASUREMENTS[body];
     expect(errors).toHaveLength(8);
 
-    for (const error of errors ?? []) {
+    for (const error of errors) {
       const at = `${body} @ ${error.sample.epoch}`;
       expect(error.longitudeArcsec, `${at} longitude`).toBeLessThanOrEqual(allowed.longitude);
       expect(error.latitudeArcsec, `${at} latitude`).toBeLessThanOrEqual(allowed.latitude);
@@ -199,8 +203,8 @@ describe("Standish Keplerian ephemeris versus JPL Horizons", () => {
   });
 
   it("selects the short-span model by default at every fixture epoch", () => {
-    for (const errors of MEASUREMENTS.values()) {
-      for (const { sample } of errors) {
+    for (const body of PLANET_IDS) {
+      for (const { sample } of MEASUREMENTS[body]) {
         expect(modelForYear(approximateJulianYear(sample.jdTdb)).id, sample.epoch).toBe(
           "short-span",
         );
@@ -222,7 +226,7 @@ describe("analytic velocity", () => {
   const STEP_DAYS = 0.01;
 
   it.each(PLANET_IDS)("%s matches a central difference of the position function", (body) => {
-    for (const { sample } of MEASUREMENTS.get(body) ?? []) {
+    for (const { sample } of MEASUREMENTS[body]) {
       const before = heliocentricPosition(body, jdTdb(sample.jdTdb - STEP_DAYS), SHORT_SPAN);
       const after = heliocentricPosition(body, jdTdb(sample.jdTdb + STEP_DAYS), SHORT_SPAN);
       const seconds = 2 * STEP_DAYS * 86_400;

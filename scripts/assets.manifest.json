@@ -1,0 +1,205 @@
+{
+  "note": "Every asset records its licence and the attribution it requires. scripts/fetch-assets.mjs reads this file, downloads by tier, verifies the bytes, and regenerates public/ATTRIBUTION.md so compliance cannot drift from what is actually on disk.",
+  "excluded": [
+    {
+      "source": "bjj.mmedia.is",
+      "reason": "its own terms forbid hosting a copy of the maps"
+    },
+    {
+      "source": "stevealbers.net",
+      "reason": "personal non-commercial use only"
+    },
+    {
+      "source": "planetpixelemporium.com",
+      "reason": "ambiguous on redistribution, and currently offline"
+    }
+  ],
+  "licences": {
+    "nasa-pd": {
+      "name": "Public domain (NASA)",
+      "requires": "Credit NASA as the source. Do not use the NASA insignia or imply endorsement.",
+      "url": "https://www.nasa.gov/nasa-brand-center/images-and-media/"
+    },
+    "usgs-pd": {
+      "name": "Public domain (USGS Astrogeology)",
+      "requires": "Credit USGS Astrogeology Science Center.",
+      "url": "https://astrogeology.usgs.gov/"
+    },
+    "usgs-cite": {
+      "name": "Public domain, authors asked to be cited",
+      "requires": "Credit USGS Astrogeology and the product authors.",
+      "url": "https://astrogeology.usgs.gov/"
+    },
+    "cc-by-4.0-sss": {
+      "name": "CC BY 4.0",
+      "requires": "Visible attribution to Solar System Scope (solarsystemscope.com).",
+      "url": "https://www.solarsystemscope.com/textures/"
+    },
+    "cc-by-3.0-tps": {
+      "name": "CC BY 3.0",
+      "requires": "Credit The Planetary Society and Bjorn Jonsson.",
+      "url": "https://www.planetary.org/space-images/merged-cassini-and-juno"
+    }
+  },
+  "assets": [
+    {
+      "id": "sun",
+      "tier": 1,
+      "file": "sun.jpg",
+      "url": "https://www.solarsystemscope.com/textures/download/8k_sun.jpg",
+      "licence": "cc-by-4.0-sss",
+      "measured": "4096x2048",
+      "filenameLies": "url says 8k, file is actually 4096 wide"
+    },
+    {
+      "id": "mercury",
+      "tier": 1,
+      "file": "mercury.jpg",
+      "url": "https://www.solarsystemscope.com/textures/download/8k_mercury.jpg",
+      "licence": "cc-by-4.0-sss",
+      "measured": "8192x4096"
+    },
+    {
+      "id": "venus-surface",
+      "tier": 1,
+      "file": "venus-surface.jpg",
+      "url": "https://www.solarsystemscope.com/textures/download/8k_venus_surface.jpg",
+      "licence": "cc-by-4.0-sss",
+      "measured": "8192x4096"
+    },
+    {
+      "id": "venus-clouds",
+      "tier": 1,
+      "file": "venus-clouds.jpg",
+      "url": "https://www.solarsystemscope.com/textures/download/4k_venus_atmosphere.jpg",
+      "licence": "cc-by-4.0-sss",
+      "measured": "4096x2048"
+    },
+    {
+      "id": "earth-day",
+      "tier": 1,
+      "file": "earth-day.jpg",
+      "url": "https://www.solarsystemscope.com/textures/download/8k_earth_daymap.jpg",
+      "licence": "cc-by-4.0-sss",
+      "measured": "8192x4096"
+    },
+    {
+      "id": "earth-night",
+      "tier": 1,
+      "file": "earth-night.jpg",
+      "url": "https://www.solarsystemscope.com/textures/download/8k_earth_nightmap.jpg",
+      "licence": "cc-by-4.0-sss",
+      "measured": "8192x4096"
+    },
+    {
+      "id": "earth-clouds",
+      "tier": 1,
+      "file": "earth-clouds.jpg",
+      "url": "https://www.solarsystemscope.com/textures/download/8k_earth_clouds.jpg",
+      "licence": "cc-by-4.0-sss",
+      "measured": "8192x4096"
+    },
+    {
+      "id": "moon",
+      "tier": 1,
+      "file": "moon.jpg",
+      "url": "https://www.solarsystemscope.com/textures/download/8k_moon.jpg",
+      "licence": "cc-by-4.0-sss",
+      "measured": "8192x4096"
+    },
+    {
+      "id": "mars",
+      "tier": 1,
+      "file": "mars.jpg",
+      "url": "https://www.solarsystemscope.com/textures/download/8k_mars.jpg",
+      "licence": "cc-by-4.0-sss",
+      "measured": "8192x4096"
+    },
+    {
+      "id": "jupiter",
+      "tier": 1,
+      "file": "jupiter.jpg",
+      "url": "https://www.solarsystemscope.com/textures/download/8k_jupiter.jpg",
+      "licence": "cc-by-4.0-sss",
+      "measured": "4096x2048",
+      "filenameLies": "url says 8k, file is actually 4096 wide"
+    },
+    {
+      "id": "saturn",
+      "tier": 1,
+      "file": "saturn.jpg",
+      "url": "https://www.solarsystemscope.com/textures/download/8k_saturn.jpg",
+      "licence": "cc-by-4.0-sss",
+      "measured": "4096x2048",
+      "filenameLies": "url says 8k, file is actually 4096 wide"
+    },
+    {
+      "id": "saturn-ring",
+      "tier": 1,
+      "file": "saturn-ring.png",
+      "url": "https://www.solarsystemscope.com/textures/download/8k_saturn_ring_alpha.png",
+      "licence": "cc-by-4.0-sss",
+      "measured": "8192x500"
+    },
+    {
+      "id": "uranus",
+      "tier": 1,
+      "file": "uranus.jpg",
+      "url": "https://www.solarsystemscope.com/textures/download/2k_uranus.jpg",
+      "licence": "cc-by-4.0-sss",
+      "measured": "2048x1024"
+    },
+    {
+      "id": "neptune",
+      "tier": 1,
+      "file": "neptune.jpg",
+      "url": "https://www.solarsystemscope.com/textures/download/2k_neptune.jpg",
+      "licence": "cc-by-4.0-sss",
+      "measured": "2048x1024"
+    },
+    {
+      "id": "stars-milkyway",
+      "tier": 1,
+      "file": "stars-milkyway.jpg",
+      "url": "https://www.solarsystemscope.com/textures/download/8k_stars_milky_way.jpg",
+      "licence": "cc-by-4.0-sss",
+      "measured": "8192x4096"
+    },
+    {
+      "id": "earth-bluemarble",
+      "tier": 2,
+      "file": "earth-bluemarble.jpg",
+      "url": "https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73909/world.topo.bathy.200412.3x21600x10800.jpg",
+      "licence": "nasa-pd"
+    },
+    {
+      "id": "mars-mola-dem",
+      "tier": 2,
+      "file": "mars-mola-dem.tif",
+      "url": "https://planetarymaps.usgs.gov/mosaic/Mars_MGS_MOLA_DEM_mosaic_global_463m.tif",
+      "licence": "usgs-pd"
+    },
+    {
+      "id": "mercury-dem",
+      "tier": 2,
+      "file": "mercury-dem.tif",
+      "url": "https://planetarymaps.usgs.gov/mosaic/Mercury_Messenger_USGS_DEM_Global_665m_v2.tif",
+      "licence": "usgs-cite"
+    },
+    {
+      "id": "jupiter-cassini-juno",
+      "tier": 2,
+      "file": "jupiter-hires.png",
+      "url": "https://planetary.s3.amazonaws.com/assets/images/5-jupiter/2018/jupiter_map_css_plus_juno_bj.png",
+      "licence": "cc-by-3.0-tps"
+    },
+    {
+      "id": "moon-lola-dem-raw",
+      "tier": 3,
+      "file": "moon-lola-dem.img",
+      "url": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/img/ldem_64.img",
+      "licence": "nasa-pd",
+      "note": "Headerless raw int16, 23040x11520. elevation_m = sample * 0.5, relative to a 1737400 m sphere. A browser can read this directly as an Int16Array."
+    }
+  ]
+}
