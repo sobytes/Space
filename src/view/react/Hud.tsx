@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { BODY_CONTRACTS, BODY_IDS } from "@/engine/bodies/registry";
 import { obliquityToOrbitDeg, rotationPeriodDays } from "@/engine/rotation";
 import { ACCURACY } from "@/engine/data/ephemeris-accuracy";
@@ -12,6 +12,7 @@ import { length, sub } from "@/engine/vec";
 import { RATE_PRESETS } from "../core/clock";
 import type { ViewportSnapshot } from "../core/viewport";
 import { useViewport, useViewportValue } from "./ViewportContext";
+import { ALL_MOONS, PLANETARY_SET } from "@/engine/nbody-tracker";
 
 /** Hoisted so `useSyncExternalStore` is not handed a new selector identity every render. */
 const selectEpoch = (s: ViewportSnapshot) => s.epoch;
@@ -19,6 +20,7 @@ const selectRate = (s: ViewportSnapshot) => s.secondsPerSecond;
 const selectRunning = (s: ViewportSnapshot) => s.running;
 const selectFocus = (s: ViewportSnapshot) => s.focus;
 const selectAltitude = (s: ViewportSnapshot) => s.distanceToFocus;
+const selectGravity = (s: ViewportSnapshot) => s.gravity;
 
 function formatEpoch(epoch: JdTdb): string {
   const ms = epochMsFromJdUtc(utcFromTdb(epoch));
@@ -273,6 +275,113 @@ function BodyList() {
   );
 }
 
+
+/**
+ * The gravity mode switch, and an honest readout of what the chosen mode is doing.
+ *
+ * Both modes are correct about different things and neither supersedes the other, so this does
+ * not present one as an upgrade. On rails the planets come from analytic fits that are accurate
+ * over the span they were made for, exactly reversible, and completely deaf to any mass you
+ * add. Under mutual gravity every body pulls every other, which is the complete physics and
+ * also the one that accumulates error, falls behind a fast clock, and has to restart if you
+ * scrub the date far enough. The numbers for all three of those are on screen rather than
+ * hidden, because a viewer who cannot tell which mode they are in cannot trust either.
+ */
+function GravityBar() {
+  const viewport = useViewport();
+  const gravity = useViewportValue(selectGravity);
+  const nbody = gravity.mode === "nbody";
+  const [withMoons, setWithMoons] = useState(false);
+
+  /**
+   * Including the moons is the same equation over more bodies, and it costs what it costs.
+   *
+   * A single global step size is set by the fastest thing in the system, and that is Phobos at
+   * 7.65 hours. Measured: the eight planets integrate a simulated century in 3.7 seconds, and
+   * all 32 bodies take about 950, because the mean step collapses from 4 hours to 66 seconds.
+   * That is fine at the rates you would watch moons at and hopeless for a century sweep, so it
+   * is a choice with its price written next to it rather than a default or a hidden limit.
+   */
+  const choose = (moons: boolean) => {
+    setWithMoons(moons);
+    viewport.setGravityMode("nbody", {
+      bodies: moons ? [...PLANETARY_SET, ...ALL_MOONS] : PLANETARY_SET,
+    });
+  };
+
+  return (
+    <div className="pointer-events-auto flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-black/70 px-4 py-3 backdrop-blur-md">
+      <div className="flex items-center gap-1.5">
+        <button
+          type="button"
+          aria-pressed={!nbody}
+          onClick={() => viewport.setGravityMode("analytic")}
+          className={`rounded-md border border-white/10 px-2.5 py-1 text-xs transition ${
+            nbody ? "text-zinc-300 hover:bg-white/10" : "bg-amber-400/90 font-medium text-black"
+          }`}
+        >
+          On rails
+        </button>
+        <button
+          type="button"
+          aria-pressed={nbody}
+          onClick={() => choose(withMoons)}
+          className={`rounded-md border border-white/10 px-2.5 py-1 text-xs transition ${
+            nbody ? "bg-amber-400/90 font-medium text-black" : "text-zinc-300 hover:bg-white/10"
+          }`}
+        >
+          Mutual gravity
+        </button>
+      </div>
+
+      {nbody ? (
+        <label className="flex items-center gap-1.5 text-[11px] text-zinc-400">
+          <input
+            type="checkbox"
+            checked={withMoons}
+            onChange={(e) => choose(e.target.checked)}
+            className="accent-amber-400"
+          />
+          Include the 23 moons
+          <span className="text-zinc-600">(Phobos sets the step: ~250x slower)</span>
+        </label>
+      ) : null}
+
+      {nbody ? (
+        <dl className="flex items-center gap-x-4 gap-y-0.5 text-[11px] tabular-nums text-zinc-400">
+          <div className="flex gap-1.5">
+            <dt>Integrated</dt>
+            <dd className="text-zinc-200">
+              {Math.abs(gravity.integratedDays) < 365
+                ? `${gravity.integratedDays.toFixed(0)} d`
+                : `${(gravity.integratedDays / 365.25).toFixed(1)} yr`}
+            </dd>
+          </div>
+          <div className="flex gap-1.5">
+            <dt>Bodies</dt>
+            <dd className="text-zinc-200">{gravity.bodyCount}</dd>
+          </div>
+          <div className="flex gap-1.5">
+            <dt>Energy drift</dt>
+            <dd className="text-zinc-200">{gravity.energyDrift.toExponential(1)}</dd>
+          </div>
+          {Math.abs(gravity.lagDays) > 1 ? (
+            <div className="flex gap-1.5">
+              <dt className="text-amber-300/80">Behind by</dt>
+              <dd className="text-amber-200">{Math.abs(gravity.lagDays).toFixed(0)} d</dd>
+            </div>
+          ) : null}
+        </dl>
+      ) : (
+        <p className="text-[11px] leading-relaxed text-zinc-500">
+          Planets follow the JPL Standish fits. Accurate and reversible, but a mass you add
+          cannot move them.
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function Hud() {
   const epoch = useViewportValue(selectEpoch);
 
@@ -282,7 +391,8 @@ export function Hud() {
         <BodyList />
         <BodyPanel epoch={epoch} />
       </div>
-      <div className="flex justify-center">
+      <div className="flex flex-col items-center gap-2">
+        <GravityBar />
         <TimeBar />
       </div>
     </div>

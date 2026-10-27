@@ -6,11 +6,10 @@
  * compile until it is handled, rather than silently returning the origin.
  */
 
-import { heliocentricPosition } from "../kepler";
+import { heliocentricPosition, heliocentricState } from "../kepler";
 import type { JdTdb } from "../time";
-import { J2000_JD } from "../time";
-import { normalizeAngle, toRadians } from "../units";
-import { add, rotateX, rotateZ, vec3, ZERO, type Vec3 } from "../vec";
+import { SECONDS_PER_DAY, normalizeAngle, toRadians } from "../units";
+import { add, rotateX, rotateZ, scale, sub, vec3, ZERO, type StateVector, type Vec3 } from "../vec";
 import { BODY_CONTRACTS, type BodyId } from "./registry";
 import { orientationOf } from "../rotation";
 import { intoPlane, laplacePlaneFor } from "./laplace";
@@ -142,4 +141,43 @@ export function earthPosition(epoch: JdTdb): Vec3 {
     y: -moonOffset.y * moonMassFraction,
     z: -moonOffset.z * moonMassFraction,
   });
+}
+
+/**
+ * Heliocentric position and velocity for any body in the registry.
+ *
+ * The two position sources need different treatment. A planet's elements come from the Standish
+ * tables, and `kepler.ts` carries the exact analytic derivative of its own position function,
+ * including the drift of every element, so that is used directly. A moon's come from JPL mean
+ * elements and pass through a chain of plane rotations that depend on the parent's pole and, for
+ * the outer satellites, on the Laplace surface. Differentiating that chain by hand would be a
+ * second implementation to keep in step with the first, so it is central-differenced instead.
+ *
+ * The differencing interval is one twenty-thousandth of the body's own orbital period, which
+ * keeps the truncation error near 1e-8 relative for Phobos, the fastest body in the registry,
+ * while leaving roughly nine significant digits in the difference itself. Both ends of that
+ * tradeoff get worse if the interval is chosen as a fixed number of seconds instead, which is
+ * why it scales with the body.
+ *
+ * This is the only approximation in the N-body mode's initial conditions, and it is well under
+ * the mean elements' own error.
+ */
+export function heliocentricStateOf(body: BodyId, epoch: JdTdb): StateVector {
+  const source = BODY_CONTRACTS[body].ephemeris;
+
+  switch (source.kind) {
+    case "fixed-at-barycentre":
+      return { position: ZERO, velocity: ZERO };
+    case "standish-elements":
+      return heliocentricState(source.planet, epoch);
+    case "mean-elements-about-parent": {
+      const halfInterval = source.periodDays / 20_000;
+      const before = heliocentricPositionOf(body, (epoch - halfInterval) as JdTdb);
+      const after = heliocentricPositionOf(body, (epoch + halfInterval) as JdTdb);
+      return {
+        position: heliocentricPositionOf(body, epoch),
+        velocity: scale(sub(after, before), 1 / (2 * halfInterval * SECONDS_PER_DAY)),
+      };
+    }
+  }
 }

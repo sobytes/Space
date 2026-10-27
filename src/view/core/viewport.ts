@@ -17,6 +17,8 @@
 
 import type { BufferAttribute, Camera, Object3D, PerspectiveCamera, Points } from "three";
 import { heliocentricPositionOf } from "@/engine/bodies/position";
+import { createNBodyTracker, type NBodyTracker } from "@/engine/nbody-tracker";
+import type { MassiveBody } from "@/engine/nbody";
 import { BODY_CONTRACTS, BODY_IDS, type BodyId } from "@/engine/bodies/registry";
 import { orientationOf } from "@/engine/rotation";
 import type { JdTdb } from "@/engine/time";
@@ -53,6 +55,26 @@ export interface ViewportSnapshot {
    * sits on the focused body, so this is just the normalised negative of the origin.
    */
   readonly sunDirection: { readonly x: number; readonly y: number; readonly z: number };
+  readonly gravity: GravitySnapshot;
+}
+
+/**
+ * What the gravity mode is doing, surfaced so the UI can state it rather than imply it.
+ *
+ * In `analytic` mode the planets are on rails from the Standish tables and a mass added to the
+ * system changes nothing about them. In `nbody` mode every body pulls every other, which is
+ * the physically complete answer and also the one that drifts, lags and occasionally has to
+ * restart. A viewer deserves to know which of those they are looking at.
+ */
+export interface GravitySnapshot {
+  readonly mode: "analytic" | "nbody";
+  /** Days by which the integration trails the clock. Non-zero means it is budget-bound. */
+  readonly lagDays: number;
+  /** Relative energy drift since the integration last restarted. */
+  readonly energyDrift: number;
+  /** Simulated days integrated under mutual gravity since the last restart. */
+  readonly integratedDays: number;
+  readonly bodyCount: number;
 }
 
 export interface Viewport {
@@ -71,6 +93,14 @@ export interface Viewport {
    */
   attachMarkers(points: Points): () => void;
   send(command: ClockCommand): void;
+  /**
+   * Switches between the analytic ephemeris and full mutual gravity.
+   *
+   * Entering `nbody` seeds the integration from the analytic ephemeris at the current epoch, so
+   * the two modes agree at the moment of the switch and diverge from there. That divergence is
+   * the mutual perturbation, and it is the thing worth watching.
+   */
+  setGravityMode(mode: "analytic" | "nbody", options?: NBodyModeOptions): void;
   setFocus(id: BodyId): void;
   /** Camera distance from the focused body's surface, metres. Driven by the controls. */
   setDistanceToSurface(metres: number): void;
@@ -90,6 +120,14 @@ export interface Viewport {
   /** Inspection hook for the visual harness. Reports what the frame loop actually did. */
   debug(): Record<string, unknown>;
   subscribe(listener: (snapshot: ViewportSnapshot) => void): () => void;
+}
+
+export interface NBodyModeOptions {
+  /** Registry bodies to integrate. Defaults to the eight planets. */
+  readonly bodies?: readonly BodyId[];
+  /** Masses that exist in no ephemeris, such as a hypothetical planet. */
+  readonly extra?: readonly MassiveBody[];
+  readonly stepBudget?: number;
 }
 
 export interface ViewportInit {
@@ -114,6 +152,19 @@ export function createViewport(init: ViewportInit = {}): Viewport {
   let heliocentricRoot: Object3D | null = null;
   let markers: Points | null = null;
   const positions = new Map<BodyId, Vec3>();
+
+  // Null means the analytic ephemeris. A tracker means mutual gravity.
+  let tracker: NBodyTracker | null = null;
+  let nbodyOptions: NBodyModeOptions = {};
+  let gravity: GravitySnapshot = {
+    mode: "analytic",
+    lagDays: 0,
+    energyDrift: 0,
+    integratedDays: 0,
+    bodyCount: 0,
+  };
+  let seedEpoch: JdTdb = clock.epoch;
+
   const screen: ScreenPlacement[] = [];
   const listeners = new Set<(snapshot: ViewportSnapshot) => void>();
 
@@ -128,6 +179,7 @@ export function createViewport(init: ViewportInit = {}): Viewport {
       focus,
       distanceToFocus: distanceToSurface,
       sunDirection: sunDirectionFromFocus(),
+      gravity,
     };
   }
 
@@ -184,15 +236,51 @@ export function createViewport(init: ViewportInit = {}): Viewport {
     };
   }
 
+  /**
+   * Writes every body's heliocentric position for this frame.
+   *
+   * In N-body mode a body the tracker integrates comes from the integration, and anything it
+   * does not comes from the analytic ephemeris. That mixture is deliberate: integrating all 32
+   * bodies costs about 950 s per simulated century because Phobos paces the step size, so the
+   * default integrates the eight planets and leaves the moons analytic about their parents.
+   * The moons then follow a planet that is itself moving under mutual gravity, which is the
+   * right compromise and is stated in the UI rather than left to be discovered.
+   */
+  function resolvePositions(): void {
+    const active = tracker;
+    if (!active) {
+      for (const id of BODY_IDS) positions.set(id, heliocentricPositionOf(id, clock.epoch));
+      return;
+    }
+
+    const status = active.seek(clock.epoch);
+    gravity = {
+      mode: "nbody",
+      lagDays: status.lagDays,
+      energyDrift: status.energyDrift,
+      integratedDays: status.epoch - seedEpoch,
+      bodyCount: status.bodyCount,
+    };
+    if (status.reseeded) seedEpoch = status.epoch;
+
+    const integrated = new Set(active.ids);
+    for (const id of BODY_IDS) {
+      positions.set(
+        id,
+        integrated.has(id)
+          ? active.heliocentricPosition(id)
+          : heliocentricPositionOf(id, clock.epoch),
+      );
+    }
+  }
+
   function advance(realDeltaSeconds: number): void {
     const activeCamera = camera;
     if (!activeCamera) return;
 
     clock = tickClock(clock, realDeltaSeconds);
 
-    for (const id of BODY_IDS) {
-      positions.set(id, heliocentricPositionOf(id, clock.epoch));
-    }
+    resolvePositions();
 
     // The origin tracks the focused body, so the deltas handed to the GPU stay small no matter
     // how far from the Sun the camera is.
@@ -321,6 +409,25 @@ export function createViewport(init: ViewportInit = {}): Viewport {
       publish(true);
     },
 
+    setGravityMode(mode, options) {
+      if (mode === "analytic") {
+        tracker = null;
+        gravity = { mode: "analytic", lagDays: 0, energyDrift: 0, integratedDays: 0, bodyCount: 0 };
+        return;
+      }
+      nbodyOptions = options ?? nbodyOptions;
+      // Seeded at the current epoch, so flipping the switch changes nothing visible at first
+      // and everything after. Any divergence from here on is the mutual perturbation.
+      tracker = createNBodyTracker({
+        epoch: clock.epoch,
+        bodies: nbodyOptions.bodies,
+        extra: nbodyOptions.extra,
+        stepBudget: nbodyOptions.stepBudget,
+      });
+      seedEpoch = clock.epoch;
+      resolvePositions();
+    },
+
     setFocus(id) {
       focus = id;
       publish(true);
@@ -366,6 +473,11 @@ export function createViewport(init: ViewportInit = {}): Viewport {
       return {
         attachedNodes: nodes.size,
         resolvedPositions: positions.size,
+        gravityMode: gravity.mode,
+        gravityLagDays: gravity.lagDays,
+        gravityEnergyDrift: gravity.energyDrift,
+        integratedDays: gravity.integratedDays,
+        integratedBodies: gravity.bodyCount,
         cameraBound: camera !== null,
         focus,
         distanceToSurface,

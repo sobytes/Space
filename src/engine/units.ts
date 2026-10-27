@@ -38,6 +38,9 @@ export const kg = (v: number) => v as Kilograms;
 export const AU_IN_METRES = 149_597_870_700;
 export const SECONDS_PER_DAY = 86_400;
 export const DAYS_PER_JULIAN_CENTURY = 36_525;
+/** The Julian year, 365.25 days exactly. Not the tropical year, which is 365.2422 days. */
+export const DAYS_PER_JULIAN_YEAR = 365.25;
+export const SECONDS_PER_JULIAN_YEAR = DAYS_PER_JULIAN_YEAR * SECONDS_PER_DAY;
 export const SPEED_OF_LIGHT_M_S = 299_792_458;
 
 /** IAU 2009 heliocentric gravitational constant, m^3 s^-2. */

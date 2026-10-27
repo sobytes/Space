@@ -50,6 +50,7 @@ A predicate counts only when a committed script prints its own pass or fail.
 | P9 | 60fps on this Mac, 30fps on a throttled mobile profile | Playwright trace, frame timings |
 | P10 | Craters resolve on the Moon and Mars from low altitude, from real elevation data | Screenshot against a NASA reference image |
 | P11 | Every AI tool call maps onto a real engine function, and the AI cannot assert a number the engine did not compute | `npm run verify:ai-tools` |
+| P12 | Under mutual gravity every body pulls every other, and the resulting perturbation reproduces Mercury's Newtonian perihelion advance to within a stated tolerance of an independently computed value | `npm run verify:nbody` |
 
 P11 is the one that keeps the AI honest. The model narrates and drives; the engine owns every number.
 
@@ -93,7 +94,7 @@ Verified by running the gates, not by assertion. `npm run verify` is 158 tests a
 | P3 | Spin axes match IAU poles | **met as restated, weaker than first specified** | Originally "within 0.01 degrees". The real test allows the body's orbital inclination plus 1.5 degrees, because the IAU quotes a pole against the invariable plane while the fact sheets quote obliquity to the body's own orbit, and for a retrograde body they pick opposite poles. Same goalpost caveat as P2 |
 | P4 | 2024 eclipse reproduces | **not started** | needs a real lunar theory; mean elements are good to about a degree, which is nowhere near eclipse grade |
 | P5 | Lambert solver vs Vallado | **not started** | research for it was lost to the spend limit and needs redoing |
-| P6 | N-body integrator energy and a JPL close approach | **half met** | Adaptive Dormand-Prince shipped and gated: four orbits close to 1e-9, energy drift 4.7e-10 over 200 orbits, and it reproduces Mercury's perihelion advance at 0.00% error against the closed form. The JPL close-approach half is not done; the Apophis fixture needs planet positions better than the Standish tables give, since Earth's own 20 arcsec error is 14,000 km at 1 au and the 2029 flyby is 38,012 km |
+| P6 | N-body integrator energy and a JPL close approach | **half met, energy half now much stronger** | Adaptive Dormand-Prince shipped and gated: four orbits close to 1e-9, energy drift 4.7e-10 over 200 orbits, and it reproduces Mercury's perihelion advance at 0.00% error against the closed form. The full mutual system since added holds energy to 1.6e-14 and angular momentum to 3.6e-14 over 100 years with 9 bodies, which is four orders tighter than the stated bound and covers 1000 years with room to spare. The JPL close-approach half is still not done; the Apophis fixture needs planet positions better than the Standish tables give, since Earth's own 20 arcsec error is 14,000 km at 1 au and the 2029 flyby is 38,012 km |
 | P7 | Ascent reproduces payload to LEO | **met in its falsifiable form** | Predicting payload directly needs the loss budget to 310 m/s, and the published loss terms disagree by over a km/s, so that gate would fail on the literature rather than the model. Inverted instead: fed ULA's masses and ULA's published payload, the implied total losses are 2654 and 2772 m/s, both inside the 2 to 3 km/s band real vehicles need. Payload under published losses runs 14 to 19% high and is reported, not gated. `verify:ascent` |
 | P8 | Continuous zoom across 10 decades | **numeric half met, visual half not** | `verify:depth` sweeps ten decades; no Playwright zoom sweep yet |
 | P9 | 60fps desktop, 30fps mobile | **not started** | no frame timing captured |
@@ -103,8 +104,15 @@ Verified by running the gates, not by assertion. `npm run verify` is 158 tests a
 Four met, three partial, four untouched, counted the way the reviewer counted rather than the
 way I first did.
 
-Met: P1, P2, P3, P7, P10, P11. Partial: P6 and P8 have their hard half done and their
+| P12 | Planets pull each other, and the perturbation is right | **met, with the external comparison declared uncertain** | Full mutual N-body in a barycentric frame. Three conserved quantities the integrator is never told about hold to 1.6e-14 (energy), 3.6e-14 (angular momentum) and 0.85 mm of barycentre drift over a century. Two bodies alone produce exactly 0.0000 arcsec/century of spurious precession, which is the null test the positive results depend on. The headline number, Mercury's perihelion advance from the planets, comes out 528.9 arcsec/century and is cross-checked by `secular.ts`, an orbit-averaged quadrature sharing no code with the integrator, which agrees to 0.027, 0.003 and 0.009 percent for Venus, Earth and Jupiter, and whose own scale is pinned to a hand-derived closed form it converges onto to 1.0000 as alpha shrinks. The comparison to the published ~531.5 is 0.5% off and is **declared unresolved** in `nbody-expectations.ts` rather than tuned away: my recalled perihelion budget does not sum self-consistently and the session's web search budget was exhausted, so the citation is missing. Earth's own share lands at 90.08 against a recalled 90.0. `verify:nbody`, `visual:nbody` |
+
+Met: P1, P2, P3, P7, P10, P11, P12. Partial: P6 and P8 have their hard half done and their
 remaining half named. Untouched: P4 eclipse, P5 Lambert, P9 frame timing.
+
+The one thing P12 does not claim is that the published figure has been matched. It has been
+approached to half a percent by two independent in-repo methods that agree with each other to
+three decimal places, which locates the remaining gap in either the recalled number or in
+physics not modelled here. Saying which needs a citation this session could not fetch.
 
 All of the user's headline asks are built and gated: the solar system, asteroids, rockets,
 the AI layer, and craters from real elevation data.

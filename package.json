@@ -23,6 +23,8 @@
     "verify:asteroid": "vitest run src/engine/scenarios",
     "check": "bash scripts/check.sh",
     "verify:ai-tools": "vitest run src/ai",
+    "verify:nbody": "vitest run src/engine/nbody.test.ts src/engine/nbody-tracker.test.ts",
+    "visual:nbody": "node scripts/visual/nbody-probe.mjs",
     "verify:ascent": "vitest run src/engine/launch",
     "terrain": "node scripts/build-terrain.mjs",
     "verify:tiles": "vitest run src/view/core/tiles.test.ts",

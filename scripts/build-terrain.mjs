@@ -15,7 +15,6 @@
  *   node scripts/build-terrain.mjs --source /tmp/ldem_64.img --body moon
  */
 
-import { createWriteStream } from "node:fs";
 import { mkdir, open, stat, writeFile } from "node:fs/promises";
 import sharp from "sharp";
 

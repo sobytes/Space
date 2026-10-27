@@ -16,6 +16,7 @@
  */
 
 import { GM_SUN } from "./units";
+import { eccentricityVector } from "./elements";
 import { cross, dot, length, lengthSquared, sub, type Vec3 } from "./vec";
 
 /** Stage nodes. */
@@ -158,13 +159,7 @@ export function specificAngularMomentum(position: Vec3, velocity: Vec3): Vec3 {
 
 /** Orbital eccentricity from a state vector. At or above one the orbit is unbound. */
 export function eccentricityOf(centralGm: number, position: Vec3, velocity: Vec3): number {
-  const r = length(position);
-  const v2 = lengthSquared(velocity);
-  const rDotV = dot(position, velocity);
-  const ex = ((v2 - centralGm / r) * position.x - rDotV * velocity.x) / centralGm;
-  const ey = ((v2 - centralGm / r) * position.y - rDotV * velocity.y) / centralGm;
-  const ez = ((v2 - centralGm / r) * position.z - rDotV * velocity.z) / centralGm;
-  return Math.hypot(ex, ey, ez);
+  return length(eccentricityVector(centralGm, position, velocity));
 }
 
 export interface PropagateOptions {
