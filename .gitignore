@@ -39,3 +39,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# but the template must be committed, since .env* above would hide it
+!.env.local.example
+
+# secrets beyond env files
+*.key
+*.p12
+*.pfx
+
+# extra build output
+.turbo/
+/dist
