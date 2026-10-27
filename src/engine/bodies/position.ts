@@ -12,6 +12,7 @@ import { J2000_JD } from "../time";
 import { normalizeAngle, toRadians } from "../units";
 import { add, rotateX, rotateZ, vec3, ZERO, type Vec3 } from "../vec";
 import { BODY_CONTRACTS, type BodyId } from "./registry";
+import { orientationOf } from "../rotation";
 import type { EphemerisSource } from "./contract";
 
 const EARTH_GM_PLUS_MOON = 4.0350324e14;
@@ -52,6 +53,28 @@ function meanElementsPosition(
   return rotateZ(rotateX(inPlane, toRadians(source.inclinationDeg as never)), nodeRad);
 }
 
+/**
+ * Rotates an orbit expressed in a planet's equatorial plane into the J2000 ecliptic.
+ *
+ * This is not a detail. Most regular satellites orbit in their parent's equatorial plane, and
+ * for Jupiter that is nearly the ecliptic so the difference hides. For Uranus, tilted 98
+ * degrees, it is the difference between moons circling the planet and moons sweeping through
+ * it. Triton's retrograde 157 degree orbit is meaningless without it too.
+ *
+ * The parent's IAU pole already comes back in ecliptic coordinates, so the transform is the
+ * rotation taking ecliptic north onto that pole.
+ */
+function intoParentEquator(local: Vec3, parent: BodyId, epoch: JdTdb): Vec3 {
+  const pole = orientationOf(parent, epoch).poleEcliptic;
+
+  // Tilt by the angle between ecliptic north and the pole, about the line where the two
+  // planes meet, then swing that line to the pole's own longitude.
+  const tilt = Math.acos(Math.min(1, Math.max(-1, pole.z)));
+  const azimuth = Math.atan2(pole.y, pole.x);
+
+  return rotateZ(rotateX(local, tilt), azimuth);
+}
+
 export function heliocentricPositionOf(body: BodyId, epoch: JdTdb): Vec3 {
   const contract = BODY_CONTRACTS[body];
   const source = contract.ephemeris;
@@ -63,8 +86,15 @@ export function heliocentricPositionOf(body: BodyId, epoch: JdTdb): Vec3 {
       return heliocentricPosition(source.planet, epoch);
     case "mean-elements-about-parent": {
       const parent = contract.parent;
-      if (parent === null) return meanElementsPosition(source, epoch);
-      return add(heliocentricPositionOf(parent, epoch), meanElementsPosition(source, epoch));
+      const local = meanElementsPosition(source, epoch);
+      if (parent === null) return local;
+
+      const oriented =
+        source.referencePlane === "parent-equator"
+          ? intoParentEquator(local, parent, epoch)
+          : local;
+
+      return add(heliocentricPositionOf(parent, epoch), oriented);
     }
   }
 }

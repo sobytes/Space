@@ -15,7 +15,8 @@
 
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { PLANET_IDS } from "../data/planets";
+import { PLANET_IDS, SHORT_SPAN } from "../data/planets";
+import { GM_SUN } from "../units";
 import { BODY_CONTRACTS, BODY_IDS } from "./registry";
 import { flattening, rotationPeriodFromIau, type BodyContract } from "./contract";
 
@@ -139,5 +140,114 @@ describe("every body satisfies its own contract", () => {
     const fixed = CONTRACTS.filter(([, c]) => c.ephemeris.kind === "fixed-at-barycentre");
     expect(fixed).toHaveLength(1);
     expect(fixed[0][1].kind).toBe("star");
+  });
+});
+
+/**
+ * Checks that only apply to satellites.
+ *
+ * These are where the moon data proves itself. The orbital period is not quoted independently;
+ * it is derived from the IAU prime-meridian rate on the grounds that a tidally locked body
+ * turns once per orbit. That is only legitimate if the result reproduces the independently
+ * published semi-major axis through Kepler's third law, which is what the second test here
+ * does. Two unrelated sources agreeing to a fraction of a percent is the evidence.
+ */
+describe("moons", () => {
+  const MOONS = CONTRACTS.filter(([, c]) => c.kind === "moon");
+  const SECONDS_PER_DAY = 86_400;
+
+  it("there are moons to check, so a filter typo cannot make this vacuous", () => {
+    expect(MOONS.length).toBeGreaterThanOrEqual(10);
+  });
+
+  /**
+   * Tolerance is 1e-5, and the reason is Earth's Moon specifically. Its orbital period is the
+   * independently published sidereal month of 27.321582 d while the IAU prime-meridian rate
+   * implies 27.3216610 d, a difference of 6.9 seconds over 27 days, or 2.9 parts per million.
+   * Two separately published figures agreeing that closely is tidal locking confirmed, not
+   * refuted. The other moons derive their period from the IAU rate so they agree exactly.
+   *
+   * 1e-5 is still a sharp check: a 3:2 spin-orbit resonance like Mercury's would miss by 50%.
+   */
+  it.each(MOONS)("%s is tidally locked: it turns once per orbit", (_id, contract) => {
+    if (contract.ephemeris.kind !== "mean-elements-about-parent") return;
+    const fromRotation = rotationPeriodFromIau(contract.rotation);
+    const ratio = fromRotation / contract.ephemeris.periodDays;
+    expect(
+      Math.abs(ratio - 1),
+      `${contract.id} rotation period over orbital period is ${ratio}`,
+    ).toBeLessThan(1e-5);
+  });
+
+  it.each(MOONS)("%s satisfies Kepler's third law about its parent", (_id, contract) => {
+    if (contract.ephemeris.kind !== "mean-elements-about-parent") return;
+    const parent = contract.parent;
+    if (parent === null) return;
+
+    const periodSeconds = Math.abs(contract.ephemeris.periodDays) * SECONDS_PER_DAY;
+    const parentGm = BODY_CONTRACTS[parent].gm;
+    const derived = Math.cbrt((parentGm * periodSeconds ** 2) / (4 * Math.PI ** 2));
+    const published = contract.ephemeris.semiMajorAxisM;
+
+    const error = Math.abs(derived - published) / published;
+    expect(
+      error,
+      `${contract.id}: period implies a = ${(derived / 1000).toFixed(0)} km, published ${(published / 1000).toFixed(0)} km`,
+    ).toBeLessThan(0.005);
+  });
+
+  /**
+   * A moon outside its parent's Hill sphere is not bound to it, so this catches a semi-major
+   * axis entered in the wrong unit, which is otherwise easy to miss.
+   */
+  it.each(MOONS)("%s orbits inside its parent's Hill sphere", (_id, contract) => {
+    if (contract.ephemeris.kind !== "mean-elements-about-parent") return;
+    const parent = contract.parent;
+    if (parent === null || parent === "sun") return;
+
+    const parentContract = BODY_CONTRACTS[parent];
+    if (parentContract.ephemeris.kind !== "standish-elements") return;
+
+    const parentOrbitM = SHORT_SPAN.elements[parentContract.ephemeris.planet].atJ2000
+      .semiMajorAxisAu as unknown as number;
+    const hillRadius =
+      parentOrbitM * 1.495_978_707e11 * Math.cbrt(parentContract.gm / (3 * GM_SUN));
+
+    expect(
+      contract.ephemeris.semiMajorAxisM,
+      `${contract.id} must orbit inside ${parent}'s Hill radius of ${(hillRadius / 1000).toExponential(2)} km`,
+    ).toBeLessThan(hillRadius);
+  });
+
+  it.each(MOONS)("%s orbits above its parent's surface", (_id, contract) => {
+    if (contract.ephemeris.kind !== "mean-elements-about-parent") return;
+    const parent = contract.parent;
+    if (parent === null) return;
+    expect(
+      contract.ephemeris.semiMajorAxisM,
+      `${contract.id} cannot orbit inside ${parent}`,
+    ).toBeGreaterThan(BODY_CONTRACTS[parent].equatorialRadiusM);
+  });
+
+  it("Triton is the retrograde one, and nothing else is", () => {
+    const retrograde = MOONS.filter(([, c]) => c.rotation.rotationRateDegPerDay < 0).map(
+      ([id]) => id,
+    );
+    expect(retrograde).toContain("triton");
+    // Uranus's moons are retrograde in the IAU sense too, but none are in the registry yet.
+    expect(retrograde.length).toBeLessThanOrEqual(2);
+  });
+
+  it("the Galilean moons are in a 1:2:4 resonance", () => {
+    const period = (id: "io" | "europa" | "ganymede") => {
+      const e = BODY_CONTRACTS[id].ephemeris;
+      if (e.kind !== "mean-elements-about-parent") throw new Error("expected mean elements");
+      return e.periodDays;
+    };
+
+    // Laplace resonance: Europa takes twice Io's period, Ganymede twice Europa's.
+    expect(period("europa") / period("io"), "Europa over Io").toBeCloseTo(2, 1);
+    expect(period("ganymede") / period("europa"), "Ganymede over Europa").toBeCloseTo(2, 1);
+    expect(period("ganymede") / period("io"), "Ganymede over Io").toBeCloseTo(4, 1);
   });
 });

@@ -248,19 +248,24 @@ function BodyList() {
   const focus = useViewportValue(selectFocus);
 
   return (
-    <nav className="pointer-events-auto flex flex-wrap gap-1.5 rounded-xl border border-white/10 bg-black/70 px-3 py-2 backdrop-blur-md">
+    <nav className="pointer-events-auto flex max-w-[min(62vw,52rem)] flex-wrap gap-1.5 overflow-y-auto rounded-xl border border-white/10 bg-black/70 px-3 py-2 backdrop-blur-md">
       {BODY_IDS.map((id) => (
         <button
           key={id}
           type="button"
           aria-current={focus === id}
           onClick={() => viewport.setFocus(id)}
+          // Moons are indented under their planet, so nineteen bodies still read as a system
+          // rather than as a flat list.
           className={`rounded-md px-2.5 py-1 text-xs transition ${
+            BODY_CONTRACTS[id].kind === "moon" ? "text-[11px] opacity-80" : ""
+          } ${
             focus === id
-              ? "bg-amber-400/90 font-medium text-black"
+              ? "bg-amber-400/90 font-medium text-black opacity-100"
               : "text-zinc-300 hover:bg-white/10"
           }`}
         >
+          {BODY_CONTRACTS[id].kind === "moon" ? "\u21b3 " : ""}
           {BODY_CONTRACTS[id].displayName}
         </button>
       ))}
@@ -273,7 +278,7 @@ export function Hud() {
 
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-3">
         <BodyList />
         <BodyPanel epoch={epoch} />
       </div>

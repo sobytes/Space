@@ -192,7 +192,7 @@ async function shot(name, note) {
 
 await shot("01-initial", "default view, focused on Earth");
 
-const bodies = ["The Sun", "Jupiter", "Saturn", "Mars", "The Moon", "Neptune"];
+const bodies = ["The Sun", "Jupiter", "Io", "Europa", "Titan", "Triton", "The Moon"];
 for (const name of bodies) {
   const button = page.locator(`nav button:has-text("${name}")`).first();
   if ((await button.count()) === 0) continue;
@@ -309,18 +309,20 @@ async function exerciseCraters() {
   await moon.click();
   await settle(2_500);
 
-  // Dolly right down to the surface. camera-controls clamps at 1.02 radii.
-  await page.evaluate(async () => {
-    const viewport = window.__solar;
-    const controls = document.querySelector("canvas");
-    void controls;
-    void viewport;
-  });
-  for (let i = 0; i < 22; i++) {
-    await page.mouse.move(700, 500);
-    await page.mouse.wheel(0, -500);
-    await settle(120);
-  }
+  /**
+   * Fly to 2,000 km, not to the surface.
+   *
+   * verify:relief measured where lunar relief actually resolves: it peaks near 2,000 km and
+   * collapses below about 1,000 km, because the LOLA 64-pixel-per-degree product runs out at
+   * 474 m per sample. Flying to the 35 km minimum and asserting craters would be asserting
+   * something the data cannot deliver, so this checks the band the claim is actually about.
+   */
+  await page.evaluate(
+    ({ radius, altitude }) => {
+      window.__controls?.dollyTo(radius + altitude, false);
+    },
+    { radius: 1_737_400, altitude: 2_000_000 },
+  );
   await settle(4_000);
 
   const altitudeKm = await page.evaluate(
@@ -361,14 +363,22 @@ async function exerciseCraters() {
   console.log(
     `  craters: altitude ${altitudeKm.toFixed(0)} km, mean neighbour contrast ${contrast.toFixed(2)}`,
   );
+  const scene = await analyseSceneRegion(`${OUT}/craters.png`);
   shots.push({
     name: "craters",
     note: `surface relief at ${altitudeKm.toFixed(0)} km`,
     file: `${OUT}/craters.png`,
     altitudeKm,
     surfaceContrast: contrast,
+    ...scene,
   });
 
+  /**
+   * A smoke test, not the measurement. `npm run verify:relief` is the authoritative crater
+   * gate: it sweeps altitudes in a controlled viewport and measures the peak. This only has
+   * to catch the surface rendering flat, and its threshold is set from what this harness
+   * actually reads here rather than borrowed from the sweep's different viewport.
+   */
   return contrast > 1.5;
 }
 
@@ -411,6 +421,10 @@ if (blank.length) {
 }
 if (focusFailures.length) {
   console.log(`\nFAIL: focused body was not centred in ${focusFailures.length} shots: ${focusFailures.join(", ")}`);
+  process.exit(1);
+}
+if (!cratersVisible) {
+  console.log("\nFAIL: no lunar surface relief at 2,000 km, where verify:relief measured it peaking");
   process.exit(1);
 }
 if (!asteroidWorked) {

@@ -19,7 +19,16 @@ import type { PlanetId } from "../data/planets";
 export type BodyId =
   | "sun"
   | PlanetId
-  | "moon";
+  | "moon"
+  | "phobos"
+  | "deimos"
+  | "io"
+  | "europa"
+  | "ganymede"
+  | "callisto"
+  | "enceladus"
+  | "titan"
+  | "triton";
 
 export type BodyKind = "star" | "planet" | "moon";
 
@@ -73,8 +82,15 @@ export interface Atmosphere {
 }
 
 export interface Appearance {
-  /** Texture ids as they appear in scripts/assets.manifest.json. The gate checks they exist. */
-  readonly albedoTextureId: string;
+  /**
+   * Texture id as it appears in scripts/assets.manifest.json, when one exists.
+   *
+   * Optional, because for most moons it does not. The only freely licensed imagery is USGS
+   * GeoTIFFs running to hundreds of megabytes each, and inventing a surface would be worse
+   * than having none. A body without a texture renders at its measured geometric albedo in
+   * its measured colour, which is a real property rather than a guess.
+   */
+  readonly albedoTextureId?: string;
   readonly nightTextureId?: string;
   readonly cloudTextureId?: string;
   readonly normalTextureId?: string;
