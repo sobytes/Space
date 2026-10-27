@@ -93,15 +93,22 @@ Verified by running the gates, not by assertion. `npm run verify` is 158 tests a
 | P3 | Spin axes match IAU poles | **met as restated, weaker than first specified** | Originally "within 0.01 degrees". The real test allows the body's orbital inclination plus 1.5 degrees, because the IAU quotes a pole against the invariable plane while the fact sheets quote obliquity to the body's own orbit, and for a retrograde body they pick opposite poles. Same goalpost caveat as P2 |
 | P4 | 2024 eclipse reproduces | **not started** | needs a real lunar theory; mean elements are good to about a degree, which is nowhere near eclipse grade |
 | P5 | Lambert solver vs Vallado | **not started** | research for it was lost to the spend limit and needs redoing |
-| P6 | N-body integrator energy and a JPL close approach | **not started** | RK4 exists and is used for the precession demonstration; no adaptive integrator, no Apophis fixture yet |
+| P6 | N-body integrator energy and a JPL close approach | **half met** | Adaptive Dormand-Prince shipped and gated: four orbits close to 1e-9, energy drift 4.7e-10 over 200 orbits, and it reproduces Mercury's perihelion advance at 0.00% error against the closed form. The JPL close-approach half is not done; the Apophis fixture needs planet positions better than the Standish tables give, since Earth's own 20 arcsec error is 14,000 km at 1 au and the 2029 flyby is 38,012 km |
 | P7 | Ascent reproduces payload to LEO | **data captured, no model** | `src/engine/launch/reference-data.ts` holds the Atlas V fixtures and the validated constants |
 | P8 | Continuous zoom across 10 decades | **numeric half met, visual half not** | `verify:depth` sweeps ten decades; no Playwright zoom sweep yet |
 | P9 | 60fps desktop, 30fps mobile | **not started** | no frame timing captured |
 | P10 | Craters resolve from low altitude | **not started** | needs streamed tiles; no global texture can carry it |
-| P11 | AI never supplies a number | **not started** | no AI code written yet |
+| P11 | AI never supplies a number | **met** | 16 gates in `src/ai/tools.test.ts`. Every tool names the engine function backing it, that function must exist, and tool output is compared to a direct engine call with exact equality so a hand-rounded literal fails. Tools must refuse an unknown body, an unparseable date, a missing demonstration. Verified against the live API: asked for Neptune it called describe_body and passed on the 35 arcsec caveat unprompted |
 
-Four of eleven met, one partial. The engine's correctness spine is real; the astrodynamics
-and AI halves are specified and unbuilt.
+Four met, three partial, four untouched, counted the way the reviewer counted rather than the
+way I first did.
+
+Met: P1, P2, P3, P11. Partial: P6 and P8 have their hard half done and their remaining half
+named. Untouched: P4 eclipse, P5 Lambert, P7 ascent model, P9 frame timing, P10 craters.
+
+The asteroid feature the user asked for is built and gated. The rocket feature is not: the
+reference data and fixtures are captured in `launch/reference-data.ts` but no ascent model
+exists. Craters need streamed tiles, which is a real piece of work and not started.
 
 
 ## Cross-model review, and what it changed
