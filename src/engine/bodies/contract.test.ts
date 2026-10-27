@@ -157,26 +157,56 @@ describe("moons", () => {
   const SECONDS_PER_DAY = 86_400;
 
   it("there are moons to check, so a filter typo cannot make this vacuous", () => {
-    expect(MOONS.length).toBeGreaterThanOrEqual(10);
+    expect(MOONS.length).toBeGreaterThanOrEqual(20);
   });
 
   /**
-   * Tolerance is 1e-5, and the reason is Earth's Moon specifically. Its orbital period is the
-   * independently published sidereal month of 27.321582 d while the IAU prime-meridian rate
-   * implies 27.3216610 d, a difference of 6.9 seconds over 27 days, or 2.9 parts per million.
-   * Two separately published figures agreeing that closely is tidal locking confirmed, not
-   * refuted. The other moons derive their period from the IAU rate so they agree exactly.
+   * Tidal locking, checked against two genuinely independent numbers.
    *
-   * 1e-5 is still a sharp check: a 3:2 spin-orbit resonance like Mercury's would miss by 50%.
+   * The orbital period is computed from Kepler's third law using the published semi-major
+   * axis and the parent's GM. The rotation period comes from the IAU prime-meridian rate.
+   * Nothing links them, so their agreement is evidence rather than arithmetic.
+   *
+   * One percent, not one part in a million. The parent GM values are system totals that
+   * include the moons themselves, and close-in satellites are also perturbed by the planet's
+   * oblateness, so pure two-body Kepler is not exact. Mimas is the worst at 0.49%. The gate is
+   * still sharp: Mercury's 3:2 spin-orbit resonance would miss by 50%.
    */
-  it.each(MOONS)("%s is tidally locked: it turns once per orbit", (_id, contract) => {
-    if (contract.ephemeris.kind !== "mean-elements-about-parent") return;
-    const fromRotation = rotationPeriodFromIau(contract.rotation);
-    const ratio = fromRotation / contract.ephemeris.periodDays;
-    expect(
-      Math.abs(ratio - 1),
-      `${contract.id} rotation period over orbital period is ${ratio}`,
-    ).toBeLessThan(1e-5);
+  it.each(MOONS.filter(([, c]) => c.rotationRegime === "synchronous"))(
+    "%s is tidally locked: it turns once per orbit",
+    (_id, contract) => {
+      if (contract.ephemeris.kind !== "mean-elements-about-parent") return;
+      const ratio =
+        Math.abs(rotationPeriodFromIau(contract.rotation)) /
+        Math.abs(contract.ephemeris.periodDays);
+      expect(
+        Math.abs(ratio - 1),
+        `${contract.id} rotation over orbital period is ${ratio}`,
+      ).toBeLessThan(0.01);
+    },
+  );
+
+  /**
+   * Phoebe is the exception that makes the rule worth testing. It turns once every 9.3 hours
+   * while taking 549 days to orbit Saturn, so it was never tidally locked, which together
+   * with its retrograde orbit marks it as captured rather than formed with Saturn.
+   */
+  it.each(MOONS.filter(([, c]) => c.rotationRegime === "independent"))(
+    "%s is declared an independent rotator, and genuinely is one",
+    (_id, contract) => {
+      if (contract.ephemeris.kind !== "mean-elements-about-parent") return;
+      const ratio =
+        Math.abs(rotationPeriodFromIau(contract.rotation)) /
+        Math.abs(contract.ephemeris.periodDays);
+      expect(
+        Math.abs(ratio - 1),
+        `${contract.id} is declared independent, so it must not be synchronous`,
+      ).toBeGreaterThan(0.1);
+    },
+  );
+
+  it.each(MOONS)("%s declares a rotation regime", (_id, contract) => {
+    expect(contract.rotationRegime, `${contract.id}`).toBeDefined();
   });
 
   it.each(MOONS)("%s satisfies Kepler's third law about its parent", (_id, contract) => {
@@ -185,21 +215,17 @@ describe("moons", () => {
     if (parent === null) return;
 
     const periodSeconds = Math.abs(contract.ephemeris.periodDays) * SECONDS_PER_DAY;
-    const parentGm = BODY_CONTRACTS[parent].gm;
-    const derived = Math.cbrt((parentGm * periodSeconds ** 2) / (4 * Math.PI ** 2));
+    const derived = Math.cbrt(
+      (BODY_CONTRACTS[parent].gm * periodSeconds ** 2) / (4 * Math.PI ** 2),
+    );
     const published = contract.ephemeris.semiMajorAxisM;
 
-    const error = Math.abs(derived - published) / published;
     expect(
-      error,
+      Math.abs(derived - published) / published,
       `${contract.id}: period implies a = ${(derived / 1000).toFixed(0)} km, published ${(published / 1000).toFixed(0)} km`,
     ).toBeLessThan(0.005);
   });
 
-  /**
-   * A moon outside its parent's Hill sphere is not bound to it, so this catches a semi-major
-   * axis entered in the wrong unit, which is otherwise easy to miss.
-   */
   it.each(MOONS)("%s orbits inside its parent's Hill sphere", (_id, contract) => {
     if (contract.ephemeris.kind !== "mean-elements-about-parent") return;
     const parent = contract.parent;
@@ -208,10 +234,10 @@ describe("moons", () => {
     const parentContract = BODY_CONTRACTS[parent];
     if (parentContract.ephemeris.kind !== "standish-elements") return;
 
-    const parentOrbitM = SHORT_SPAN.elements[parentContract.ephemeris.planet].atJ2000
+    const parentOrbitAu = SHORT_SPAN.elements[parentContract.ephemeris.planet].atJ2000
       .semiMajorAxisAu as unknown as number;
     const hillRadius =
-      parentOrbitM * 1.495_978_707e11 * Math.cbrt(parentContract.gm / (3 * GM_SUN));
+      parentOrbitAu * 1.495_978_707e11 * Math.cbrt(parentContract.gm / (3 * GM_SUN));
 
     expect(
       contract.ephemeris.semiMajorAxisM,
@@ -229,13 +255,34 @@ describe("moons", () => {
     ).toBeGreaterThan(BODY_CONTRACTS[parent].equatorialRadiusM);
   });
 
-  it("Triton is the retrograde one, and nothing else is", () => {
-    const retrograde = MOONS.filter(([, c]) => c.rotation.rotationRateDegPerDay < 0).map(
-      ([id]) => id,
-    );
-    expect(retrograde).toContain("triton");
-    // Uranus's moons are retrograde in the IAU sense too, but none are in the registry yet.
-    expect(retrograde.length).toBeLessThanOrEqual(2);
+  /**
+   * A moon's IAU rotation sign should match its parent's, because both follow the same
+   * north-pole convention. Uranus's moons all come out negative for the same reason Uranus
+   * does, which is a convention artifact rather than a physical oddity.
+   *
+   * Triton is the one real exception: it rotates opposite to Neptune because it orbits
+   * opposite to Neptune, having been captured.
+   */
+  it.each(MOONS)("%s rotation sign agrees with its parent, or is Triton", (_id, contract) => {
+    const parent = contract.parent;
+    if (parent === null) return;
+    const moonSign = Math.sign(contract.rotation.rotationRateDegPerDay);
+    const parentSign = Math.sign(BODY_CONTRACTS[parent].rotation.rotationRateDegPerDay);
+
+    if (contract.id === "triton") {
+      expect(moonSign, "Triton must rotate opposite to Neptune").not.toBe(parentSign);
+      return;
+    }
+    expect(moonSign, `${contract.id} versus ${parent}`).toBe(parentSign);
+  });
+
+  it("Triton and Phoebe are the retrograde orbiters", () => {
+    const retrogradeOrbits = MOONS.filter(([, c]) => {
+      if (c.ephemeris.kind !== "mean-elements-about-parent") return false;
+      return c.ephemeris.inclinationDeg > 90;
+    }).map(([id]) => id);
+
+    expect(retrogradeOrbits.sort()).toEqual(["phoebe", "triton"]);
   });
 
   it("the Galilean moons are in a 1:2:4 resonance", () => {
@@ -244,10 +291,17 @@ describe("moons", () => {
       if (e.kind !== "mean-elements-about-parent") throw new Error("expected mean elements");
       return e.periodDays;
     };
-
-    // Laplace resonance: Europa takes twice Io's period, Ganymede twice Europa's.
     expect(period("europa") / period("io"), "Europa over Io").toBeCloseTo(2, 1);
     expect(period("ganymede") / period("europa"), "Ganymede over Europa").toBeCloseTo(2, 1);
     expect(period("ganymede") / period("io"), "Ganymede over Io").toBeCloseTo(4, 1);
+  });
+
+  it("every planet from Mars outward has at least one moon, and Mercury and Venus have none", () => {
+    const withMoons = new Set(MOONS.map(([, c]) => c.parent));
+    for (const planet of ["mars", "jupiter", "saturn", "uranus", "neptune", "embary"]) {
+      expect(withMoons.has(planet as never), `${planet} should have a moon`).toBe(true);
+    }
+    expect(withMoons.has("mercury" as never)).toBe(false);
+    expect(withMoons.has("venus" as never)).toBe(false);
   });
 });

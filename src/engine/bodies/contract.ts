@@ -26,9 +26,22 @@ export type BodyId =
   | "europa"
   | "ganymede"
   | "callisto"
+  | "amalthea"
+  | "mimas"
   | "enceladus"
+  | "tethys"
+  | "dione"
+  | "rhea"
   | "titan"
-  | "triton";
+  | "iapetus"
+  | "phoebe"
+  | "ariel"
+  | "umbriel"
+  | "titania"
+  | "oberon"
+  | "miranda"
+  | "triton"
+  | "proteus";
 
 export type BodyKind = "star" | "planet" | "moon";
 
@@ -41,6 +54,14 @@ export type EphemerisSource =
       readonly semiMajorAxisM: number;
       readonly eccentricity: number;
       readonly inclinationDeg: number;
+      /** Argument of periapsis, degrees, measured in the reference plane. */
+      readonly argumentOfPeriapsisDeg: number;
+      /** Longitude of the ascending node, degrees, measured in the reference plane. */
+      readonly ascendingNodeDeg: number;
+      /** Mean anomaly at the element epoch, degrees. */
+      readonly meanAnomalyAtEpochDeg: number;
+      /** Julian date the elements are referenced to. */
+      readonly epochJd: number;
       readonly periodDays: number;
       readonly referencePlane: "parent-equator" | "laplace" | "ecliptic";
       readonly source: string;
@@ -113,6 +134,16 @@ export interface Education {
   readonly facts: readonly string[];
 }
 
+/**
+ * Whether a body keeps one face towards its primary.
+ *
+ * Explicit rather than inferred, because the exception matters. Phoebe turns once every 9.3
+ * hours while taking 549 days to orbit Saturn, and that mismatch is the evidence it was
+ * captured rather than formed in place. A gate that assumed every moon was synchronous would
+ * either fail on Phoebe or have to be loosened until it stopped meaning anything.
+ */
+export type RotationRegime = "synchronous" | "independent";
+
 export interface BodyContract {
   readonly id: BodyId;
   readonly displayName: string;
@@ -121,6 +152,8 @@ export interface BodyContract {
 
   readonly ephemeris: EphemerisSource;
   readonly rotation: RotationalElements;
+  /** Satellites only. Planets are always independent of their orbit. */
+  readonly rotationRegime?: RotationRegime;
 
   /** System gravitational parameter, m^3 s^-2. */
   readonly gm: number;

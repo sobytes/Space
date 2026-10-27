@@ -13,28 +13,39 @@ import { normalizeAngle, toRadians } from "../units";
 import { add, rotateX, rotateZ, vec3, ZERO, type Vec3 } from "../vec";
 import { BODY_CONTRACTS, type BodyId } from "./registry";
 import { orientationOf } from "../rotation";
+import { intoPlane, laplacePlaneFor } from "./laplace";
 import type { EphemerisSource } from "./contract";
 
 const EARTH_GM_PLUS_MOON = 4.0350324e14;
 
 /**
- * A moon's position relative to its primary, from mean elements.
+ * A moon's position relative to its primary, from JPL's mean elements.
  *
- * Honest about what this is. Mean elements give a fixed ellipse, while the real Moon's orbit is
- * perturbed hard enough by the Sun that a proper theory such as ELP2000 needs hundreds of terms.
- * This is good to roughly a degree, which is fine for showing the Moon going round the Earth and
- * not fine for predicting an eclipse. Predicate P4 will need the full theory, and the UI says so.
+ * The full element set, not a simplification. The first version used only the semi-major axis,
+ * eccentricity and inclination and invented an ascending node that regressed from zero. That
+ * leaves the orbit's orientation within its plane arbitrary, which happens to look fine for a
+ * near-circular equatorial moon and is badly wrong for Triton: with a fabricated node its
+ * orbit came out 5 degrees from the ecliptic instead of about 130, because the 157 degree
+ * inclination was being added to Neptune's tilt rather than combined with the real node.
+ *
+ * Honest about what it is. These are mean elements at a single epoch, so they give the orbit
+ * the moon follows on average and not the perturbed path it follows this week. For Earth's
+ * Moon that is good to roughly a degree, which is fine for showing it going round and nowhere
+ * near enough for an eclipse.
  */
 function meanElementsPosition(
   source: Extract<EphemerisSource, { kind: "mean-elements-about-parent" }>,
   epoch: JdTdb,
 ): Vec3 {
-  const daysSinceJ2000 = epoch - J2000_JD;
-  const meanAnomaly = normalizeAngle((2 * Math.PI * daysSinceJ2000) / source.periodDays);
+  const daysSinceEpoch = epoch - source.epochJd;
+  const meanAnomaly = normalizeAngle(
+    toRadians(source.meanAnomalyAtEpochDeg as never) +
+      (2 * Math.PI * daysSinceEpoch) / source.periodDays,
+  );
 
   const e = source.eccentricity;
   let eccentric = meanAnomaly;
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 16; i++) {
     const delta = (eccentric - e * Math.sin(eccentric) - meanAnomaly) / (1 - e * Math.cos(eccentric));
     eccentric -= delta;
     if (Math.abs(delta) < 1e-13) break;
@@ -47,10 +58,15 @@ function meanElementsPosition(
     0,
   );
 
-  // The ascending node regresses once every 18.6 years, which is the dominant slow term and
-  // cheap to include. Everything faster is left to a proper lunar theory.
-  const nodeRad = normalizeAngle(-(2 * Math.PI * daysSinceJ2000) / (18.612_958 * 365.25));
-  return rotateZ(rotateX(inPlane, toRadians(source.inclinationDeg as never)), nodeRad);
+  // Argument of periapsis, then inclination, then node. The same sequence kepler.ts uses for
+  // the planets, so the two paths cannot drift apart in convention.
+  return rotateZ(
+    rotateX(
+      rotateZ(inPlane, toRadians(source.argumentOfPeriapsisDeg as never)),
+      toRadians(source.inclinationDeg as never),
+    ),
+    toRadians(source.ascendingNodeDeg as never),
+  );
 }
 
 /**
@@ -89,10 +105,20 @@ export function heliocentricPositionOf(body: BodyId, epoch: JdTdb): Vec3 {
       const local = meanElementsPosition(source, epoch);
       if (parent === null) return local;
 
+      /**
+       * Three reference planes, because JPL quotes satellite elements in three.
+       *
+       * Close satellites sit in their planet's equator. Distant ones are pulled towards the
+       * planet's own orbital plane by the Sun, and the Laplace surface is the transition
+       * between the two. Treating everything as equatorial puts Iapetus and Phoebe in
+       * visibly wrong orbits, which is why `laplace.ts` computes the blend.
+       */
       const oriented =
         source.referencePlane === "parent-equator"
           ? intoParentEquator(local, parent, epoch)
-          : local;
+          : source.referencePlane === "laplace"
+            ? intoPlane(local, laplacePlaneFor(parent, source.semiMajorAxisM, epoch).pole)
+            : local;
 
       return add(heliocentricPositionOf(parent, epoch), oriented);
     }
