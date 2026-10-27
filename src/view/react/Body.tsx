@@ -2,7 +2,15 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTexture } from "@react-three/drei";
-import { AdditiveBlending, BackSide, DoubleSide, Group, TextureLoader, type Texture } from "three";
+import {
+  AdditiveBlending,
+  BackSide,
+  Color,
+  DoubleSide,
+  Group,
+  TextureLoader,
+  type Texture,
+} from "three";
 import { BODY_CONTRACTS, type BodyId } from "@/engine/bodies/registry";
 import { TerrainTiles, useTerrainManifest } from "./TerrainTiles";
 import { useViewport } from "./ViewportContext";
@@ -53,6 +61,16 @@ export function Body({ id, segments = 96 }: { id: BodyId; segments?: number }) {
     return viewport.attach(id, group.current);
   }, [viewport, id]);
 
+  /**
+   * Geometric albedo is the fraction of light a body reflects straight back, and the spread is
+   * large: Enceladus is near 0.99 while Callisto is 0.22. Folding it into the material colour
+   * makes that spread visible instead of flattening every untextured body to the same grey.
+   */
+  const untexturedColour = useMemo(() => {
+    const tint = new Color(contract.appearance.tint);
+    return tint.multiplyScalar(Math.min(1, contract.geometricAlbedo / 0.99 + 0.12));
+  }, [contract.appearance.tint, contract.geometricAlbedo]);
+
   const flattening = useMemo(
     () => contract.polarRadiusM / contract.equatorialRadiusM,
     [contract.polarRadiusM, contract.equatorialRadiusM],
@@ -74,6 +92,11 @@ export function Body({ id, segments = 96 }: { id: BodyId; segments?: number }) {
             // The global normal map comes from real elevation data, so craters shade correctly
             // through the terminator at orbital range. Close range switches to tiles below.
             normalMap={globalNormal ?? undefined}
+            // A body with no imagery is drawn at its measured geometric albedo in its measured
+            // colour, rather than as a white sphere. That is why Io reads sulphur yellow,
+            // Europa bright ice and Callisto dark: the brightness difference between them is
+            // real data, not styling. Scaled so Enceladus at 0.99 stays just under clipping.
+            color={albedo ? "#ffffff" : untexturedColour}
             roughness={0.95}
             metalness={0}
           />

@@ -52,7 +52,7 @@ export function CameraRig() {
      * The camera is placed along that direction and lifted slightly out of the ecliptic so the
      * terminator is visible rather than edge-on.
      */
-    const { sunDirection } = viewport.snapshot();
+    const sunDirection = viewport.sunDirectionFor(focus);
     const distance = isSystemView ? 1.6e12 : radius * 6;
     void instance.setLookAt(
       sunDirection.x * distance,

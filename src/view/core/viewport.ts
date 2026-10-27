@@ -74,6 +74,16 @@ export interface Viewport {
   setFocus(id: BodyId): void;
   /** Camera distance from the focused body's surface, metres. Driven by the controls. */
   setDistanceToSurface(metres: number): void;
+  /**
+   * Direction from a body towards the Sun, in render space, computed for that body now.
+   *
+   * Deliberately not read from the cached origin. `setFocus` does not recompute the origin;
+   * the frame loop does, on its next tick. A camera placed from the snapshot immediately
+   * after a focus change was therefore aiming using the previous body's position, which for
+   * a short hop looked fine and for a jump across the solar system put the camera over the
+   * night side.
+   */
+  sunDirectionFor(body: BodyId): { x: number; y: number; z: number };
   pickAt(ndcX: number, ndcY: number, viewportHeightPx: number): BodyId | null;
   readonly screen: readonly ScreenPlacement[];
   snapshot(): ViewportSnapshot;
@@ -318,6 +328,13 @@ export function createViewport(init: ViewportInit = {}): Viewport {
 
     setDistanceToSurface(metres) {
       distanceToSurface = Math.max(0, metres);
+    },
+
+    sunDirectionFor(body) {
+      const position = heliocentricPositionOf(body, clock.epoch);
+      const magnitude = Math.hypot(position.x, position.y, position.z);
+      if (magnitude === 0) return { x: 0, y: 0, z: 1 };
+      return { x: -position.x / magnitude, y: -position.y / magnitude, z: -position.z / magnitude };
     },
 
     pickAt(ndcX, ndcY, viewportHeightPx) {
