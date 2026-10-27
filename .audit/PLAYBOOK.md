@@ -80,3 +80,25 @@ shapes the file layout, so it is settled before any rendering code is written.
 A browser tool does not replace GMAT, STK or Copernicus. The plan is a narrow validated
 envelope with the validation visible in the UI, rather than a broad claim. Where a number
 comes from a model with known error, the UI shows the error.
+
+
+## Status as of the render milestone
+
+Verified by running the gates, not by assertion. `npm run verify` is 158 tests across 6 files.
+
+| # | Predicate | State | Evidence |
+|---|-----------|-------|----------|
+| P1 | Planet positions match JPL Horizons | **met, with one declared limit** | 64 real Horizons fixtures, RMS inside JPL nominal for 6 of 8 bodies; Uranus and Neptune carry declared envelopes with written justification. `npm run verify:ephemeris` |
+| P2 | Rotation periods match IAU | **met** | `verify:contracts`, 93 assertions, period derived from W1 cross-checked against the fact sheet with Neptune's conflict declared |
+| P3 | Spin axes match IAU poles | **met** | `src/engine/rotation.test.ts`, 34 assertions, obliquity reproduced once the IAU and fact-sheet pole conventions are reconciled |
+| P4 | 2024 eclipse reproduces | **not started** | needs a real lunar theory; mean elements are good to about a degree, which is nowhere near eclipse grade |
+| P5 | Lambert solver vs Vallado | **not started** | research for it was lost to the spend limit and needs redoing |
+| P6 | N-body integrator energy and a JPL close approach | **not started** | RK4 exists and is used for the precession demonstration; no adaptive integrator, no Apophis fixture yet |
+| P7 | Ascent reproduces payload to LEO | **data captured, no model** | `src/engine/launch/reference-data.ts` holds the Atlas V fixtures and the validated constants |
+| P8 | Continuous zoom across 10 decades | **numeric half met, visual half not** | `verify:depth` sweeps ten decades; no Playwright zoom sweep yet |
+| P9 | 60fps desktop, 30fps mobile | **not started** | no frame timing captured |
+| P10 | Craters resolve from low altitude | **not started** | needs streamed tiles; no global texture can carry it |
+| P11 | AI never supplies a number | **not started** | no AI code written yet |
+
+Four of eleven met, one partial. The engine's correctness spine is real; the astrodynamics
+and AI halves are specified and unbuilt.

@@ -37,9 +37,17 @@ page.on("response", (response) => {
   if (response.status() >= 400) failedRequests.push(`${response.url()} HTTP ${response.status()}`);
 });
 
-// The star field alone lights roughly 0.4% of the scene region, so the bar sits above that:
-// a body in frame has to contribute real area, not just a scatter of single pixels.
-const BODY_VISIBLE_THRESHOLD = 0.012;
+/**
+ * Measured, not guessed: a frame showing only the star field lights 0.376% of the scene region.
+ * The bar is set at twice that, which a genuinely blank frame cannot reach and which the
+ * widest system view clears at 0.858% with only orbit lines and sub-pixel markers in shot.
+ *
+ * Pixel counting alone is a weak gate though, so `assertFocusCentred` below does the precise
+ * part: it reads the Viewport's own screen index and checks the focused body is actually
+ * projected near the centre of the frame and in front of the camera.
+ */
+const STARFIELD_ONLY_BASELINE = 0.00376;
+const BODY_VISIBLE_THRESHOLD = STARFIELD_ONLY_BASELINE * 2;
 
 const settle = (ms) => page.waitForTimeout(ms);
 
@@ -72,6 +80,7 @@ async function waitForScene(label, timeoutMs = 90_000) {
 }
 
 await waitForScene("first paint");
+if (!(await assertFocusCentred("first paint"))) focusFailures.push("first paint");
 
 /**
  * Measures the rendered PNG rather than the live canvas.
@@ -116,7 +125,45 @@ async function analyseSceneRegion(file) {
   return { sceneLitFraction: stats.litFraction, sceneMeanLuminance: stats.meanLuminance };
 }
 
+/**
+ * The precise half of the check. Pixel counts prove something was drawn; this proves the right
+ * thing was drawn in the right place, which is what focusing a body actually means.
+ */
+async function assertFocusCentred(label) {
+  const result = await page.evaluate(() => {
+    const viewport = window.__solar;
+    if (!viewport) return { error: "no viewport on window" };
+    const snapshot = viewport.snapshot();
+    const placement = viewport.screen.find((p) => p.id === snapshot.focus);
+    return {
+      focus: snapshot.focus,
+      distanceToSurface: snapshot.distanceToFocus,
+      placement: placement ? { ...placement } : null,
+    };
+  });
+
+  if (result.error) {
+    console.log(`  ${label}: ${result.error}`);
+    return false;
+  }
+  if (!result.placement) {
+    console.log(`  ${label}: focused body has no screen placement`);
+    return false;
+  }
+
+  const { placement } = result;
+  const offCentre = Math.hypot(placement.ndcX, placement.ndcY);
+  const ok = !placement.behindCamera && offCentre < 0.25 && result.distanceToSurface > 0;
+  console.log(
+    `    focus ${result.focus}: ndc offset ${offCentre.toFixed(3)}, ` +
+      `altitude ${(result.distanceToSurface / 1000).toFixed(0)} km, ` +
+      `apparent radius ${placement.radiusPx.toFixed(1)} px ${ok ? "OK" : "FAIL"}`,
+  );
+  return ok;
+}
+
 const shots = [];
+const focusFailures = [];
 
 async function shot(name, note) {
   const file = `${OUT}/${name}.png`;
@@ -133,13 +180,14 @@ async function shot(name, note) {
 
 await shot("01-initial", "default view, focused on Earth");
 
-const bodies = ["Jupiter", "Saturn", "The Sun", "The Moon", "Mars", "Uranus"];
+const bodies = ["The Sun", "Jupiter", "Saturn", "Mars", "The Moon", "Neptune"];
 for (const name of bodies) {
   const button = page.locator(`nav button:has-text("${name}")`).first();
   if ((await button.count()) === 0) continue;
   await button.click();
   await settle(2_000);
   await waitForScene(name, 25_000);
+  if (!(await assertFocusCentred(name))) focusFailures.push(name);
   await shot(`body-${name.toLowerCase().replace(/\s+/g, "-")}`, `focused on ${name}`);
 }
 
@@ -147,6 +195,8 @@ const report = {
   url: BASE,
   capturedAt: new Date().toISOString(),
   shots,
+  focusFailures,
+  starfieldOnlyBaseline: STARFIELD_ONLY_BASELINE,
   consoleErrors,
   failedRequests,
 };
@@ -171,4 +221,8 @@ if (blank.length) {
   );
   process.exit(1);
 }
-console.log("\nevery shot shows a body in frame");
+if (focusFailures.length) {
+  console.log(`\nFAIL: focused body was not centred in ${focusFailures.length} shots: ${focusFailures.join(", ")}`);
+  process.exit(1);
+}
+console.log("\nevery shot shows a body in frame, and the focused body is centred in each");

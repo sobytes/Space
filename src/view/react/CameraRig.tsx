@@ -32,12 +32,17 @@ export function CameraRig() {
     if (!instance) return;
 
     const radius = BODY_CONTRACTS[focus].equatorialRadiusM;
+
+    // Focusing the Sun is the system view, so it gets a far wider range: past Neptune's orbit
+    // at 4.5e12 m. Every other body is framed against itself, a kilometre above the surface at
+    // the closest and a few thousand radii at the widest.
+    const isSystemView = focus === "sun";
     instance.minDistance = radius * 1.02;
-    instance.maxDistance = radius * 4_000;
+    instance.maxDistance = isSystemView ? 2e13 : radius * 4_000;
     instance.dollySpeed = 0.6;
     instance.truckSpeed = 0;
     void instance.setTarget(0, 0, 0, false);
-    void instance.dollyTo(radius * 6, true);
+    void instance.dollyTo(isSystemView ? 1.6e12 : radius * 6, true);
   }, [focus]);
 
   useFrame(() => {

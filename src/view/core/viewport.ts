@@ -11,7 +11,7 @@
  * is fenced off by lint so nothing can route around it.
  */
 
-import type { Camera, Object3D, PerspectiveCamera } from "three";
+import type { BufferAttribute, Camera, Object3D, PerspectiveCamera, Points } from "three";
 import { heliocentricPositionOf } from "@/engine/bodies/position";
 import { BODY_CONTRACTS, BODY_IDS, type BodyId } from "@/engine/bodies/registry";
 import { orientationOf } from "@/engine/rotation";
@@ -23,6 +23,9 @@ import { initialClock, reduceClock, tickClock, type ClockCommand, type ClockStat
 
 /** Click targets never shrink below this, so a sub-pixel planet stays reachable. */
 export const MIN_HIT_RADIUS_PX = 14;
+
+/** Above this apparent radius the real sphere is resolvable and the marker fades out. */
+export const MARKER_FADE_PX = 7;
 
 export interface ScreenPlacement {
   readonly id: BodyId;
@@ -48,6 +51,16 @@ export interface Viewport {
   setCamera(camera: PerspectiveCamera): void;
   advance(realDeltaSeconds: number): void;
   attach(id: BodyId, node: Object3D): () => void;
+  /**
+   * Registers the group that holds heliocentric geometry such as orbit lines. It is placed at
+   * the Sun each frame, so its children can keep vertices in plain heliocentric metres.
+   */
+  attachHeliocentricRoot(node: Object3D): () => void;
+  /**
+   * Registers the Points object that marks bodies too small to see as geometry. The Viewport
+   * writes its position buffer, so the single-writer rule over scale-critical data still holds.
+   */
+  attachMarkers(points: Points): () => void;
   send(command: ClockCommand): void;
   setFocus(id: BodyId): void;
   /** Camera distance from the focused body's surface, metres. Driven by the controls. */
@@ -79,6 +92,8 @@ export function createViewport(init: ViewportInit = {}): Viewport {
   let origin: Vec3 = { x: 0, y: 0, z: 0 };
 
   const nodes = new Map<BodyId, Object3D>();
+  let heliocentricRoot: Object3D | null = null;
+  let markers: Points | null = null;
   const positions = new Map<BodyId, Vec3>();
   const screen: ScreenPlacement[] = [];
   const listeners = new Set<(snapshot: ViewportSnapshot) => void>();
@@ -174,6 +189,17 @@ export function createViewport(init: ViewportInit = {}): Viewport {
       });
     }
 
+    if (heliocentricRoot) {
+      // The Sun is the heliocentric origin, so this group sits at minus the floating origin.
+      // Its children keep vertices in true heliocentric metres. Those are large float32 values
+      // and carry roughly 500 m of error at Neptune, which is far below one pixel at any
+      // distance from which a whole orbit is visible. The invariant that matters is not
+      // "never a large float32 number", it is "never a float32 error you can resolve".
+      heliocentricRoot.position.set(-origin.x, -origin.y, -origin.z);
+      heliocentricRoot.updateMatrix();
+      heliocentricRoot.matrixWorldNeedsUpdate = true;
+    }
+
     const heightPx = typeof window === "undefined" ? 1080 : window.innerHeight;
     screen.length = 0;
     for (const id of BODY_IDS) {
@@ -184,6 +210,27 @@ export function createViewport(init: ViewportInit = {}): Viewport {
         id,
         ...project(activeCamera, delta, BODY_CONTRACTS[id].equatorialRadiusM, heightPx),
       });
+    }
+
+    if (markers) {
+      // A body under a few pixels across cannot be seen as geometry, which is most of the
+      // system from most viewpoints. These markers keep every body findable and clickable
+      // without faking its size: the marker fades out as the real sphere becomes resolvable.
+      const attribute = markers.geometry.getAttribute("position") as BufferAttribute;
+      const sizeAttribute = markers.geometry.getAttribute("aSize") as BufferAttribute | undefined;
+      BODY_IDS.forEach((id, index) => {
+        const worldPosition = positions.get(id);
+        if (!worldPosition) return;
+        const delta = relativeTo(worldPosition, origin);
+        attribute.setXYZ(index, delta.x, delta.y, delta.z);
+        if (sizeAttribute) {
+          const placement = screen.find((p) => p.id === id);
+          const apparent = placement?.radiusPx ?? 0;
+          sizeAttribute.setX(index, apparent < MARKER_FADE_PX ? 1 - apparent / MARKER_FADE_PX : 0);
+        }
+      });
+      attribute.needsUpdate = true;
+      if (sizeAttribute) sizeAttribute.needsUpdate = true;
     }
 
     const focusPlacement = screen.find((p) => p.id === focus);
@@ -224,6 +271,21 @@ export function createViewport(init: ViewportInit = {}): Viewport {
       node.matrixAutoUpdate = false;
       return () => {
         nodes.delete(id);
+      };
+    },
+
+    attachHeliocentricRoot(node) {
+      heliocentricRoot = node;
+      node.matrixAutoUpdate = false;
+      return () => {
+        heliocentricRoot = null;
+      };
+    },
+
+    attachMarkers(points) {
+      markers = points;
+      return () => {
+        markers = null;
       };
     },
 

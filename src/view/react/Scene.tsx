@@ -5,8 +5,10 @@ import { Canvas } from "@react-three/fiber";
 import { ACESFilmicToneMapping } from "three";
 import { BODY_IDS } from "@/engine/bodies/registry";
 import { Body } from "./Body";
+import { BodyMarkers } from "./BodyMarkers";
 import { CameraRig } from "./CameraRig";
 import { Hud } from "./Hud";
+import { OrbitPaths } from "./OrbitPaths";
 import { PickLayer } from "./PickLayer";
 import { Starfield } from "./Starfield";
 import { ViewportBinding, ViewportProvider } from "./ViewportContext";
@@ -35,6 +37,8 @@ export function Scene() {
         >
           <ViewportBinding />
           <Starfield />
+          <OrbitPaths />
+          <BodyMarkers />
           {/* The Sun carries its own light, inside its own group. See Body.tsx. */}
           <ambientLight intensity={0.05} />
           <Suspense fallback={null}>
