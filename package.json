@@ -21,7 +21,8 @@
     "verify:invariants": "vitest run src/view/core/invariants.test.ts",
     "verify:propagate": "vitest run src/engine/propagate.test.ts",
     "verify:asteroid": "vitest run src/engine/scenarios",
-    "check": "bash scripts/check.sh"
+    "check": "bash scripts/check.sh",
+    "verify:ai-tools": "vitest run src/ai"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "1.3.0",

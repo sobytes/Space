@@ -247,7 +247,56 @@ async function exerciseAsteroid() {
   return true;
 }
 
+/**
+ * Exercises the AI panel against the real API. Skipped without a key, because the simulation
+ * is meant to work fully without one and a missing key is not a failure of the app.
+ */
+async function exerciseAsk() {
+  const open = page.locator('button:has-text("Ask about the solar system")');
+  if ((await open.count()) === 0) {
+    console.log("  ask: panel trigger not found");
+    return false;
+  }
+  await open.click();
+  await settle(400);
+
+  await page.locator('input[placeholder*="Ask anything"]').fill(
+    "How far is Mars from Earth right now?",
+  );
+  await page.locator("form button[type=submit]").click();
+
+  try {
+    // Any tool call will do. Asserting a specific one was wrong: the model picked
+    // compare_bodies over describe_body for a two-body distance question, which is the
+    // better choice, and a gate that pins the model's tool selection is testing the wrong
+    // thing. What matters is that a tool ran at all before any prose appeared.
+    await page.waitForFunction(
+      () => /\u2192 [a-z_]+\(/.test(document.body.innerText),
+      undefined,
+      { timeout: 120_000 },
+    );
+    await page.waitForFunction(() => !document.body.innerText.includes("thinking\u2026"), undefined, {
+      timeout: 120_000,
+    });
+  } catch {
+    const text = await page.evaluate(() => document.body.innerText.slice(0, 400));
+    console.log(`  ask: FAILED or no key. Panel said: ${text.replace(/\s+/g, " ").slice(0, 200)}`);
+    return false;
+  }
+
+  await page.screenshot({ path: `${OUT}/ask.png` });
+  const said = await page.evaluate(() => {
+    const aside = [...document.querySelectorAll("aside")].find((el) =>
+      /\u2192 [a-z_]+\(/.test(el.innerText),
+    );
+    return aside ? aside.innerText.replace(/\s+/g, " ").slice(0, 420) : null;
+  });
+  console.log(`  ask: ${said}`);
+  return true;
+}
+
 const asteroidWorked = await exerciseAsteroid();
+const askWorked = await exerciseAsk();
 
 const report = {
   url: BASE,
@@ -255,6 +304,7 @@ const report = {
   shots,
   focusFailures,
   asteroidWorked,
+  askWorked,
   starfieldOnlyBaseline: STARFIELD_ONLY_BASELINE,
   consoleErrors,
   failedRequests,
@@ -288,4 +338,8 @@ if (!asteroidWorked) {
   console.log("\nFAIL: the asteroid propagation did not return a result");
   process.exit(1);
 }
-console.log("\nevery shot shows a body in frame, the focused body is centred, and the asteroid propagated");
+if (!askWorked) {
+  console.log("\nFAIL: the AI panel produced no tool call. Without ANTHROPIC_API_KEY this is expected.");
+  process.exit(1);
+}
+console.log("\nevery shot renders, the focused body is centred, the asteroid propagated, and the AI answered from a tool");

@@ -8,6 +8,7 @@ import { Body } from "./Body";
 import { BodyMarkers } from "./BodyMarkers";
 import { CameraRig } from "./CameraRig";
 import { Hud } from "./Hud";
+import { AskPanel } from "./AskPanel";
 import { AsteroidPanel } from "./AsteroidPanel";
 import { AsteroidTrajectory } from "./AsteroidTrajectory";
 import { HeliocentricRoot } from "./HeliocentricRoot";
@@ -60,6 +61,7 @@ export function Scene() {
         <PickLayer />
         <Hud />
         <AsteroidPanel asteroid={asteroid} />
+        <AskPanel />
       </div>
     </ViewportProvider>
   );
