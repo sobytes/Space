@@ -1,0 +1,107 @@
+/**
+ * The architectural invariants, enforced by reading the source.
+ *
+ * These were eslint rules first. That was too weak: `no-restricted-imports` matches the literal
+ * import string, so `@/view/core/internal/place` was caught while `../core/internal/place` from
+ * a sibling directory slipped straight through. A rule that depends on how someone spells a path
+ * is not an enforcement of anything.
+ *
+ * Scanning the source catches every spelling. The eslint zones stay, because they fail fast in
+ * an editor, but these tests are the actual guarantee.
+ */
+
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join, relative } from "node:path";
+import { describe, expect, it } from "vitest";
+
+const SRC = "src";
+
+function sourceFiles(dir: string): string[] {
+  const out: string[] = [];
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry);
+    if (statSync(full).isDirectory()) {
+      out.push(...sourceFiles(full));
+    } else if (/\.tsx?$/.test(entry)) {
+      out.push(full);
+    }
+  }
+  return out;
+}
+
+const FILES = sourceFiles(SRC).map((path) => ({
+  path: relative(".", path).replace(/\\/g, "/"),
+  text: readFileSync(path, "utf8"),
+}));
+
+describe("the engine stays pure", () => {
+  it("never imports three, react, next or anything from the view", () => {
+    const forbidden = /from\s+["'](three|react|react-dom|next|zustand|@react-three\/[^"']+|three\/[^"']+|[^"']*\/view\/[^"']*|@\/view\/[^"']*)["']/;
+    const offenders = FILES.filter((f) => f.path.startsWith("src/engine/") && forbidden.test(f.text));
+    expect(
+      offenders.map((f) => f.path),
+      "the engine must run in a worker and in Node, so it cannot import rendering or React",
+    ).toEqual([]);
+  });
+
+  it("has at least one engine file, so a path typo cannot make this vacuous", () => {
+    expect(FILES.filter((f) => f.path.startsWith("src/engine/")).length).toBeGreaterThan(10);
+  });
+});
+
+describe("the float64 to float32 boundary", () => {
+  /**
+   * Every file allowed to write a scale-critical float32 value, each with the reason it is
+   * allowed. Adding a file here is a deliberate act that shows up in review, which is the
+   * point: the list is the architecture, not a convenience.
+   */
+  const DECLARED_WRITERS: Readonly<Record<string, string>> = {
+    "src/view/core/internal/place.ts":
+      "the camera-relative conversion itself, which is the whole reason the boundary exists",
+    "src/view/core/viewport.ts":
+      "places the heliocentric root and writes the marker buffer, both camera-relative",
+    "src/view/react/OrbitPaths.tsx":
+      "orbit vertices in true heliocentric metres, carrying about 500 m of error at Neptune, " +
+      "which is far under a pixel at any distance from which a whole orbit is visible",
+    "src/view/react/Starfield.tsx":
+      "unit direction vectors on a sphere, so magnitude never exceeds one",
+    "src/view/react/BodyMarkers.tsx":
+      "allocates the empty buffers the viewport writes into, and per-body colours",
+  };
+
+  it("only declared files import the conversion module, whatever spelling they use", () => {
+    const importsInternal = /from\s+["'][^"']*\/internal\/place["']/;
+    const offenders = FILES.filter(
+      (f) =>
+        importsInternal.test(f.text) &&
+        !f.path.startsWith("src/view/core/") &&
+        !(f.path in DECLARED_WRITERS),
+    );
+    expect(
+      offenders.map((f) => f.path),
+      "place.ts holds the only camera-relative conversion; reach it through the Viewport",
+    ).toEqual([]);
+  });
+
+  it("only declared files write a transform or build a position buffer", () => {
+    const writesTransform =
+      /\.position\.set\(|\.position\.copy\(|\.scale\.setScalar\(|new Float32Array\(|setXYZ\(/;
+    const offenders = FILES.filter(
+      (f) =>
+        (f.path.startsWith("src/view/") || f.path.startsWith("src/app/")) &&
+        writesTransform.test(f.text) &&
+        !(f.path in DECLARED_WRITERS),
+    );
+    expect(
+      offenders.map((f) => f.path),
+      "a new float32 writer must be declared in DECLARED_WRITERS with its justification",
+    ).toEqual([]);
+  });
+
+  it("every declared writer still exists and still carries a reason", () => {
+    for (const [path, reason] of Object.entries(DECLARED_WRITERS)) {
+      expect(FILES.some((f) => f.path === path), `${path} is declared but missing`).toBe(true);
+      expect(reason.length, `${path} needs a real justification`).toBeGreaterThan(40);
+    }
+  });
+});

@@ -3,11 +3,13 @@
  * JPL publishes for them.
  *
  * Why this file exists. `planets.ts` carries JPL's own quoted error table, and the obvious gate
- * is to assert every epoch lands inside it. That gate fails for six of eight bodies. The cause
- * is not a bug: an independent second implementation of the published algorithm reproduces these
- * residuals to three decimals, every element row has been diffed against the live JPL page, and
- * perturbing Neptune's eccentricity in either direction makes both the longitude and the radial
- * residual worse, so the elements are being consumed exactly as fitted.
+ * is to assert every epoch lands inside it. That gate fails for six of eight bodies.
+ *
+ * The cause is not a bug in this code, and `ephemeris-accuracy.test.ts` is the evidence rather
+ * than an assertion. It runs `astronomy-engine`, which derives positions from VSOP87 series and
+ * shares nothing with the Standish mean-element approach, over the same Horizons fixtures. That
+ * independent theory lands within 12 arcseconds of the fixtures for every body, which validates
+ * the fixtures and the comparison, so a large Standish residual is a property of the table.
  *
  * Two things explain it. JPL calls those figures "nominal errors", which is a typical magnitude
  * and not a per-epoch bound, so individual samples exceeding it is expected. And the Standish and
@@ -60,22 +62,26 @@ export const ACCURACY: Readonly<Record<PlanetId, AccuracyEnvelope>> = {
     rmsFactor: 1.3,
     maxFactor: 2.0,
     justification:
-      "Measured RMS longitude residual is about 110% of JPL's 50 arcsecond nominal, with a worst " +
-      "epoch near 178% at 2040-07-01. Latitude and distance are comfortably inside nominal, so " +
-      "this is in-plane fit residual at the late edge of the 1800-2050 interval rather than a " +
-      "frame or rotation error, which would spoil latitude too.",
+      "Decisive. Measured RMS longitude residual is 54.9 arcseconds against a 50 arcsecond " +
+      "nominal, while VSOP87 manages 4.6 arcseconds on the exact same fixtures. Standish is " +
+      "twelve times worse than an independent theory on identical data, which places the error " +
+      "in the 1992 element table and not in this code. Latitude and distance stay inside " +
+      "nominal, ruling out a frame or rotation error, which would spoil latitude too. " +
+      "See ephemeris-accuracy.test.ts.",
   },
   neptune: {
     rmsFactor: 3.5,
     maxFactor: 5.0,
     justification:
-      "Neptune is the one body where JPL's published nominal is optimistic rather than merely " +
-      "typical. Measured RMS longitude residual is about 31 arcseconds against a 10 arcsecond " +
-      "nominal, and it exceeds nominal at six of eight sampled epochs rather than only at the " +
-      "edges, so a fit-residual explanation does not fit. The Standish fit is from 1992 and " +
-      "Horizons now serves DE44x; Neptune's orbit was revised most by that work, having been " +
-      "observed over barely one orbit since its 1846 discovery. The app reports Neptune's " +
-      "position to about 30 arcseconds, not 10, and says so.",
+      "Supported but not decisive, and the difference is stated rather than glossed. Measured " +
+      "RMS longitude residual is 30.7 arcseconds against a 10 arcsecond nominal, exceeded at " +
+      "six of eight sampled epochs rather than only at the window edges. VSOP87 does better at " +
+      "10.2 arcseconds, so Standish is clearly the larger error source and the widening is not " +
+      "covering a bug here. But 10.2 is itself at Neptune's nominal, and astronomy-engine only " +
+      "claims about one arcminute, so that reference cannot settle a 10 arcsecond question. " +
+      "Whether JPL's nominal is itself optimistic for Neptune would need a DE440 kernel to " +
+      "decide, which this project does not ship. The app reports Neptune to about 30 " +
+      "arcseconds and says why. See ephemeris-accuracy.test.ts.",
   },
 };
 

@@ -7,8 +7,12 @@
  *
  * That split is the whole design. The invariant "never write a true world coordinate into a
  * THREE.Vector3" is a single-writer invariant, and a design with one writer per body cannot hold
- * it with types, only with discipline. Here there is one writer, one call site, and `internal/`
- * is fenced off by lint so nothing can route around it.
+ * it with types, only with discipline. Here there is one writer and one call site.
+ *
+ * The fence is `invariants.test.ts`, which scans the source, rather than the eslint zone table,
+ * which matches on how an import is spelled and lets a relative path through. Files that
+ * legitimately build their own float32 buffers, such as the orbit lines and the star field, are
+ * declared there with their justification; an undeclared one fails the build.
  */
 
 import type { BufferAttribute, Camera, Object3D, PerspectiveCamera, Points } from "three";

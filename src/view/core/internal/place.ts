@@ -1,5 +1,5 @@
 /**
- * The only place in this repository where a float64 simulation coordinate becomes float32.
+ * The camera-relative conversion from float64 simulation coordinates to float32.
  *
  * Everything in src/engine computes in plain JS doubles, in metres, heliocentric. The GPU
  * stores vertex positions and matrices in float32, which carries about seven decimal digits.
@@ -11,8 +11,15 @@
  * a small number. Distant bodies lose precision, which does not matter, because they are
  * distant. This is the whole floating-origin technique in one subtraction.
  *
- * `internal/` is unreachable from outside src/view/core via the eslint zone table, so no other
- * module can route around this function.
+ * This is not literally the only float32 write in the view layer, and claiming otherwise would
+ * be false. `invariants.test.ts` holds the real list: each additional writer is declared there
+ * with the reason it is safe, and an undeclared one fails the build. Orbit lines, for instance,
+ * keep vertices in true heliocentric metres because a 500 m error at Neptune is far under a
+ * pixel at any distance from which a whole orbit is visible.
+ *
+ * What this function is, exactly, is the only place a body's transform is written. The eslint
+ * zone table guards the import, but it matches on how a path is spelled and a relative import
+ * from a sibling directory slips through it, so `invariants.test.ts` scans the source instead.
  */
 
 import type { Object3D } from "three";

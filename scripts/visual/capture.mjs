@@ -47,7 +47,16 @@ page.on("response", (response) => {
  * projected near the centre of the frame and in front of the camera.
  */
 const STARFIELD_ONLY_BASELINE = 0.00376;
-const BODY_VISIBLE_THRESHOLD = STARFIELD_ONLY_BASELINE * 2;
+
+/**
+ * 1.5x the baseline, not 2x. At 2x this gate was flaky on exactly one shot: the widest system
+ * view, where the only content is orbit lines and sub-pixel markers, measured between 0.737%
+ * and 0.860% across runs against a 0.752% bar, so it failed or passed depending on where the
+ * planets happened to be. 1.5x leaves the blank case (0.376%) failing by a wide margin and the
+ * thin case passing by one. The precise check is `assertFocusCentred`; this one only has to
+ * catch a frame that drew nothing.
+ */
+const BODY_VISIBLE_THRESHOLD = STARFIELD_ONLY_BASELINE * 1.5;
 
 const settle = (ms) => page.waitForTimeout(ms);
 
