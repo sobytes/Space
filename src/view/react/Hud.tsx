@@ -47,6 +47,48 @@ function formatRate(secondsPerSecond: number): string {
   return secondsPerSecond < 0 ? `${label}, reversed` : label;
 }
 
+/**
+ * How long a simulated duration takes in real seconds at the current rate.
+ *
+ * This exists because "1 day/s" is accurate and still tells you nothing about what you are
+ * about to watch. At that rate Earth turns once per real second, which looks wrong until you
+ * do the arithmetic, and the first thing anyone concludes is that the rotation is broken
+ * rather than that the clock is running at 86,400 times real time. Showing the consequence
+ * next to the cause turns a suspected bug into the lesson the number was there to teach.
+ */
+function formatRealDuration(simulatedSeconds: number): string | null {
+  const s = Math.abs(simulatedSeconds);
+  // Below a couple of frames there is nothing honest to say about what you are seeing.
+  if (s < 0.05) return null;
+  if (s < 1) return `${s.toFixed(2)} s`;
+  if (s < 90) return `${s.toFixed(1)} s`;
+  if (s < 5_400) return `${(s / 60).toFixed(1)} min`;
+  if (s < 172_800) return `${(s / 3_600).toFixed(1)} h`;
+  if (s < 63_115_200) return `${(s / 86_400).toFixed(1)} days`;
+  return `${(s / 31_557_600).toFixed(1)} years`;
+}
+
+/** Translates a period into what you will actually watch at the clock's current rate. */
+function OnScreen({
+  label,
+  simulatedSeconds,
+  rate,
+}: {
+  label: string;
+  simulatedSeconds: number;
+  rate: number;
+}) {
+  if (rate === 0) return null;
+  const real = formatRealDuration(simulatedSeconds / Math.abs(rate));
+  return (
+    <span className="block text-[11px] text-zinc-500">
+      {real === null
+        ? `${label} is too fast to see at this speed`
+        : `${label} every ${real} on screen at this speed`}
+    </span>
+  );
+}
+
 /** Every number on screen carries where it came from. That is the point of the panel. */
 function Provenance({ children }: { children: React.ReactNode }) {
   return <p className="mt-2 text-[11px] leading-relaxed text-zinc-500">{children}</p>;
@@ -69,16 +111,28 @@ const SURFACE_DATA = {
 function BodyPanel({ epoch }: { epoch: JdTdb }) {
   const focus = useViewportValue(selectFocus);
   const altitudeM = useViewportValue(selectAltitude);
+  const rate = useViewportValue(selectRate);
   const contract = BODY_CONTRACTS[focus];
 
   const derived = useMemo(() => {
     const self = heliocentricPositionOf(focus, epoch);
     const earth = heliocentricPositionOf("embary", epoch);
+    // Mean longitude advances 360 degrees in one orbit, and the table gives its rate per
+    // century, so the period falls straight out of the element set rather than from a constant.
+    const ephemeris = BODY_CONTRACTS[focus].ephemeris;
+    const orbitDays =
+      ephemeris.kind === "standish-elements"
+        ? (360 / SHORT_SPAN.elements[ephemeris.planet].ratePerCentury.meanLongitudeDeg) * 36_525
+        : ephemeris.kind === "mean-elements-about-parent"
+          ? ephemeris.periodDays
+          : null;
+
     return {
       fromSun: length(self),
       fromEarth: length(sub(self, earth)),
       obliquity: obliquityToOrbitDeg(focus, epoch),
       rotationDays: rotationPeriodDays(focus),
+      orbitDays,
     };
   }, [focus, epoch]);
 
@@ -99,7 +153,16 @@ function BodyPanel({ epoch }: { epoch: JdTdb }) {
 
       <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-[13px] tabular-nums">
         <dt className="text-zinc-500">From the Sun</dt>
-        <dd className="text-zinc-200">{formatDistance(derived.fromSun)}</dd>
+        <dd className="text-zinc-200">
+          {formatDistance(derived.fromSun)}
+          {derived.orbitDays !== null ? (
+            <OnScreen
+              label="one orbit"
+              simulatedSeconds={derived.orbitDays * 86_400}
+              rate={rate}
+            />
+          ) : null}
+        </dd>
         <dt className="text-zinc-500">From Earth</dt>
         <dd className="text-zinc-200">
           {formatDistance(derived.fromEarth)}{" "}
@@ -113,6 +176,11 @@ function BodyPanel({ epoch }: { epoch: JdTdb }) {
             ? `${(Math.abs(derived.rotationDays) * 24).toFixed(2)} h`
             : `${Math.abs(derived.rotationDays).toFixed(4)} d`}
           {derived.rotationDays < 0 ? <span className="text-sky-300"> retrograde</span> : null}
+          <OnScreen
+            label="one turn"
+            simulatedSeconds={Math.abs(derived.rotationDays) * 86_400}
+            rate={rate}
+          />
         </dd>
         <dt className="text-zinc-500">Axial tilt</dt>
         <dd className="text-zinc-200">{derived.obliquity.toFixed(2)}&deg;</dd>
