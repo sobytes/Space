@@ -101,6 +101,10 @@ export interface Viewport {
    * the mutual perturbation, and it is the thing worth watching.
    */
   setGravityMode(mode: "analytic" | "nbody", options?: NBodyModeOptions): void;
+  /** Issues a camera request. Does nothing if no camera rig is listening. */
+  requestView(command: ViewCommand): void;
+  /** The camera rig subscribes here. Returns an unsubscribe function. */
+  subscribeView(listener: (command: ViewCommand) => void): () => void;
   setFocus(id: BodyId): void;
   /** Camera distance from the focused body's surface, metres. Driven by the controls. */
   setDistanceToSurface(metres: number): void;
@@ -121,6 +125,24 @@ export interface Viewport {
   debug(): Record<string, unknown>;
   subscribe(listener: (snapshot: ViewportSnapshot) => void): () => void;
 }
+
+/**
+ * A request to reposition the camera, issued by the UI and executed by the camera rig.
+ *
+ * The HUD must not reach into three.js, and the camera rig is the only thing that knows about
+ * the controls, so this is a one-way channel between them. The Viewport carries it because it
+ * already owns focus and the Sun's direction from the focused body, which is everything a
+ * placement needs.
+ */
+export type ViewCommand =
+  /**
+   * Swing the camera to a given angle between the Sun and the viewer, in degrees, keeping the
+   * current distance. 0 is the fully lit disc, 90 puts the terminator down the middle, 180 is
+   * the night side. The swing is about ecliptic north, so it reads as the body's phases.
+   */
+  | { readonly kind: "sunAngle"; readonly degrees: number }
+  /** Pull back far enough to hold the focused body and all of its moons. */
+  | { readonly kind: "frameMoons" };
 
 export interface NBodyModeOptions {
   /** Registry bodies to integrate. Defaults to the eight planets. */
@@ -167,6 +189,7 @@ export function createViewport(init: ViewportInit = {}): Viewport {
 
   const screen: ScreenPlacement[] = [];
   const listeners = new Set<(snapshot: ViewportSnapshot) => void>();
+  const viewListeners = new Set<(command: ViewCommand) => void>();
 
   const publishIntervalMs = init.publishIntervalMs ?? 100;
   let lastPublish = 0;
@@ -426,6 +449,15 @@ export function createViewport(init: ViewportInit = {}): Viewport {
       });
       seedEpoch = clock.epoch;
       resolvePositions();
+    },
+
+    requestView(command) {
+      for (const listener of viewListeners) listener(command);
+    },
+
+    subscribeView(listener) {
+      viewListeners.add(listener);
+      return () => viewListeners.delete(listener);
     },
 
     setFocus(id) {

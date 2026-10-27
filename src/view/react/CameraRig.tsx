@@ -4,8 +4,9 @@ import { useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { CameraControls } from "@react-three/drei";
 import type CameraControlsImpl from "camera-controls";
-import { BODY_CONTRACTS } from "@/engine/bodies/registry";
-import type { ViewportSnapshot } from "../core/viewport";
+import type { PerspectiveCamera } from "three";
+import { BODY_CONTRACTS, satelliteSystemRadiusM } from "@/engine/bodies/registry";
+import type { ViewCommand, ViewportSnapshot } from "../core/viewport";
 import { useViewport, useViewportValue } from "./ViewportContext";
 
 /**
@@ -64,6 +65,82 @@ export function CameraRig() {
       true,
     );
   }, [focus, viewport]);
+
+  /**
+   * Camera requests from the HUD.
+   *
+   * `sunAngle` rotates the viewing direction about ecliptic north, away from the Sun. The
+   * rotation is Rodrigues' formula with the axis not perpendicular to the Sun direction, since
+   * a body's Sun direction is never exactly in the ecliptic plane:
+   *
+   *     d = S cos(t) + (n x S) sin(t) + n (n . S)(1 - cos(t))
+   *
+   * No vertical lift is added, unlike the arrival framing. At 90 degrees that puts the viewer
+   * exactly in the plane containing the Sun, which makes the terminator a clean vertical line
+   * down the middle of the disc rather than a curve, and that is the whole point of the view.
+   *
+   * Distance is deliberately preserved. Choosing a lighting angle should not also change how
+   * close you are, or every press would undo your zoom.
+   */
+  useEffect(
+    () =>
+      viewport.subscribeView((command: ViewCommand) => {
+        const instance = controls.current;
+        if (!instance) return;
+
+        if (command.kind === "frameMoons") {
+          const systemRadius = satelliteSystemRadiusM(focus);
+          if (systemRadius === null) return;
+          /**
+           * Derived from the camera, not from a constant.
+           *
+           * A fixed multiple of the orbit radius only works for one field of view. At 2.4 times
+           * the apoapsis the moon subtends 22.6 degrees off axis, which squeaks inside a 50
+           * degree vertical field and falls straight out of a narrower one or a shorter window.
+           * Solving for the distance that puts the apoapsis at a set fraction of the vertical
+           * half-frame holds regardless:  d = r / tan(fov/2 * fill).
+           *
+           * Vertical rather than horizontal because that is the shorter axis on every window
+           * wider than it is tall, so it is the one that crops.
+           */
+          const halfFovRad = ((instance.camera as PerspectiveCamera).fov * Math.PI) / 360;
+          const fill = 0.7;
+          const distance = systemRadius / Math.tan(halfFovRad * fill);
+          void instance.dollyTo(Math.min(distance, instance.maxDistance), true);
+          return;
+        }
+
+        const sun = viewport.sunDirectionFor(focus);
+        const t = (command.degrees * Math.PI) / 180;
+        const cos = Math.cos(t);
+        const sin = Math.sin(t);
+        // Ecliptic north in render space. The scene's y axis is the ecliptic pole.
+        const nx = 0;
+        const ny = 1;
+        const nz = 0;
+        const dot = nx * sun.x + ny * sun.y + nz * sun.z;
+        const crossX = ny * sun.z - nz * sun.y;
+        const crossY = nz * sun.x - nx * sun.z;
+        const crossZ = nx * sun.y - ny * sun.x;
+
+        const dx = sun.x * cos + crossX * sin + nx * dot * (1 - cos);
+        const dy = sun.y * cos + crossY * sin + ny * dot * (1 - cos);
+        const dz = sun.z * cos + crossZ * sin + nz * dot * (1 - cos);
+        const length = Math.hypot(dx, dy, dz) || 1;
+
+        const distance = instance.distance || BODY_CONTRACTS[focus].equatorialRadiusM * 6;
+        void instance.setLookAt(
+          (dx / length) * distance,
+          (dy / length) * distance,
+          (dz / length) * distance,
+          0,
+          0,
+          0,
+          true,
+        );
+      }),
+    [viewport, focus],
+  );
 
   useEffect(() => {
     // Inspection hook for the visual harness, alongside window.__solar. Flying to a precise

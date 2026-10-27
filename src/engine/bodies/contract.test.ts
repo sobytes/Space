@@ -17,7 +17,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { PLANET_IDS, SHORT_SPAN } from "../data/planets";
 import { GM_SUN } from "../units";
-import { BODY_CONTRACTS, BODY_IDS } from "./registry";
+import { BODY_CONTRACTS, BODY_IDS, childrenOf, satelliteSystemRadiusM } from "./registry";
 import { flattening, rotationPeriodFromIau, type BodyContract } from "./contract";
 
 const MANIFEST_TEXTURE_IDS: ReadonlySet<string> = new Set(
@@ -305,3 +305,43 @@ describe("moons", () => {
     expect(withMoons.has("venus" as never)).toBe(false);
   });
 });
+
+describe("framing a body with its moons", () => {
+  it("reaches past the Moon for Earth, and past Phoebe for Saturn", () => {
+    // The Moon's apoapsis is about 405,500 km, and Phoebe's about 15.0 million.
+    const earth = satelliteSystemRadiusM("embary");
+    expect(earth).not.toBeNull();
+    expect(earth! / 1000).toBeGreaterThan(400_000);
+    expect(earth! / 1000).toBeLessThan(420_000);
+
+    const saturn = satelliteSystemRadiusM("saturn");
+    expect(saturn! / 1e9).toBeGreaterThan(14);
+    expect(saturn! / 1e9).toBeLessThan(16);
+  });
+
+  it("includes eccentricity, so a loose moon is not cropped out of frame", () => {
+    // Phoebe's eccentricity is 0.16, which puts its apoapsis well past its mean distance.
+    // Framing on the semi-major axis alone would leave it outside the view for much of its
+    // 1.5 year orbit, which is exactly the bug this function exists to prevent.
+    const phoebe = BODY_CONTRACTS.phoebe.ephemeris;
+    if (phoebe.kind !== "mean-elements-about-parent") throw new Error("expected mean elements");
+    expect(satelliteSystemRadiusM("saturn")).toBeGreaterThan(phoebe.semiMajorAxisM);
+  });
+
+  it("returns null for a body with no moons in the registry", () => {
+    expect(satelliteSystemRadiusM("venus")).toBeNull();
+    expect(satelliteSystemRadiusM("mercury")).toBeNull();
+    // And for a moon, which has no satellites of its own here.
+    expect(satelliteSystemRadiusM("titan")).toBeNull();
+  });
+
+  it("agrees with childrenOf about which bodies have moons", () => {
+    for (const id of BODY_IDS) {
+      const hasMoons = childrenOf(id).some(
+        (child) => BODY_CONTRACTS[child].ephemeris.kind === "mean-elements-about-parent",
+      );
+      expect(satelliteSystemRadiusM(id) !== null, id).toBe(hasMoons);
+    }
+  });
+});
+

@@ -1735,4 +1735,26 @@ export function childrenOf(id: BodyId): readonly BodyId[] {
   return BODY_IDS.filter((candidate) => BODY_CONTRACTS[candidate].parent === id);
 }
 
+/**
+ * How far out a body's satellite system reaches, metres, or null if it has no moons here.
+ *
+ * This exists so the camera can frame a planet together with its moons. Framing Earth against
+ * its own radius puts the Moon 1,322 pixels off the top of the screen, which reads as a missing
+ * Moon rather than as a camera 11 times too close. The number is the furthest satellite's
+ * semi-major axis, taken from the same contracts that position them, so it cannot drift away
+ * from where the moons actually are.
+ */
+export function satelliteSystemRadiusM(id: BodyId): number | null {
+  let furthest = 0;
+  for (const child of childrenOf(id)) {
+    const ephemeris = BODY_CONTRACTS[child].ephemeris;
+    if (ephemeris.kind !== "mean-elements-about-parent") continue;
+    // Apoapsis, not the semi-major axis: Phoebe's eccentricity of 0.16 puts it 1.6 million km
+    // further out than its mean distance suggests.
+    const apoapsis = ephemeris.semiMajorAxisM * (1 + ephemeris.eccentricity);
+    furthest = Math.max(furthest, apoapsis);
+  }
+  return furthest > 0 ? furthest : null;
+}
+
 export type { BodyContract, BodyId } from "./contract";

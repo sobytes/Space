@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { BODY_CONTRACTS, BODY_IDS } from "@/engine/bodies/registry";
+import { BODY_CONTRACTS, BODY_IDS, satelliteSystemRadiusM, type BodyId } from "@/engine/bodies/registry";
 import { obliquityToOrbitDeg, rotationPeriodDays } from "@/engine/rotation";
 import { ACCURACY } from "@/engine/data/ephemeris-accuracy";
 import { SHORT_SPAN } from "@/engine/data/planets";
@@ -66,6 +66,69 @@ function formatRealDuration(simulatedSeconds: number): string | null {
   if (s < 172_800) return `${(s / 3_600).toFixed(1)} h`;
   if (s < 63_115_200) return `${(s / 86_400).toFixed(1)} days`;
   return `${(s / 31_557_600).toFixed(1)} years`;
+}
+
+/**
+ * Where to stand relative to the Sun, and how far back to stand.
+ *
+ * The lighting angles exist because the thing worth seeing on a planet is usually the line
+ * between its day and its night, and arriving over the lit face hides it. At 90 degrees the
+ * terminator runs straight down the middle of the disc, which is the clearest way to show that
+ * half a world is always in darkness. At 180 degrees Earth shows its city lights.
+ *
+ * "Fit moons" is here because framing a planet against its own radius crops its moons out
+ * entirely. Earth's Moon lands over 1,300 pixels above the top of the window at the default
+ * distance, which reads as a missing Moon rather than as a camera far too close.
+ */
+function ViewControls({ focus }: { focus: BodyId }) {
+  const viewport = useViewport();
+  const systemRadius = satelliteSystemRadiusM(focus);
+
+  // The Sun is the light source, so there is no angle to it and no dark side to swing around to.
+  if (focus === "sun") return null;
+
+  const angles: readonly { label: string; degrees: number; title: string }[] = [
+    { label: "Day", degrees: 0, title: "Look from the Sun's side. The whole disc is lit." },
+    { label: "Terminator", degrees: 90, title: "Half lit, half dark, with the day-night line down the middle." },
+    { label: "Night", degrees: 180, title: "Look at the dark side. Earth shows its city lights." },
+  ];
+
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-1.5">
+      <span className="mr-1 text-[11px] uppercase tracking-wide text-zinc-500">View</span>
+      {angles.map(({ label, degrees, title }) => (
+        <button
+          key={label}
+          type="button"
+          title={title}
+          onClick={() => viewport.requestView({ kind: "sunAngle", degrees })}
+          className="rounded-md border border-white/10 px-2 py-0.5 text-[11px] text-zinc-300 transition hover:bg-white/10"
+        >
+          {label}
+        </button>
+      ))}
+      {systemRadius !== null ? (
+        <button
+          type="button"
+          /**
+           * The tooltip carries the number because the view itself is the lesson. Almost every
+           * diagram of the Earth and Moon draws them a few diameters apart; the real gap is
+           * thirty Earths, which is why the planet shrinks to a few pixels the moment the Moon
+           * fits on screen. That emptiness is the thing worth seeing, not a framing problem.
+           */
+          title={
+            `Pull back to ${Math.round(systemRadius / 1000).toLocaleString()} km so the moons fit. ` +
+            `That is ${Math.round(systemRadius / (2 * BODY_CONTRACTS[focus].equatorialRadiusM))} ` +
+            `${BODY_CONTRACTS[focus].displayName} diameters away, which is why it ends up so small.`
+          }
+          onClick={() => viewport.requestView({ kind: "frameMoons" })}
+          className="rounded-md border border-sky-400/30 px-2 py-0.5 text-[11px] text-sky-200 transition hover:bg-sky-400/10"
+        >
+          Fit moons
+        </button>
+      ) : null}
+    </div>
+  );
 }
 
 /** Translates a period into what you will actually watch at the clock's current rate. */
@@ -150,6 +213,8 @@ function BodyPanel({ epoch }: { epoch: JdTdb }) {
     <aside className="pointer-events-auto w-[22rem] max-w-[calc(100vw-2rem)] rounded-xl border border-white/10 bg-black/70 p-4 backdrop-blur-md">
       <h2 className="text-lg font-semibold tracking-tight text-zinc-50">{contract.displayName}</h2>
       <p className="mt-1 text-sm leading-snug text-amber-200/90">{contract.education.oneLine}</p>
+
+      <ViewControls focus={focus} />
 
       <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-[13px] tabular-nums">
         <dt className="text-zinc-500">From the Sun</dt>

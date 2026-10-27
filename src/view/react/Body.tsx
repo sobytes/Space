@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useFrame } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import {
   AdditiveBlending,
@@ -9,7 +10,9 @@ import {
   DoubleSide,
   Group,
   TextureLoader,
+  Vector3,
   type Texture,
+  type WebGLProgramParametersWithUniforms,
 } from "three";
 import { BODY_CONTRACTS, type BodyId } from "@/engine/bodies/registry";
 import { TerrainTiles, useTerrainManifest } from "./TerrainTiles";
@@ -37,6 +40,125 @@ function useOptionalTexture(id: string | undefined): Texture | null {
   return id ? (loaded as Texture) : null;
 }
 
+
+/**
+ * City lights on the night side.
+ *
+ * Earth's contract has carried a `nightTextureId` since the registry was written and nothing
+ * rendered it, so the dark side was simply black. That is the half of the planet a child is
+ * most likely to find interesting, and the lit cities are the clearest evidence a simulator can
+ * give that the dark side is night rather than empty space.
+ *
+ * It cannot be an `emissiveMap`, which three adds unconditionally and would paint the lights
+ * across the daylit hemisphere too. The mask has to come from the lighting geometry, so this
+ * injects the term into the standard material: carry the fragment's world normal through as a
+ * varying, dot it with the direction to the Sun, and fade the lights in across the terminator.
+ *
+ * The Sun direction is a single uniform rather than per-fragment, which treats the Sun as
+ * infinitely far away. At Earth's distance the Sun subtends half a degree, so the error in the
+ * terminator's position is under a quarter of a degree of latitude, far finer than the texture.
+ *
+ * The world normal uses mat3(modelMatrix) rather than a proper inverse transpose. That is exact
+ * for uniform scale and wrong under shear; the only non-uniform scale here is oblateness, and
+ * the largest is Saturn at 10%, which tilts a normal by at most a few degrees near 45 latitude.
+ * Earth, the only body with a night map, is flattened by 0.3%.
+ */
+interface NightUniforms {
+  readonly uSunDirection: { value: Vector3 };
+  readonly uNightMap: { value: Texture | null };
+  readonly uNightStrength: { value: number };
+}
+
+/** Points the lighting mask at the Sun. Called every frame, so no allocation. */
+function aimAtSun(uniforms: NightUniforms, x: number, y: number, z: number): void {
+  uniforms.uSunDirection.value.set(x, y, z);
+}
+
+/**
+ * Patches the standard material's program to add the night map, masked by the lighting.
+ *
+ * Module scope on purpose, as with the two setters above. These mutate objects that outlive a
+ * render, which is the documented `onBeforeCompile` and uniform contract, and doing it inline
+ * in a hook body trips the immutability rule for a good general reason even though these
+ * particular mutations are the intended pattern.
+ */
+function nightSideProgram(uniforms: NightUniforms, nightMap: Texture) {
+  // Bound here rather than from an effect. An effect runs after three has already built and
+  // bound the program, and a sampler uniform still holding null at that point is given three's
+  // empty texture, which samples black. The result is a night side with no lights and no error
+  // anywhere: the shader compiles, runs, and adds zero.
+  uniforms.uNightMap.value = nightMap;
+
+  return (shader: WebGLProgramParametersWithUniforms) => {
+    shader.uniforms.uSunDirection = uniforms.uSunDirection;
+    shader.uniforms.uNightMap = uniforms.uNightMap;
+    shader.uniforms.uNightStrength = uniforms.uNightStrength;
+
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <common>", "#include <common>\nvarying vec3 vSunFacingNormal;")
+      .replace(
+        "#include <beginnormal_vertex>",
+        "#include <beginnormal_vertex>\n\tvSunFacingNormal = normalize(mat3(modelMatrix) * objectNormal);",
+      );
+
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        "#include <common>",
+        "#include <common>\nuniform vec3 uSunDirection;\nuniform sampler2D uNightMap;\nuniform float uNightStrength;\nvarying vec3 vSunFacingNormal;",
+      )
+      /**
+       * Added immediately after `opaque_fragment`, which is where the shader still holds
+       * linear radiance, and before tone mapping and the sRGB encode that follow it.
+       *
+       * Injecting at the end of the chain instead, after both, costs about a factor of twenty
+       * in apparent brightness: the texture is sampled with an automatic sRGB decode so the
+       * value is linear, and adding a linear 0.05 to an already-encoded pixel is invisible.
+       * It takes a strength near 25 to see anything that way, which is the symptom of adding
+       * in the wrong space rather than of a texture that is too dark. Here the lights are
+       * tone-mapped along with everything else, which is also what makes them hold up when
+       * the exposure changes.
+       */
+      .replace(
+        "#include <opaque_fragment>",
+        [
+          "#include <opaque_fragment>",
+          "float sunFacing = dot(normalize(vSunFacingNormal), normalize(uSunDirection));",
+          // Widened slightly either side of the geometric terminator. A hard edge reads as a
+          // rendering seam; the real one is softened by atmosphere over roughly this width.
+          "float nightAmount = smoothstep(0.12, -0.08, sunFacing);",
+          "vec3 cityLights = texture2D(uNightMap, vMapUv).rgb;",
+          "gl_FragColor.rgb += cityLights * nightAmount * uNightStrength;",
+        ].join("\n\t"),
+      );
+  };
+}
+
+/** Distinguishes the night-side program from the stock one in three's program cache. */
+const nightCacheKey = () => "solar-night-side-v1";
+
+function useNightSide(bodyId: BodyId, nightMap: Texture | null) {
+  const viewport = useViewport();
+  const uniforms = useMemo<NightUniforms>(
+    () => ({
+      uSunDirection: { value: new Vector3(0, 0, 1) },
+      uNightMap: { value: null },
+      uNightStrength: { value: 2.2 },
+    }),
+    [],
+  );
+
+  useFrame(() => {
+    if (!nightMap) return;
+    const sun = viewport.sunDirectionFor(bodyId);
+    aimAtSun(uniforms, sun.x, sun.y, sun.z);
+  });
+
+  return useMemo(
+    () => (nightMap ? nightSideProgram(uniforms, nightMap) : undefined),
+    [nightMap, uniforms],
+  );
+}
+
 /**
  * A body declares how it looks. It never says where it is: the group's transform is written
  * exclusively by the Viewport, and `matrixAutoUpdate` is switched off on attach so three.js
@@ -55,6 +177,8 @@ export function Body({ id, segments = 96 }: { id: BodyId; segments?: number }) {
   const albedo = useOptionalTexture(contract.appearance.albedoTextureId);
   const clouds = useOptionalTexture(contract.appearance.cloudTextureId);
   const ring = useOptionalTexture(contract.appearance.ringSystem?.textureId);
+  const night = useOptionalTexture(contract.appearance.nightTextureId);
+  const applyNightSide = useNightSide(id, night);
 
   useEffect(() => {
     if (!group.current) return;
@@ -88,6 +212,20 @@ export function Body({ id, segments = 96 }: { id: BodyId; segments?: number }) {
           <meshBasicMaterial map={albedo ?? undefined} toneMapped={false} color="#fff3d0" />
         ) : (
           <meshStandardMaterial
+            // Changing the injected program needs a fresh material, since three compiles
+            // onBeforeCompile once and caches the result against the material.
+            key={applyNightSide ? "night" : "plain"}
+            onBeforeCompile={applyNightSide}
+            /**
+             * Without this the injection silently does nothing.
+             *
+             * Three caches compiled programs by a key built from the material's parameters, and
+             * `onBeforeCompile` is not part of that key. Every textured planet here produces the
+             * same parameter set, so Earth was handed a program already compiled for one of the
+             * others and the night map never reached the shader. Nothing errors, the planet just
+             * renders without it, which is the hardest kind of failure to notice.
+             */
+            customProgramCacheKey={applyNightSide ? nightCacheKey : undefined}
             map={albedo ?? undefined}
             // The global normal map comes from real elevation data, so craters shade correctly
             // through the terminator at orbital range. Close range switches to tiles below.

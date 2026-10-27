@@ -36,7 +36,10 @@ export function nowEpoch(): JdTdb {
 }
 
 export function initialClock(): ClockState {
-  return { epoch: nowEpoch(), secondsPerSecond: 86_400, running: true };
+  // Real time, so the first thing anyone sees is the solar system as it is right now, moving
+  // at the speed it actually moves. Starting at a day per second made Earth spin once a second
+  // and read as a bug rather than as a fast clock.
+  return { epoch: nowEpoch(), secondsPerSecond: 1, running: true };
 }
 
 export function reduceClock(state: ClockState, command: ClockCommand): ClockState {
