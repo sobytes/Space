@@ -18,7 +18,6 @@ const KM = 1000;
 const KM3_TO_M3 = 1e9;
 
 const IAU_SOURCE = "IAU WGCCRE 2015 report via NASA NAIF pck00011.tpc";
-const JPL_PHYS = "https://ssd.jpl.nasa.gov/planets/phys_par.html";
 const FACT_SHEET = "https://nssdc.gsfc.nasa.gov/planetary/factsheet/";
 
 export const BODY_CONTRACTS: Readonly<Record<BodyId, BodyContract>> = {

@@ -15,7 +15,8 @@
     "assets": "node scripts/fetch-assets.mjs",
     "assets:list": "node scripts/fetch-assets.mjs --list",
     "stars": "node scripts/build-star-catalogue.mjs",
-    "verify:contracts": "vitest run src/engine/bodies"
+    "verify:contracts": "vitest run src/engine/bodies",
+    "verify:depth": "vitest run src/view/core/depth.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "1.3.0",
