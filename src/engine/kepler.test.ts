@@ -14,9 +14,9 @@
 
 import { readFileSync } from "node:fs";
 import { beforeAll, describe, expect, it } from "vitest";
-import { PLANET_IDS, SHORT_SPAN, type PlanetId } from "./data/planets";
+import { PLANET_IDS, SHORT_SPAN, modelForYear, type PlanetId } from "./data/planets";
 import { heliocentricPosition, heliocentricState } from "./kepler";
-import { jdTdb, type JdTdb } from "./time";
+import { approximateJulianYear, jdTdb, type JdTdb } from "./time";
 import { metresToKm } from "./units";
 import { length, sub, vec3, type Vec3 } from "./vec";
 
@@ -107,7 +107,7 @@ interface SampleError {
 }
 
 function measure(sample: HorizonsSample): SampleError {
-  const computed = heliocentricState(sample.body, sample.jdTdb);
+  const computed = heliocentricState(sample.body, sample.jdTdb, SHORT_SPAN);
   return {
     sample,
     longitudeArcsec:
@@ -141,18 +141,21 @@ describe("Standish Keplerian ephemeris versus JPL Horizons", () => {
       const allowed = SHORT_SPAN.quotedError[body];
       const errors = MEASUREMENTS.get(body) ?? [];
       let worst = 0;
-      let worstLabel = "";
+      let worstEpoch = "";
+      let worstQuantity = "";
 
       for (const error of errors) {
-        const shares = [
-          error.longitudeArcsec / allowed.longitude,
-          error.latitudeArcsec / allowed.latitude,
-          error.distanceKm / allowed.distanceKm,
+        const shares: readonly (readonly [string, number])[] = [
+          ["longitude", error.longitudeArcsec / allowed.longitude],
+          ["latitude", error.latitudeArcsec / allowed.latitude],
+          ["distance", error.distanceKm / allowed.distanceKm],
         ];
-        const peak = Math.max(...shares);
-        if (peak > worst) {
-          worst = peak;
-          worstLabel = error.sample.epoch;
+        for (const [quantity, share] of shares) {
+          if (share > worst) {
+            worst = share;
+            worstEpoch = error.sample.epoch;
+            worstQuantity = quantity;
+          }
         }
         perSample.push({
           body,
@@ -173,7 +176,8 @@ describe("Standish Keplerian ephemeris versus JPL Horizons", () => {
         'allowed lat ("")': allowed.latitude,
         "allowed dist (km)": allowed.distanceKm,
         "worst share of allowance": `${(100 * worst).toFixed(1)}%`,
-        "worst epoch": worstLabel,
+        "worst quantity": worstQuantity,
+        "worst epoch": worstEpoch,
       });
     }
 
@@ -193,6 +197,16 @@ describe("Standish Keplerian ephemeris versus JPL Horizons", () => {
       expect(error.distanceKm, `${at} distance`).toBeLessThanOrEqual(allowed.distanceKm);
     }
   });
+
+  it("selects the short-span model by default at every fixture epoch", () => {
+    for (const errors of MEASUREMENTS.values()) {
+      for (const { sample } of errors) {
+        expect(modelForYear(approximateJulianYear(sample.jdTdb)).id, sample.epoch).toBe(
+          "short-span",
+        );
+      }
+    }
+  });
 });
 
 describe("analytic velocity", () => {
@@ -200,20 +214,24 @@ describe("analytic velocity", () => {
    * A central difference over 0.01 d has a truncation error near 1e-7 relative for Mercury,
    * the fastest body here, and far less for the rest. Agreement to 1e-6 therefore pins the
    * hand-derived rotation and element-drift derivatives without pinning round-off.
+   *
+   * The model is pinned rather than left to `modelForYear`, because the 2050-01-01 fixture
+   * sits exactly on the short-span window's edge and the step after it lands in the long-span
+   * table. Differentiating across that seam would compare two different functions.
    */
   const STEP_DAYS = 0.01;
 
   it.each(PLANET_IDS)("%s matches a central difference of the position function", (body) => {
     for (const { sample } of MEASUREMENTS.get(body) ?? []) {
-      const before = heliocentricPosition(body, jdTdb(sample.jdTdb - STEP_DAYS));
-      const after = heliocentricPosition(body, jdTdb(sample.jdTdb + STEP_DAYS));
+      const before = heliocentricPosition(body, jdTdb(sample.jdTdb - STEP_DAYS), SHORT_SPAN);
+      const after = heliocentricPosition(body, jdTdb(sample.jdTdb + STEP_DAYS), SHORT_SPAN);
       const seconds = 2 * STEP_DAYS * 86_400;
       const numerical = vec3(
         (after.x - before.x) / seconds,
         (after.y - before.y) / seconds,
         (after.z - before.z) / seconds,
       );
-      const analytic = heliocentricState(body, sample.jdTdb).velocity;
+      const analytic = heliocentricState(body, sample.jdTdb, SHORT_SPAN).velocity;
       const relative = length(sub(analytic, numerical)) / length(numerical);
       expect(relative, `${body} @ ${sample.epoch} velocity derivative`).toBeLessThan(1e-6);
     }

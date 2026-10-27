@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
-    "verify:relativity": "vitest run src/engine/relativity.test.ts"
+    "verify:relativity": "vitest run src/engine/relativity.test.ts",
+    "verify:ephemeris": "vitest run src/engine/kepler.test.ts",
+    "verify:physics": "vitest run src/engine/demonstrations",
+    "verify": "vitest run"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "1.3.0",
