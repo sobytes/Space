@@ -1,0 +1,7 @@
+ts	phase	decision	why	evidence	result
+2026-10-27T00:09:56Z	frame	routed to figure-it-out, not the Feature playbook	ambitious multi-part build, two one-way-door decisions, and a correctness claim that needs a real gate	.audit/PLAYBOOK.md	rigor set high
+2026-10-27T00:09:56Z	scaffold	Next.js 16.4.3 + React 19.3 + Tailwind 4, TypeScript, App Router, src dir	CLAUDE.md mandates Next.js App Router with Tailwind for websites	commit pending, package.json	scaffolded, deps installed
+2026-10-27T00:09:56Z	scaffold	sent the 3.4MB bundled Next 16 docs to a subagent instead of reading them here	Next's own AGENTS.md says this version breaks from older training data, but the docs would eat the context window	node_modules/next/dist/docs/	agent running
+2026-10-27T00:12:21Z	frame	scope grew mid-turn to rockets, asteroids, N-body gravity, time control and an AI layer	user sent three follow-ups before any engine code existed, which is the cheapest moment to absorb them	.audit/PLAYBOOK.md	reframed, 11 predicates
+2026-10-27T00:12:21Z	frame	physics engine will be pure TypeScript, no DOM and no WebGL	same code then runs in the browser, in a worker, and in a Node route handler, so the AI tools and the CI gates hit the real engine	.audit/PLAYBOOK.md	settled before any rendering code
+2026-10-27T00:12:21Z	frame	AI gets tools that call the engine, and is never the source of a number	a narrated figure the engine did not compute is the failure mode that would make an engineer dismiss the whole thing	predicate P11	gate planned
