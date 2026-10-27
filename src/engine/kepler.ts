@@ -29,7 +29,7 @@ import {
   toMetresFromAu,
   toRadians,
 } from "./units";
-import { approximateJulianYear, julianCenturiesSinceJ2000, type JdTdb } from "./time";
+import { julianCenturiesSinceJ2000, julianYearForModelSelection, type JdTdb } from "./time";
 import {
   add,
   cross,
@@ -48,28 +48,22 @@ const Z_AXIS: Vec3 = vec3(0, 0, 1);
 
 const SECONDS_PER_JULIAN_CENTURY = DAYS_PER_JULIAN_CENTURY * SECONDS_PER_DAY;
 
-/** Newton-Raphson stops once a step moves E by less than this, in radians. */
-const ECCENTRIC_ANOMALY_TOLERANCE = 1e-13;
+const ECCENTRIC_ANOMALY_TOLERANCE_RADIANS = 1e-13;
 const ECCENTRIC_ANOMALY_MAX_ITERATIONS = 40;
 
-/**
- * Elements evaluated at one instant, paired with their rate of change, in engine units:
- * metres and radians, rates per Julian century. The rates are what makes the analytic
- * velocity exact rather than a frozen-element approximation.
- */
 interface EvaluatedElements {
-  readonly semiMajorAxis: number;
-  readonly semiMajorAxisRate: number;
+  readonly semiMajorAxisMetres: number;
+  readonly semiMajorAxisMetresPerCentury: number;
   readonly eccentricity: number;
-  readonly eccentricityRate: number;
-  readonly inclination: number;
-  readonly inclinationRate: number;
-  readonly argumentOfPerihelion: number;
-  readonly argumentOfPerihelionRate: number;
-  readonly longitudeOfAscendingNode: number;
-  readonly longitudeOfAscendingNodeRate: number;
-  readonly meanAnomaly: number;
-  readonly meanAnomalyRate: number;
+  readonly eccentricityPerCentury: number;
+  readonly inclinationRadians: number;
+  readonly inclinationRadiansPerCentury: number;
+  readonly argumentOfPerihelionRadians: number;
+  readonly argumentOfPerihelionRadiansPerCentury: number;
+  readonly longitudeOfAscendingNodeRadians: number;
+  readonly longitudeOfAscendingNodeRadiansPerCentury: number;
+  readonly meanAnomalyRadians: number;
+  readonly meanAnomalyRadiansPerCentury: number;
 }
 
 function evaluateElements(elements: PlanetElements, centuries: number): EvaluatedElements {
@@ -98,92 +92,119 @@ function evaluateElements(elements: PlanetElements, centuries: number): Evaluate
   }
 
   return {
-    semiMajorAxis: toMetresFromAu(au(semiMajorAxisAu)),
-    semiMajorAxisRate: toMetresFromAu(ratePerCentury.semiMajorAxisAu),
+    semiMajorAxisMetres: toMetresFromAu(au(semiMajorAxisAu)),
+    semiMajorAxisMetresPerCentury: toMetresFromAu(ratePerCentury.semiMajorAxisAu),
     eccentricity: atJ2000.eccentricity + ratePerCentury.eccentricity * centuries,
-    eccentricityRate: ratePerCentury.eccentricity,
-    inclination: radiansFromDegrees(inclinationDeg),
-    inclinationRate: radiansFromDegrees(ratePerCentury.inclinationDeg),
-    argumentOfPerihelion: radiansFromDegrees(
+    eccentricityPerCentury: ratePerCentury.eccentricity,
+    inclinationRadians: radiansFromDegrees(inclinationDeg),
+    inclinationRadiansPerCentury: radiansFromDegrees(ratePerCentury.inclinationDeg),
+    argumentOfPerihelionRadians: radiansFromDegrees(
       longitudeOfPerihelionDeg - longitudeOfAscendingNodeDeg,
     ),
-    argumentOfPerihelionRate: radiansFromDegrees(
+    argumentOfPerihelionRadiansPerCentury: radiansFromDegrees(
       ratePerCentury.longitudeOfPerihelionDeg - ratePerCentury.longitudeOfAscendingNodeDeg,
     ),
-    longitudeOfAscendingNode: radiansFromDegrees(longitudeOfAscendingNodeDeg),
-    longitudeOfAscendingNodeRate: radiansFromDegrees(
+    longitudeOfAscendingNodeRadians: radiansFromDegrees(longitudeOfAscendingNodeDeg),
+    longitudeOfAscendingNodeRadiansPerCentury: radiansFromDegrees(
       ratePerCentury.longitudeOfAscendingNodeDeg,
     ),
-    meanAnomaly: normalizeAngleSigned(radiansFromDegrees(meanAnomalyDeg)),
-    meanAnomalyRate: radiansFromDegrees(meanAnomalyRateDeg),
+    meanAnomalyRadians: normalizeAngleSigned(radiansFromDegrees(meanAnomalyDeg)),
+    meanAnomalyRadiansPerCentury: radiansFromDegrees(meanAnomalyRateDeg),
   };
 }
 
-/**
- * Solves `M = E - e sin E` for E. Throws rather than returning a half-solved value, because
- * a silently unconverged E is a position that looks plausible and is wrong.
- */
+/** Solves `M = E - e sin E` for E. Throws rather than returning a half-solved value. */
 export function solveEccentricAnomaly(meanAnomaly: number, eccentricity: number): number {
   let eccentricAnomaly = meanAnomaly + eccentricity * Math.sin(meanAnomaly);
   for (let i = 0; i < ECCENTRIC_ANOMALY_MAX_ITERATIONS; i += 1) {
     const residual = eccentricAnomaly - eccentricity * Math.sin(eccentricAnomaly) - meanAnomaly;
     const step = residual / (1 - eccentricity * Math.cos(eccentricAnomaly));
     eccentricAnomaly -= step;
-    if (Math.abs(step) < ECCENTRIC_ANOMALY_TOLERANCE) return eccentricAnomaly;
+    if (Math.abs(step) < ECCENTRIC_ANOMALY_TOLERANCE_RADIANS) return eccentricAnomaly;
   }
   throw new Error(
-    `Kepler's equation did not converge to ${ECCENTRIC_ANOMALY_TOLERANCE} rad in ` +
+    `Kepler's equation did not converge to ${ECCENTRIC_ANOMALY_TOLERANCE_RADIANS} rad in ` +
       `${ECCENTRIC_ANOMALY_MAX_ITERATIONS} iterations (M=${meanAnomaly}, e=${eccentricity})`,
   );
 }
 
+/** A vector and its time derivative, carried together so one rotation can turn both. */
+interface Moving {
+  readonly value: Vec3;
+  readonly rate: Vec3;
+}
+
+type Rotation = (v: Vec3, radians: number) => Vec3;
+
+/**
+ * Rotates a moving vector about `axis` by an angle that is itself changing, applying the
+ * product rule `d/dT (R v) = R dv/dT + (dangle/dT) (axis x R v)`.
+ */
+function rotateMoving(
+  moving: Moving,
+  rotate: Rotation,
+  axis: Vec3,
+  radians: number,
+  radiansRate: number,
+): Moving {
+  const value = rotate(moving.value, radians);
+  return {
+    value,
+    rate: add(rotate(moving.rate, radians), scale(cross(axis, value), radiansRate)),
+  };
+}
+
 function stateFrom(el: EvaluatedElements): StateVector {
-  const eccentricAnomaly = solveEccentricAnomaly(el.meanAnomaly, el.eccentricity);
+  const eccentricAnomaly = solveEccentricAnomaly(el.meanAnomalyRadians, el.eccentricity);
   const cosE = Math.cos(eccentricAnomaly);
   const sinE = Math.sin(eccentricAnomaly);
 
   const minorFactor = Math.sqrt(1 - el.eccentricity * el.eccentricity);
-  const semiMinorAxis = el.semiMajorAxis * minorFactor;
-
-  const inPlane = vec3(
-    el.semiMajorAxis * (cosE - el.eccentricity),
-    semiMinorAxis * sinE,
-    0,
-  );
+  const semiMinorAxis = el.semiMajorAxisMetres * minorFactor;
 
   const eccentricAnomalyRate =
-    (el.meanAnomalyRate + sinE * el.eccentricityRate) / (1 - el.eccentricity * cosE);
+    (el.meanAnomalyRadiansPerCentury + sinE * el.eccentricityPerCentury) /
+    (1 - el.eccentricity * cosE);
   const semiMinorAxisRate =
-    el.semiMajorAxisRate * minorFactor -
-    (el.semiMajorAxis * el.eccentricity * el.eccentricityRate) / minorFactor;
+    el.semiMajorAxisMetresPerCentury * minorFactor -
+    (el.semiMajorAxisMetres * el.eccentricity * el.eccentricityPerCentury) / minorFactor;
 
-  const inPlaneRate = vec3(
-    el.semiMajorAxisRate * (cosE - el.eccentricity) +
-      el.semiMajorAxis * (-sinE * eccentricAnomalyRate - el.eccentricityRate),
-    semiMinorAxisRate * sinE + semiMinorAxis * cosE * eccentricAnomalyRate,
-    0,
+  const inPlane: Moving = {
+    value: vec3(el.semiMajorAxisMetres * (cosE - el.eccentricity), semiMinorAxis * sinE, 0),
+    rate: vec3(
+      el.semiMajorAxisMetresPerCentury * (cosE - el.eccentricity) +
+        el.semiMajorAxisMetres * (-sinE * eccentricAnomalyRate - el.eccentricityPerCentury),
+      semiMinorAxisRate * sinE + semiMinorAxis * cosE * eccentricAnomalyRate,
+      0,
+    ),
+  };
+
+  const perihelion = rotateMoving(
+    inPlane,
+    rotateZ,
+    Z_AXIS,
+    el.argumentOfPerihelionRadians,
+    el.argumentOfPerihelionRadiansPerCentury,
+  );
+  const inclined = rotateMoving(
+    perihelion,
+    rotateX,
+    X_AXIS,
+    el.inclinationRadians,
+    el.inclinationRadiansPerCentury,
+  );
+  const ecliptic = rotateMoving(
+    inclined,
+    rotateZ,
+    Z_AXIS,
+    el.longitudeOfAscendingNodeRadians,
+    el.longitudeOfAscendingNodeRadiansPerCentury,
   );
 
-  // d/dT of R(angle) v is R(angle) dv/dT + (dangle/dT) * (axis x R(angle) v), applied once per
-  // rotation so the drift of w, I and Omega all contribute to the velocity.
-  const afterPerihelion = rotateZ(inPlane, el.argumentOfPerihelion);
-  const afterInclination = rotateX(afterPerihelion, el.inclination);
-  const position = rotateZ(afterInclination, el.longitudeOfAscendingNode);
-
-  const ratePerihelion = add(
-    rotateZ(inPlaneRate, el.argumentOfPerihelion),
-    scale(cross(Z_AXIS, afterPerihelion), el.argumentOfPerihelionRate),
-  );
-  const rateInclination = add(
-    rotateX(ratePerihelion, el.inclination),
-    scale(cross(X_AXIS, afterInclination), el.inclinationRate),
-  );
-  const rateNode = add(
-    rotateZ(rateInclination, el.longitudeOfAscendingNode),
-    scale(cross(Z_AXIS, position), el.longitudeOfAscendingNodeRate),
-  );
-
-  return { position, velocity: scale(rateNode, 1 / SECONDS_PER_JULIAN_CENTURY) };
+  return {
+    position: ecliptic.value,
+    velocity: scale(ecliptic.rate, 1 / SECONDS_PER_JULIAN_CENTURY),
+  };
 }
 
 /** Heliocentric position in metres, J2000 ecliptic. */
@@ -214,6 +235,6 @@ export function heliocentricState(
   jd: JdTdb,
   model?: EphemerisModel,
 ): StateVector {
-  const resolved = model ?? modelForYear(approximateJulianYear(jd));
+  const resolved = model ?? modelForYear(julianYearForModelSelection(jd));
   return stateFrom(evaluateElements(resolved.elements[planet], julianCenturiesSinceJ2000(jd)));
 }

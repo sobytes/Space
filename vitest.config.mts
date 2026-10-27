@@ -1,9 +1,10 @@
 import { defineConfig } from "vitest/config";
 
 /**
- * The verbose reporter is not cosmetic here: the default reporter swallows stdout from
- * passing tests, and `verify:ephemeris` has to print its per-body error table on a pass as
- * well as a failure, so a human can read the margin rather than just the word "passed".
+ * `reporters` is not cosmetic. Measured on vitest 5.0.5: with no config, a passing test's
+ * `console.log` and `console.table` are dropped from the output entirely, and a CLI
+ * `--reporter=default` does not override this key. `verify:ephemeris` has to print its
+ * per-body error table on a pass as well as a failure, so a reader can see the margin.
  */
 export default defineConfig({
   test: {
