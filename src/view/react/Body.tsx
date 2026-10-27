@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTexture } from "@react-three/drei";
-import { AdditiveBlending, BackSide, DoubleSide, Group, type Texture } from "three";
+import { AdditiveBlending, BackSide, DoubleSide, Group, TextureLoader, type Texture } from "three";
 import { BODY_CONTRACTS, type BodyId } from "@/engine/bodies/registry";
+import { TerrainTiles, useTerrainManifest } from "./TerrainTiles";
 import { useViewport } from "./ViewportContext";
 
 /**
@@ -41,6 +42,8 @@ export function Body({ id, segments = 96 }: { id: BodyId; segments?: number }) {
   const group = useRef<Group>(null);
   const contract = BODY_CONTRACTS[id];
 
+  const terrain = useTerrainManifest(id);
+  const globalNormal = useGlobalNormalMap(id, terrain !== null);
   const albedo = useOptionalTexture(contract.appearance.albedoTextureId);
   const clouds = useOptionalTexture(contract.appearance.cloudTextureId);
   const ring = useOptionalTexture(contract.appearance.ringSystem?.textureId);
@@ -59,13 +62,21 @@ export function Body({ id, segments = 96 }: { id: BodyId; segments?: number }) {
 
   return (
     <group ref={group}>
+      {terrain ? <TerrainTiles body={id} bodyGroupRef={group} manifest={terrain} /> : null}
       {/* Oblateness is real and visible on Saturn, which is 10% wider than it is tall. */}
       <mesh scale={[1, flattening, 1]} castShadow={!contract.appearance.emissive} receiveShadow={!contract.appearance.emissive}>
         <sphereGeometry args={[1, segments, segments / 2]} />
         {contract.appearance.emissive ? (
           <meshBasicMaterial map={albedo ?? undefined} toneMapped={false} color="#fff3d0" />
         ) : (
-          <meshStandardMaterial map={albedo ?? undefined} roughness={0.95} metalness={0} />
+          <meshStandardMaterial
+            map={albedo ?? undefined}
+            // The global normal map comes from real elevation data, so craters shade correctly
+            // through the terminator at orbital range. Close range switches to tiles below.
+            normalMap={globalNormal ?? undefined}
+            roughness={0.95}
+            metalness={0}
+          />
         )}
       </mesh>
 
@@ -117,4 +128,34 @@ export function Body({ id, segments = 96 }: { id: BodyId; segments?: number }) {
       ) : null}
     </group>
   );
+}
+
+/**
+ * Loads a body's global normal map when it has one.
+ *
+ * Separate from `useOptionalTexture` because terrain is optional per body and a missing file
+ * must not suspend the whole scene. Bodies without elevation data simply render unlit relief,
+ * which is honest: we do not have the data, so we do not invent it.
+ */
+function useGlobalNormalMap(body: string, hasTerrain: boolean): Texture | null {
+  const [texture, setTexture] = useState<Texture | null>(null);
+
+  useEffect(() => {
+    if (!hasTerrain) return;
+    let cancelled = false;
+    const loader = new TextureLoader();
+    loader.load(`/terrain/${body}/normal-global.jpg`, (loaded) => {
+      if (cancelled) {
+        loaded.dispose();
+        return;
+      }
+      setTexture(loaded);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [body, hasTerrain]);
+
+  // Derived rather than cleared in the effect, so no state is set synchronously there.
+  return hasTerrain ? texture : null;
 }
