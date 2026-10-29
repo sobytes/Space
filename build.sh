@@ -8,6 +8,7 @@
 #   ./build.sh website dev     run it on port 3000
 #   ./build.sh ios             build the iPhone app for the simulator
 #   ./build.sh ios run         build, install and launch it on a simulator
+#   ./build.sh ios device      build signed for a paired iPhone, and list what is paired
 #   ./build.sh ios test        SolarKit's gates against the JPL fixtures
 #   ./build.sh generate        regenerate the Swift tables from the TypeScript engine
 #
@@ -111,6 +112,29 @@ case "${1:-}" in
         ;;
       test)
         swift test --package-path mobile/ios/SolarKit
+        ;;
+      device)
+        # Signed as SOBYTES LTD, team pinned in project.yml. -allowProvisioningUpdates lets
+        # Xcode create or refresh the team profile rather than failing on a missing one.
+        udid="${3:-}"
+        if [ -z "$udid" ]; then
+          # Matched by the UDID's own shape, not by column position. devicectl pads its
+          # columns with spaces and the model name contains spaces too, so counting fields
+          # from the end lands on a word of the model rather than on the identifier.
+          udid=$(xcrun devicectl list devices 2>/dev/null \
+            | grep "physical" | grep "available" \
+            | grep -oE '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{16}' | head -1)
+        fi
+        if [ -z "$udid" ]; then
+          printf 'no paired iPhone found. Pair one, or pass its UDID:\n'
+          printf '  ./build.sh ios device <UDID>\n\n'
+          xcrun devicectl list devices 2>/dev/null | head -20
+          exit 1
+        fi
+        printf 'building for device %s\n' "$udid"
+        xcodebuild -project mobile/ios/Solar.xcodeproj -scheme Solar \
+          -destination "id=$udid" -configuration Debug -allowProvisioningUpdates build \
+          | grep -E 'error:|Provisioning Profile|BUILD' || true
         ;;
       run)
         xcodebuild -project mobile/ios/Solar.xcodeproj -scheme Solar \

@@ -1,14 +1,27 @@
-# XcodeGen spec for the iPhone app. Regenerate with `xcodegen generate` in this directory,
-# or through `./build.sh ios` at the repository root.
+# XcodeGen spec for the iPhone app. Regenerate with `xcodegen generate` here, or through
+# `./build.sh ios` at the repository root, which regenerates before every build.
 #
-# One spec, one target for now. Apple TV will be added as a second target here sharing
-# SolarKit, which is why the kit is a package rather than a folder of sources in the app.
+# One spec, one target for now. Apple TV will be added as a second target sharing SolarKit,
+# which is why the kit is a Swift package rather than a folder of sources inside the app.
 name: Solar
+
 options:
-  bundleIdPrefix: com.sobytes.solar
+  bundleIdPrefix: com.sobytes
+  createIntermediateGroups: true
+  # Keep this low and explicit. Leaving it unset makes Xcode default to the installed SDK,
+  # which was 27.0, and that silently excluded a phone running 26.6.1 and every simulator
+  # below 27 with a "doesn't match deployment target" error rather than anything about the
+  # deployment target being wrong.
   deploymentTarget:
     iOS: "17.0"
-  createIntermediateGroups: true
+
+# Signed as SOBYTES LTD, always. Pinned here rather than in a git-ignored xcconfig for the
+# same reason OTNetAI pins it: this file is the one XcodeGen actually reads, and a missing
+# local override would let a build quietly sign as a personal team without anyone noticing.
+settings:
+  base:
+    DEVELOPMENT_TEAM: FT97GD7996
+    CODE_SIGN_STYLE: Automatic
 
 packages:
   SolarKit:
@@ -32,16 +45,29 @@ targets:
         CFBundleShortVersionString: "0.1.0"
         CFBundleVersion: "1"
         UILaunchScreen: {}
-        UISupportedInterfaceOrientations:
-          - UIInterfaceOrientationPortrait
-          - UIInterfaceOrientationLandscapeLeft
-          - UIInterfaceOrientationLandscapeRight
         UIStatusBarStyle: UIStatusBarStyleLightContent
         UIUserInterfaceStyle: Dark
+        # iPad has to support all four orientations unless the app declares it requires full
+        # screen, or the build warns and review rejects it. The scene reads fine in any
+        # orientation, so supporting all four is the right answer rather than forcing one.
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.sobytes.solar
         GENERATE_INFOPLIST_FILE: NO
         SWIFT_VERSION: "6.0"
         TARGETED_DEVICE_FAMILY: "1,2"
-        CODE_SIGNING_ALLOWED: NO
+        # Deliberately no CODE_SIGNING_ALLOWED: NO. It makes simulator builds convenient and
+        # makes installing on a real phone impossible, surfacing as CoreDeviceError 3002
+        # after a successful compile, which reads as a build problem rather than a signing
+        # one. The simulator builds fine with signing left enabled.
+        CODE_SIGN_IDENTITY: "Apple Development"
