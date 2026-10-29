@@ -1,0 +1,47 @@
+# XcodeGen spec for the iPhone app. Regenerate with `xcodegen generate` in this directory,
+# or through `./build.sh ios` at the repository root.
+#
+# One spec, one target for now. Apple TV will be added as a second target here sharing
+# SolarKit, which is why the kit is a package rather than a folder of sources in the app.
+name: Solar
+options:
+  bundleIdPrefix: com.sobytes.solar
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+
+packages:
+  SolarKit:
+    path: SolarKit
+
+targets:
+  Solar:
+    type: application
+    platform: iOS
+    sources:
+      - path: App/Sources
+      - path: App/Resources
+        buildPhase: resources
+    dependencies:
+      - package: SolarKit
+        product: SolarKit
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: Solar
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "1"
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UIStatusBarStyle: UIStatusBarStyleLightContent
+        UIUserInterfaceStyle: Dark
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.sobytes.solar
+        GENERATE_INFOPLIST_FILE: NO
+        SWIFT_VERSION: "6.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CODE_SIGNING_ALLOWED: NO

@@ -62,3 +62,12 @@ next-env.d.ts
 # Generated terrain pyramids. Rebuild with `npm run terrain` after downloading the source
 # elevation model named in public/terrain/<body>/manifest.json.
 /public/terrain/
+
+# Xcode and Swift build output. The project file is generated from project.yml by XcodeGen,
+# so build.sh regenerates it and it is not committed.
+mobile/ios/*.xcodeproj
+mobile/ios/*.xcworkspace
+**/.build/
+**/DerivedData/
+*.xcuserstate
+xcuserdata/

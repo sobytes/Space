@@ -1,0 +1,470 @@
+{
+  "bodies" : {
+    "embary" : [
+      {
+        "distanceKm" : 2060.2639789581299,
+        "epoch" : "1800-01-01",
+        "jdTdb" : 2378496.5,
+        "latitudeArcsec" : 1.6226119217530395,
+        "longitudeArcsec" : 4.1540191289835882
+      },
+      {
+        "distanceKm" : 1947.0902523398399,
+        "epoch" : "1850-07-01",
+        "jdTdb" : 2396939.5,
+        "latitudeArcsec" : 0.66243001040053784,
+        "longitudeArcsec" : 16.857855747771673
+      },
+      {
+        "distanceKm" : 1209.9533008635044,
+        "epoch" : "1900-01-01",
+        "jdTdb" : 2415020.5,
+        "latitudeArcsec" : 0.60855589258384046,
+        "longitudeArcsec" : 5.1662712480434418
+      },
+      {
+        "distanceKm" : 930.09537467360497,
+        "epoch" : "1950-07-01",
+        "jdTdb" : 2433463.5,
+        "latitudeArcsec" : 0.094485714054890452,
+        "longitudeArcsec" : 9.416359125783055
+      },
+      {
+        "distanceKm" : 372.67684057354927,
+        "epoch" : "2000-01-01",
+        "jdTdb" : 2451544.5,
+        "latitudeArcsec" : 0.1878440120627296,
+        "longitudeArcsec" : 2.7346687451946168
+      },
+      {
+        "distanceKm" : 511.15609428286552,
+        "epoch" : "2025-01-01",
+        "jdTdb" : 2460676.5,
+        "latitudeArcsec" : 0.27240412159759847,
+        "longitudeArcsec" : 4.2336294537655785
+      },
+      {
+        "distanceKm" : 1081.8193450570107,
+        "epoch" : "2040-07-01",
+        "jdTdb" : 2466336.5,
+        "latitudeArcsec" : 0.35744594076305081,
+        "longitudeArcsec" : 14.191545904503606
+      },
+      {
+        "distanceKm" : 2190.0389059484005,
+        "epoch" : "2050-01-01",
+        "jdTdb" : 2469807.5,
+        "latitudeArcsec" : 0.31579243051673955,
+        "longitudeArcsec" : 5.3736466510693512
+      }
+    ],
+    "jupiter" : [
+      {
+        "distanceKm" : 237507.82439672947,
+        "epoch" : "1800-01-01",
+        "jdTdb" : 2378496.5,
+        "latitudeArcsec" : 4.1478984203315008,
+        "longitudeArcsec" : 231.50575675299638
+      },
+      {
+        "distanceKm" : 271236.97687315941,
+        "epoch" : "1850-07-01",
+        "jdTdb" : 2396939.5,
+        "latitudeArcsec" : 1.4416899258526377,
+        "longitudeArcsec" : 106.48244994054812
+      },
+      {
+        "distanceKm" : 285712.50563514233,
+        "epoch" : "1900-01-01",
+        "jdTdb" : 2415020.5,
+        "latitudeArcsec" : 0.59458586825929316,
+        "longitudeArcsec" : 44.753379308328228
+      },
+      {
+        "distanceKm" : 413026.15704989433,
+        "epoch" : "1950-07-01",
+        "jdTdb" : 2433463.5,
+        "latitudeArcsec" : 0.6772875045999267,
+        "longitudeArcsec" : 41.216402158475233
+      },
+      {
+        "distanceKm" : 287656.3712605238,
+        "epoch" : "2000-01-01",
+        "jdTdb" : 2451544.5,
+        "latitudeArcsec" : 4.4366356531448989,
+        "longitudeArcsec" : 309.2105063877155
+      },
+      {
+        "distanceKm" : 400519.0947496891,
+        "epoch" : "2025-01-01",
+        "jdTdb" : 2460676.5,
+        "latitudeArcsec" : 3.6523211038560546,
+        "longitudeArcsec" : 124.82358544387046
+      },
+      {
+        "distanceKm" : 218936.05720865726,
+        "epoch" : "2040-07-01",
+        "jdTdb" : 2466336.5,
+        "latitudeArcsec" : 0.73378590310362368,
+        "longitudeArcsec" : 3.4020950774625938
+      },
+      {
+        "distanceKm" : 549428.85591971874,
+        "epoch" : "2050-01-01",
+        "jdTdb" : 2469807.5,
+        "latitudeArcsec" : 7.1018812344625761,
+        "longitudeArcsec" : 258.97503926656532
+      }
+    ],
+    "mars" : [
+      {
+        "distanceKm" : 9770.3496739268303,
+        "epoch" : "1800-01-01",
+        "jdTdb" : 2378496.5,
+        "latitudeArcsec" : 1.0782289454297382,
+        "longitudeArcsec" : 27.158881848323212
+      },
+      {
+        "distanceKm" : 3826.6491426825523,
+        "epoch" : "1850-07-01",
+        "jdTdb" : 2396939.5,
+        "latitudeArcsec" : 0.13331582460933891,
+        "longitudeArcsec" : 3.2173928971999439
+      },
+      {
+        "distanceKm" : 19090.994030505419,
+        "epoch" : "1900-01-01",
+        "jdTdb" : 2415020.5,
+        "latitudeArcsec" : 0.084072975298632072,
+        "longitudeArcsec" : 12.806780335321104
+      },
+      {
+        "distanceKm" : 6109.6357698142529,
+        "epoch" : "1950-07-01",
+        "jdTdb" : 2433463.5,
+        "latitudeArcsec" : 0.55893474688660472,
+        "longitudeArcsec" : 11.043007890163702
+      },
+      {
+        "distanceKm" : 7365.5328703224659,
+        "epoch" : "2000-01-01",
+        "jdTdb" : 2451544.5,
+        "latitudeArcsec" : 0.76928000182266087,
+        "longitudeArcsec" : 3.577137721220109
+      },
+      {
+        "distanceKm" : 5213.7824230790138,
+        "epoch" : "2025-01-01",
+        "jdTdb" : 2460676.5,
+        "latitudeArcsec" : 0.50385670303656838,
+        "longitudeArcsec" : 15.29126763319293
+      },
+      {
+        "distanceKm" : 5683.4954465925694,
+        "epoch" : "2040-07-01",
+        "jdTdb" : 2466336.5,
+        "latitudeArcsec" : 0.17903774330535932,
+        "longitudeArcsec" : 4.0307593845094969
+      },
+      {
+        "distanceKm" : 6534.5029959976673,
+        "epoch" : "2050-01-01",
+        "jdTdb" : 2469807.5,
+        "latitudeArcsec" : 0.95452709192681917,
+        "longitudeArcsec" : 58.773914236371915
+      }
+    ],
+    "mercury" : [
+      {
+        "distanceKm" : 336.58880344778299,
+        "epoch" : "1800-01-01",
+        "jdTdb" : 2378496.5,
+        "latitudeArcsec" : 0.090644443800589419,
+        "longitudeArcsec" : 5.0279250424922681
+      },
+      {
+        "distanceKm" : 987.74046732485294,
+        "epoch" : "1850-07-01",
+        "jdTdb" : 2396939.5,
+        "latitudeArcsec" : 0.036808625784677071,
+        "longitudeArcsec" : 8.5520169424168344
+      },
+      {
+        "distanceKm" : 286.95531199872494,
+        "epoch" : "1900-01-01",
+        "jdTdb" : 2415020.5,
+        "latitudeArcsec" : 0.7906757405493845,
+        "longitudeArcsec" : 4.4027452504249371
+      },
+      {
+        "distanceKm" : 1002.082404345274,
+        "epoch" : "1950-07-01",
+        "jdTdb" : 2433463.5,
+        "latitudeArcsec" : 0.45926598922781914,
+        "longitudeArcsec" : 4.5970678065521788
+      },
+      {
+        "distanceKm" : 455.21959489583969,
+        "epoch" : "2000-01-01",
+        "jdTdb" : 2451544.5,
+        "latitudeArcsec" : 0.16345851912318174,
+        "longitudeArcsec" : 2.7533503561130659
+      },
+      {
+        "distanceKm" : 245.7286821603775,
+        "epoch" : "2025-01-01",
+        "jdTdb" : 2460676.5,
+        "latitudeArcsec" : 0.39983241107567935,
+        "longitudeArcsec" : 2.127160175836214
+      },
+      {
+        "distanceKm" : 1340.0273442715406,
+        "epoch" : "2040-07-01",
+        "jdTdb" : 2466336.5,
+        "latitudeArcsec" : 0.0068036828045112191,
+        "longitudeArcsec" : 1.2283680981686442
+      },
+      {
+        "distanceKm" : 364.4788533449173,
+        "epoch" : "2050-01-01",
+        "jdTdb" : 2469807.5,
+        "latitudeArcsec" : 0.17423378254258945,
+        "longitudeArcsec" : 10.469547494989852
+      }
+    ],
+    "neptune" : [
+      {
+        "distanceKm" : 519470.98160171509,
+        "epoch" : "1800-01-01",
+        "jdTdb" : 2378496.5,
+        "latitudeArcsec" : 0.62122933057159568,
+        "longitudeArcsec" : 45.081400420539033
+      },
+      {
+        "distanceKm" : 133034.03542804718,
+        "epoch" : "1850-07-01",
+        "jdTdb" : 2396939.5,
+        "latitudeArcsec" : 0.32077503939122926,
+        "longitudeArcsec" : 5.4581738111496776
+      },
+      {
+        "distanceKm" : 920901.87681770325,
+        "epoch" : "1900-01-01",
+        "jdTdb" : 2415020.5,
+        "latitudeArcsec" : 0.37853587165162778,
+        "longitudeArcsec" : 22.539947060208299
+      },
+      {
+        "distanceKm" : 17458.452459335327,
+        "epoch" : "1950-07-01",
+        "jdTdb" : 2433463.5,
+        "latitudeArcsec" : 0.1300453572048661,
+        "longitudeArcsec" : 9.4606422066210101
+      },
+      {
+        "distanceKm" : 491101.68822669983,
+        "epoch" : "2000-01-01",
+        "jdTdb" : 2451544.5,
+        "latitudeArcsec" : 1.3303503722756642,
+        "longitudeArcsec" : 45.016047536299958
+      },
+      {
+        "distanceKm" : 725295.80500030518,
+        "epoch" : "2025-01-01",
+        "jdTdb" : 2460676.5,
+        "latitudeArcsec" : 0.55223612237058817,
+        "longitudeArcsec" : 30.773575677411415
+      },
+      {
+        "distanceKm" : 930813.66927051544,
+        "epoch" : "2040-07-01",
+        "jdTdb" : 2466336.5,
+        "latitudeArcsec" : 0.054969270045931537,
+        "longitudeArcsec" : 35.685686603721756
+      },
+      {
+        "distanceKm" : 345954.82702636719,
+        "epoch" : "2050-01-01",
+        "jdTdb" : 2469807.5,
+        "latitudeArcsec" : 0.26906235040720083,
+        "longitudeArcsec" : 25.310276274987171
+      }
+    ],
+    "saturn" : [
+      {
+        "distanceKm" : 440619.88826727867,
+        "epoch" : "1800-01-01",
+        "jdTdb" : 2378496.5,
+        "latitudeArcsec" : 22.952131862362339,
+        "longitudeArcsec" : 543.45143110636468
+      },
+      {
+        "distanceKm" : 810169.58803153038,
+        "epoch" : "1850-07-01",
+        "jdTdb" : 2396939.5,
+        "latitudeArcsec" : 2.0107328321055471,
+        "longitudeArcsec" : 616.2188336527098
+      },
+      {
+        "distanceKm" : 1874219.0343077183,
+        "epoch" : "1900-01-01",
+        "jdTdb" : 2415020.5,
+        "latitudeArcsec" : 19.092428567441342,
+        "longitudeArcsec" : 544.68406154079071
+      },
+      {
+        "distanceKm" : 390992.82439947128,
+        "epoch" : "1950-07-01",
+        "jdTdb" : 2433463.5,
+        "latitudeArcsec" : 2.0823262279652677,
+        "longitudeArcsec" : 56.643018684552274
+      },
+      {
+        "distanceKm" : 1723839.2889800072,
+        "epoch" : "2000-01-01",
+        "jdTdb" : 2451544.5,
+        "latitudeArcsec" : 12.000831591480885,
+        "longitudeArcsec" : 517.13469147247918
+      },
+      {
+        "distanceKm" : 839881.76127052307,
+        "epoch" : "2025-01-01",
+        "jdTdb" : 2460676.5,
+        "latitudeArcsec" : 5.6946196253700343,
+        "longitudeArcsec" : 264.49188814984086
+      },
+      {
+        "distanceKm" : 1881562.9733557701,
+        "epoch" : "2040-07-01",
+        "jdTdb" : 2466336.5,
+        "latitudeArcsec" : 3.1474320277021541,
+        "longitudeArcsec" : 410.49987035951989
+      },
+      {
+        "distanceKm" : 761938.22601747513,
+        "epoch" : "2050-01-01",
+        "jdTdb" : 2469807.5,
+        "latitudeArcsec" : 19.79834702109989,
+        "longitudeArcsec" : 399.22829349533316
+      }
+    ],
+    "uranus" : [
+      {
+        "distanceKm" : 1341412.5162081718,
+        "epoch" : "1800-01-01",
+        "jdTdb" : 2378496.5,
+        "latitudeArcsec" : 0.51809971886056783,
+        "longitudeArcsec" : 50.342922817580792
+      },
+      {
+        "distanceKm" : 107729.23909664154,
+        "epoch" : "1850-07-01",
+        "jdTdb" : 2396939.5,
+        "latitudeArcsec" : 0.74054562874118102,
+        "longitudeArcsec" : 25.701203511167073
+      },
+      {
+        "distanceKm" : 1214620.4339599609,
+        "epoch" : "1900-01-01",
+        "jdTdb" : 2415020.5,
+        "latitudeArcsec" : 2.2256103993979806,
+        "longitudeArcsec" : 8.7282206220636738
+      },
+      {
+        "distanceKm" : 79265.85458612442,
+        "epoch" : "1950-07-01",
+        "jdTdb" : 2433463.5,
+        "latitudeArcsec" : 0.75222394617922828,
+        "longitudeArcsec" : 20.174168924622574
+      },
+      {
+        "distanceKm" : 350272.97759914398,
+        "epoch" : "2000-01-01",
+        "jdTdb" : 2451544.5,
+        "latitudeArcsec" : 0.8348817742432999,
+        "longitudeArcsec" : 70.545524668471117
+      },
+      {
+        "distanceKm" : 1150800.0616731644,
+        "epoch" : "2025-01-01",
+        "jdTdb" : 2460676.5,
+        "latitudeArcsec" : 0.77809631376159438,
+        "longitudeArcsec" : 36.392703398436332
+      },
+      {
+        "distanceKm" : 340933.01488637924,
+        "epoch" : "2040-07-01",
+        "jdTdb" : 2466336.5,
+        "latitudeArcsec" : 2.9831723511405523,
+        "longitudeArcsec" : 88.824689830693984
+      },
+      {
+        "distanceKm" : 20248.946008682251,
+        "epoch" : "2050-01-01",
+        "jdTdb" : 2469807.5,
+        "latitudeArcsec" : 0.4271594853955778,
+        "longitudeArcsec" : 79.042153922077006
+      }
+    ],
+    "venus" : [
+      {
+        "distanceKm" : 2221.7918918132782,
+        "epoch" : "1800-01-01",
+        "jdTdb" : 2378496.5,
+        "latitudeArcsec" : 0.068981888029943497,
+        "longitudeArcsec" : 15.099796262239416
+      },
+      {
+        "distanceKm" : 3355.25939206779,
+        "epoch" : "1850-07-01",
+        "jdTdb" : 2396939.5,
+        "latitudeArcsec" : 0.04279572130031839,
+        "longitudeArcsec" : 10.696099140783275
+      },
+      {
+        "distanceKm" : 3882.0518513321877,
+        "epoch" : "1900-01-01",
+        "jdTdb" : 2415020.5,
+        "latitudeArcsec" : 0.40666405297915048,
+        "longitudeArcsec" : 10.839006720396375
+      },
+      {
+        "distanceKm" : 3728.618412271142,
+        "epoch" : "1950-07-01",
+        "jdTdb" : 2433463.5,
+        "latitudeArcsec" : 0.037478485035027577,
+        "longitudeArcsec" : 8.9594968928311314
+      },
+      {
+        "distanceKm" : 2410.5640352070332,
+        "epoch" : "2000-01-01",
+        "jdTdb" : 2451544.5,
+        "latitudeArcsec" : 0.1521726356902483,
+        "longitudeArcsec" : 14.913165646393145
+      },
+      {
+        "distanceKm" : 1042.7252556532621,
+        "epoch" : "2025-01-01",
+        "jdTdb" : 2460676.5,
+        "latitudeArcsec" : 0.99789846761120271,
+        "longitudeArcsec" : 21.338819652805064
+      },
+      {
+        "distanceKm" : 2238.7037521004677,
+        "epoch" : "2040-07-01",
+        "jdTdb" : 2466336.5,
+        "latitudeArcsec" : 0.32955476879882117,
+        "longitudeArcsec" : 2.9496722813559337
+      },
+      {
+        "distanceKm" : 1931.1996567100286,
+        "epoch" : "2050-01-01",
+        "jdTdb" : 2469807.5,
+        "latitudeArcsec" : 0.22799137002293579,
+        "longitudeArcsec" : 1.2915587781465432
+      }
+    ]
+  },
+  "model" : "short-span",
+  "note" : "Written by SolarKitTests. Checked by website\/src\/swift-port.test.ts."
+}
