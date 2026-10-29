@@ -13,8 +13,11 @@ import SolarKit
 struct ContentView: View {
     @State private var clock = Clock()
     @State private var scene = SolarScene()
+    @State private var gravity = Gravity()
     @State private var focus: BodyId = .embary
     @State private var lastTick = Date()
+    @State private var showingDemonstrations = false
+    @State private var showingAsk = false
 
     private let tick = Timer.publish(every: 1.0 / 60.0, on: .main, in: .common).autoconnect()
 
@@ -32,6 +35,7 @@ struct ContentView: View {
             VStack(spacing: 10) {
                 BodyPanel(id: focus, clock: clock)
                 ViewControls(focus: focus, scene: scene, clock: clock)
+                GravityBar(gravity: gravity, clock: clock)
                 TimeBar(clock: clock)
             }
             .padding(14)
@@ -39,15 +43,32 @@ struct ContentView: View {
         .overlay(alignment: .top) {
             BodyPicker(focus: $focus).padding(.top, 6)
         }
+        .overlay(alignment: .topTrailing) {
+            VStack(spacing: 6) {
+                Button { showingDemonstrations = true } label: {
+                    Image(systemName: "function")
+                }
+                Button { showingAsk = true } label: {
+                    Image(systemName: "sparkles")
+                }
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .padding(.trailing, 10)
+            .padding(.top, 54)
+        }
+        .sheet(isPresented: $showingDemonstrations) { DemonstrationsView() }
+        .sheet(isPresented: $showingAsk) { AskView() }
         .onChange(of: focus) { _, body in
             scene.setFocus(body, at: clock.epoch)
-            scene.update(to: clock.epoch)
+            scene.update(to: clock.epoch, gravity: gravity)
         }
         .onReceive(tick) { now in
             let delta = now.timeIntervalSince(lastTick)
             lastTick = now
             clock.advance(realSeconds: delta)
-            scene.update(to: clock.epoch)
+            gravity.seek(to: clock.epoch)
+            scene.update(to: clock.epoch, gravity: gravity)
         }
     }
 }
@@ -306,6 +327,75 @@ private struct ViewControls: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+/**
+ The gravity switch, with the integration's own health on screen.
+
+ A viewer who cannot tell which mode they are in cannot trust either, so the numbers for all
+ three failure modes from `contracts/gravity-modes` are shown rather than hidden: how far the
+ integration has run, how much energy it has lost, and how far behind the clock it is.
+ */
+private struct GravityBar: View {
+    @Bindable var gravity: Gravity
+    let clock: Clock
+
+    private var mutual: Bool { gravity.mode == .mutual }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Button("On rails") { gravity.setMode(.analytic, at: clock.epoch) }
+                    .buttonStyle(.bordered)
+                    .controlSize(.mini)
+                    .tint(mutual ? .gray : .orange)
+                Button("Mutual gravity") { gravity.setMode(.mutual, at: clock.epoch) }
+                    .buttonStyle(.bordered)
+                    .controlSize(.mini)
+                    .tint(mutual ? .orange : .gray)
+
+                if mutual {
+                    Toggle("Moons", isOn: Binding(
+                        get: { gravity.includeMoons },
+                        set: { gravity.setMode(.mutual, at: clock.epoch, includeMoons: $0) }
+                    ))
+                    .toggleStyle(.button)
+                    .controlSize(.mini)
+                    .font(.system(size: 10))
+                }
+                Spacer()
+            }
+
+            if mutual {
+                HStack(spacing: 12) {
+                    label("Integrated", gravity.integratedDays < 365
+                        ? String(format: "%.0f d", gravity.integratedDays)
+                        : String(format: "%.1f yr", gravity.integratedDays / 365.25))
+                    label("Bodies", "\(gravity.bodyCount)")
+                    label("Energy drift", String(format: "%.1e", gravity.energyDrift))
+                    if abs(gravity.lagDays) > 1 {
+                        label("Behind by", String(format: "%.0f d", abs(gravity.lagDays)))
+                            .foregroundStyle(.orange)
+                    }
+                }
+            } else {
+                Text("Planets follow the JPL Standish fits. Accurate and reversible, "
+                     + "but a mass you add cannot move them.")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    private func label(_ name: String, _ value: String) -> some View {
+        HStack(spacing: 4) {
+            Text(name).font(.system(size: 10)).foregroundStyle(.secondary)
+            Text(value).font(.system(size: 10).monospacedDigit())
+        }
     }
 }
 

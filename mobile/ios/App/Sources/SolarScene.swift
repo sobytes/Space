@@ -477,9 +477,19 @@ final class SolarScene {
         return SCNVector3(Float(toSun.x), Float(toSun.z), Float(-toSun.y))
     }
 
-    /// Moves and orients every body for `epoch`.
-    func update(to epoch: JdTdb) {
-        for id in bodyIds { positions[id] = heliocentricPositionOf(id, at: epoch) }
+    /**
+     Moves and orients every body for `epoch`.
+
+     Under mutual gravity a body the integration carries comes from the integration, and
+     anything it does not comes from the analytic ephemeris. That mixture is deliberate: the
+     default integrates the planets and leaves the moons analytic about their parents, which
+     then follow a planet that is itself moving under mutual gravity.
+     */
+    func update(to epoch: JdTdb, gravity: Gravity? = nil) {
+        for id in bodyIds {
+            positions[id] = gravity?.heliocentricPosition(of: id)
+                ?? heliocentricPositionOf(id, at: epoch)
+        }
         origin = positions[focus] ?? .zero
 
         for id in bodyIds {

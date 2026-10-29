@@ -70,7 +70,11 @@ case "${1:-}" in
     step "lint" npx eslint .
     step "tests" npx vitest run
     if command -v swift >/dev/null 2>&1; then
-      step "swift SolarKit" swift test --package-path mobile/ios/SolarKit
+      # Release, not debug. Measured: 0.6 s against 61.7 s, a factor of 99. The physics loops
+      # are completely dominated by debug-mode bounds checking and ARC traffic, so a debug
+      # test run is measuring Swift's debug overhead rather than the integrator. The same
+      # applies to the app: mutual gravity is unusable in a debug build.
+      step "swift SolarKit" swift test -c release --package-path mobile/ios/SolarKit
     else
       printf '%-22s skipped, no swift toolchain\n' "swift SolarKit"
     fi
@@ -111,7 +115,7 @@ case "${1:-}" in
           | grep -E 'error:|warning:|BUILD' || true
         ;;
       test)
-        swift test --package-path mobile/ios/SolarKit
+        swift test -c release --package-path mobile/ios/SolarKit
         ;;
       device)
         # Signed as SOBYTES LTD, team pinned in project.yml. -allowProvisioningUpdates lets

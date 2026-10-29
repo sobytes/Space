@@ -390,8 +390,11 @@
         ]
       },
       "ios": {
-        "status": "planned",
-        "gap": "Needs the Dormand-Prince integrator ported to SolarKit."
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/SolarKit/Sources/SolarKit/NBody.swift",
+          "mobile/ios/App/Sources/Gravity.swift"
+        ]
       },
       "android": {
         "status": "planned"
@@ -460,7 +463,11 @@
         ]
       },
       "ios": {
-        "status": "planned"
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/SolarKit/Sources/SolarKit/Demonstrations.swift",
+          "mobile/ios/App/Sources/DemonstrationsView.swift"
+        ]
       },
       "android": {
         "status": "planned"
@@ -483,8 +490,10 @@
         ]
       },
       "ios": {
-        "status": "planned",
-        "gap": "Should call the website's /api/ask rather than embedding a key in a shipped binary."
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/AskView.swift"
+        ]
       },
       "android": {
         "status": "planned"
