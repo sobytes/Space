@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BODY_CONTRACTS, BODY_IDS, satelliteSystemRadiusM, type BodyId } from "@solar/engine/bodies/registry";
 import { obliquityToOrbitDeg, rotationPeriodDays } from "@solar/engine/rotation";
 import { ACCURACY } from "@solar/engine/data/ephemeris-accuracy";
@@ -515,14 +515,70 @@ function GravityBar() {
   );
 }
 
+/**
+ * Hides everything but the solar system.
+ *
+ * The panels are the point of the app right up until you want to look at the planet, at which
+ * moment they are covering it. Hiding leaves one small control, because an overlay with no way
+ * back is a trap: a viewer who cannot find the UI again has lost the app, not decluttered it.
+ *
+ * `h` toggles it from the keyboard, and Escape always restores, so there is a second way out
+ * that does not depend on finding a button.
+ */
+function useHiddenOverlay(): [boolean, (hidden: boolean) => void] {
+  const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      // Ignore while typing, or the Ask box loses every h the user types.
+      const target = event.target as HTMLElement | null;
+      if (target && /^(INPUT|TEXTAREA)$/.test(target.tagName)) return;
+      if (event.key === "h" || event.key === "H") setHidden((value) => !value);
+      if (event.key === "Escape") setHidden(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  return [hidden, setHidden];
+}
+
 export function Hud() {
   const epoch = useViewportValue(selectEpoch);
+  const [hidden, setHidden] = useHiddenOverlay();
+
+  if (hidden) {
+    return (
+      <div className="pointer-events-none absolute inset-0 p-4">
+        <button
+          type="button"
+          aria-label="Show the information overlay"
+          title="Show the overlay (h)"
+          onClick={() => setHidden(false)}
+          className="pointer-events-auto absolute right-4 top-4 rounded-lg border border-white/10 bg-black/50 px-2.5 py-1.5 text-xs text-zinc-400 backdrop-blur-md transition hover:bg-white/10 hover:text-zinc-100"
+        >
+          Show panels
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-4">
       <div className="flex items-start justify-between gap-3">
         <BodyList />
-        <BodyPanel epoch={epoch} />
+        <div className="flex items-start gap-2">
+          <BodyPanel epoch={epoch} />
+          <button
+            type="button"
+            aria-label="Hide the information overlay"
+            title="Hide the overlay (h)"
+            onClick={() => setHidden(true)}
+            className="pointer-events-auto mt-0 shrink-0 rounded-lg border border-white/10 bg-black/70 px-2.5 py-1.5 text-xs text-zinc-400 backdrop-blur-md transition hover:bg-white/10 hover:text-zinc-100"
+          >
+            Hide
+          </button>
+        </div>
       </div>
       <div className="flex flex-col items-center gap-2">
         <GravityBar />

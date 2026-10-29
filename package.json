@@ -34,7 +34,8 @@
     "visual": "npm run visual --workspace website",
     "visual:nbody": "npm run visual:nbody --workspace website",
     "visual:views": "npm run visual:views --workspace website",
-    "verify:relief": "npm run verify:relief --workspace website"
+    "verify:relief": "npm run verify:relief --workspace website",
+    "visual:hide": "npm run visual:hide --workspace website"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",

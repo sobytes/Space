@@ -565,6 +565,32 @@
       "androidtv": {
         "status": "planned"
       }
+    },
+    {
+      "id": "hide-overlay",
+      "title": "Hide every panel to see the scene unobstructed",
+      "why": "The panels are the point right up until you want to look at the planet, at which moment they are covering it.",
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/react/Hud.tsx"
+        ]
+      },
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/ContentView.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     }
   ]
 }

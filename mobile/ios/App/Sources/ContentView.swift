@@ -20,6 +20,14 @@ struct ContentView: View {
     @State private var showingAsk = false
     @State private var showingAsteroid = false
     @State private var showingLaunch = false
+    /**
+     Hides every panel so the scene is unobstructed.
+
+     The panels are the point right up until you want to look at the planet, at which moment
+     they are covering it. One small control stays visible, because an overlay with no way
+     back is a trap rather than a decluttered view.
+     */
+    @State private var overlayHidden = CommandLine.arguments.contains("-startHidden")
 
     private let tick = Timer.publish(every: 1.0 / 60.0, on: .main, in: .common).autoconnect()
 
@@ -34,36 +42,58 @@ struct ContentView: View {
             )
             .ignoresSafeArea()
 
-            VStack(spacing: 10) {
-                BodyPanel(id: focus, clock: clock)
-                ViewControls(focus: focus, scene: scene, clock: clock)
-                GravityBar(gravity: gravity, clock: clock)
-                TimeBar(clock: clock)
+            if !overlayHidden {
+                VStack(spacing: 10) {
+                    BodyPanel(id: focus, clock: clock)
+                    ViewControls(focus: focus, scene: scene, clock: clock)
+                    GravityBar(gravity: gravity, clock: clock)
+                    TimeBar(clock: clock)
+                }
+                .padding(14)
+                .transition(.opacity.combined(with: .move(edge: .bottom)))
             }
-            .padding(14)
         }
         .overlay(alignment: .top) {
-            BodyPicker(focus: $focus).padding(.top, 6)
+            if !overlayHidden {
+                BodyPicker(focus: $focus)
+                    .padding(.top, 6)
+                    .transition(.opacity)
+            }
         }
         .overlay(alignment: .topTrailing) {
+            /**
+             The tool rail sits above the body panel in z-order and the panel used to grow up
+             underneath it, so an expanded panel's own control ended up behind the launch
+             button. The panel is height-capped now and the rail keeps its own row, so neither
+             can reach the other.
+             */
             VStack(spacing: 6) {
-                Button { showingDemonstrations = true } label: {
-                    Image(systemName: "function")
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { overlayHidden.toggle() }
+                } label: {
+                    Image(systemName: overlayHidden ? "eye" : "eye.slash")
                 }
-                Button { showingAsk = true } label: {
-                    Image(systemName: "sparkles")
-                }
-                Button { showingAsteroid = true } label: {
-                    Image(systemName: "circle.dotted.and.circle")
-                }
-                Button { showingLaunch = true } label: {
-                    Image(systemName: "paperplane")
+                .tint(overlayHidden ? .orange : .gray)
+
+                if !overlayHidden {
+                    Button { showingDemonstrations = true } label: {
+                        Image(systemName: "function")
+                    }
+                    Button { showingAsk = true } label: {
+                        Image(systemName: "sparkles")
+                    }
+                    Button { showingAsteroid = true } label: {
+                        Image(systemName: "circle.dotted.and.circle")
+                    }
+                    Button { showingLaunch = true } label: {
+                        Image(systemName: "paperplane")
+                    }
                 }
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
             .padding(.trailing, 10)
-            .padding(.top, 54)
+            .padding(.top, overlayHidden ? 8 : 54)
         }
         .sheet(isPresented: $showingDemonstrations) { DemonstrationsView() }
         .sheet(isPresented: $showingAsk) { AskView() }
@@ -223,7 +253,9 @@ private struct BodyPanel: View {
                             .foregroundStyle(.secondary)
                     }
                 }
-                .frame(maxHeight: 280)
+                // Capped so a body with a lot to say cannot push the panel up into the tool
+                // rail. Jupiter's contract alone runs past the top of the screen uncapped.
+                .frame(maxHeight: 240)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
