@@ -69,6 +69,29 @@ function appPath() {
   return found;
 }
 
+/**
+ * Reads the scene's own geometry, which the app logs once when given `-dumpScene`.
+ *
+ * Pixels answer "is anything on screen". They do not answer "is this node where it should
+ * be": an attempt to check the orbits were centred on the Sun by comparing image centroids
+ * read 53% off with entirely correct code, because the starfield dominated the sample.
+ * Geometry questions get geometry answers, the same way the website has `__solar.debug()`.
+ */
+function sceneDebug(udid, since) {
+  // Windowed from this launch, not "the last 30 seconds". A previous run's line is still in
+  // the log and reading it reports the previous build's geometry, which is how a planted bug
+  // appeared to survive a fix.
+  const log = execFileSync("xcrun", [
+    "simctl", "spawn", udid, "log", "show",
+    "--start", since,
+    "--predicate", 'process == "Solar"',
+  ], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+
+  const matches = [...log.matchAll(/SCENEDEBUG (\{.*?\})\s*$/gm)];
+  if (matches.length === 0) return null;
+  return JSON.parse(matches[matches.length - 1][1]);
+}
+
 async function litFraction(file) {
   const image = sharp(file);
   const { width, height } = await image.metadata();
@@ -98,17 +121,61 @@ execFileSync("xcrun", ["simctl", "install", udid, app]);
 let failures = 0;
 for (const { id: body, minimumLit, note } of BODIES) {
   try { execFileSync("xcrun", ["simctl", "terminate", udid, BUNDLE], { stdio: "ignore" }); } catch { /* not running */ }
-  execFileSync("xcrun", [
-    "simctl", "launch", udid, BUNDLE, "-focus", body, "-startHidden",
-  ], { stdio: "ignore" });
+  /**
+   * The Sun is reached by switching focus from Earth, not by starting there.
+   *
+   * Those are different code paths and have not had the same bugs. Orbit geometry built
+   * against a stale origin is invisible when the first focus is the Sun, because the origin
+   * is zero there, and wrong by an astronomical unit when you arrive from Earth.
+   */
+  // Log timestamps are local time to the second; a second early avoids a boundary miss.
+  const launchedAt = new Date(Date.now() - 1000)
+    .toLocaleString("sv-SE", { hour12: false })
+    .replace("T", " ");
+  const args = body === "sun"
+    ? ["-focus", "embary", "-focusAfter", "sun", "-startHidden", "-dumpScene"]
+    : ["-focus", body, "-startHidden"];
+  execFileSync("xcrun", ["simctl", "launch", udid, BUNDLE, ...args], { stdio: "ignore" });
 
-  await new Promise((resolve) => setTimeout(resolve, 6000));
+  await new Promise((resolve) => setTimeout(resolve, body === "sun" ? 10000 : 6000));
   const file = join(OUT, `${body}.png`);
   execFileSync("xcrun", ["simctl", "io", udid, "screenshot", file], { stdio: "ignore" });
 
   const lit = await litFraction(file);
-  const ok = lit >= minimumLit;
+  let ok = lit >= minimumLit;
   if (!ok) failures += 1;
+
+  if (body === "sun") {
+    /**
+     * Are the orbits drawn about the Sun?
+     *
+     * Each drawn orbit's closest point to the origin must be its perihelion, a(1 - e).
+     * Measured: 0.0003 relative error with correct geometry, which is the 256-sample
+     * discretisation, against 1.18 with an origin baked into the vertices. A factor of four
+     * thousand, so the threshold is not delicate.
+     *
+     * The vertex centroid is deliberately not the test. Sampling uniformly in time biases it
+     * toward aphelion by (3/2) a e, so Uranus reads 1.36 units from the Sun with entirely
+     * correct geometry, which is indistinguishable from a one-au offset.
+     */
+    const scene = sceneDebug(udid, launchedAt);
+    if (scene === null) {
+      console.log(`${"".padEnd(9)} no scene debug output; cannot check the orbits`);
+      failures += 1;
+    } else {
+      const error = scene.maxPerihelionError;
+      const centred = error < 0.01 && scene.sunToRootUnits < 1e-6;
+      console.log(
+        `${"".padEnd(9)} orbits: perihelion error ${error.toExponential(1)}, `
+          + `Sun to heliocentric root ${scene.sunToRootUnits.toExponential(1)} units  `
+          + `${centred ? "ok" : "NOT DRAWN ABOUT THE SUN"}`,
+      );
+      if (!centred) {
+        failures += 1;
+        ok = false;
+      }
+    }
+  }
   console.log(
     `${body.padEnd(9)} ${lit.toFixed(1).padStart(5)}% lit  (needs ${minimumLit})  `
       + `${ok ? "ok" : "TOO DARK"}${note ? `  ${note}` : ""}`,

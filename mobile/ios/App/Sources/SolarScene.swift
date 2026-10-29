@@ -36,6 +36,9 @@ final class SolarScene {
     private(set) var focus: BodyId = .embary
     private var nodes: [BodyId: SCNNode] = [:]
     private var orbitNodes: [BodyId: SCNNode] = [:]
+    /// How far each drawn orbit's closest point misses its true perihelion, as a fraction.
+    /// See `debug()`; this is the check that the orbits are drawn about the Sun.
+    private var orbitPerihelionError: [BodyId: Double] = [:]
     private var nightMaterials: [BodyId: SCNMaterial] = [:]
     private let sunLight = SCNNode()
     private var positions: [BodyId: Vec3] = [:]
@@ -43,6 +46,23 @@ final class SolarScene {
     private let terrain = Terrain()
     private var tileNodes: [TileId: SCNNode] = [:]
     private var tileRoot: SCNNode?
+
+    /**
+     Holds everything expressed in plain heliocentric coordinates: the orbit paths.
+
+     Orbit geometry is static, and the floating origin is not. Building the vertices with the
+     origin already subtracted bakes in whichever origin happened to be current at build time,
+     and `setFocus` runs before the frame loop has recomputed one, so switching from Earth to
+     the Sun built every orbit offset by an astronomical unit. The symptom is orbits whose
+     shared focus is nowhere near the Sun.
+
+     Worse, even a correct origin at build time goes stale immediately when the focused body
+     is moving, so the orbits would drift away from the planets over a few seconds.
+
+     So the vertices stay heliocentric and this one node carries the origin, repositioned
+     every frame. Its children never need rebuilding as the camera moves.
+     */
+    private let heliocentricRoot = SCNNode()
     private var lastTileRefresh = Date.distantPast
 
     /**
@@ -68,6 +88,7 @@ final class SolarScene {
     init() {
         scene.background.contents = UIColor.black
         buildCamera()
+        scene.rootNode.addChildNode(heliocentricRoot)
         buildStars()
         buildBodies()
         buildLight()
@@ -87,6 +108,16 @@ final class SolarScene {
      */
     private static func unitFor(_ body: BodyId) -> Double {
         body == .sun ? Constants.auInMetres : bodyContracts[body]!.equatorialRadiusM
+    }
+
+    /// Heliocentric metres to scene units, with no origin applied. Only for geometry that
+    /// lives under `heliocentricRoot`, which supplies the origin itself.
+    private func inHeliocentricUnits(_ metres: Vec3) -> SCNVector3 {
+        SCNVector3(
+            Float(metres.x / metresPerUnit),
+            Float(metres.z / metresPerUnit),
+            Float(-metres.y / metresPerUnit)
+        )
     }
 
     /// The single Double-to-Float conversion in the app. Camera-relative by construction.
@@ -354,11 +385,14 @@ final class SolarScene {
     private func rebuildOrbits() {
         for (_, node) in orbitNodes { node.removeFromParentNode() }
         orbitNodes.removeAll()
+        orbitPerihelionError.removeAll()
 
         for id in bodyIds {
             let contract = bodyContracts[id]!
             guard let path = orbitPath(for: id, contract: contract) else { continue }
-            scene.rootNode.addChildNode(path)
+            // Parented to the heliocentric root, not the scene, so the origin is applied once
+            // per frame to the parent rather than baked into every vertex.
+            heliocentricRoot.addChildNode(path)
             orbitNodes[id] = path
         }
     }
@@ -385,7 +419,32 @@ final class SolarScene {
         let start = Epochs.j2000
         for i in 0 ..< samples {
             let jd = JdTdb(start + periodDays * Double(i) / Double(samples))
-            vertices.append(renderPosition(heliocentricPositionOf(id, at: jd)))
+            // Plain heliocentric, with no origin subtracted. The parent node carries that.
+            vertices.append(inHeliocentricUnits(heliocentricPositionOf(id, at: jd)))
+        }
+
+        /**
+         Does the drawn orbit actually go round the Sun?
+
+         Its closest point to the origin must be the perihelion, a(1 - e). That is a crisp
+         test and an origin baked into the vertices destroys it: Earth's orbit shifted by an
+         astronomical unit passes within a whisker of the origin instead of staying 0.98 au
+         away. Nothing on screen distinguishes the two; this number does.
+
+         The vertex centroid is not the test, which cost a detour. Sampling uniformly in time
+         biases it toward aphelion by (3/2) a e, so Uranus reads 1.36 units from the Sun with
+         entirely correct geometry, and that is indistinguishable from a one-au offset.
+         */
+        if case let .standishElements(planet) = contract.ephemeris,
+           let at = shortSpan.elements[planet]?.atJ2000 {
+            let expected = toMetres(au(at.semiMajorAxisAu)) * (1 - at.eccentricity) / metresPerUnit
+            var closest = Double.infinity
+            for v in vertices {
+                closest = Swift.min(closest, Double(
+                    (v.x * v.x + v.y * v.y + v.z * v.z).squareRoot()
+                ))
+            }
+            orbitPerihelionError[id] = abs(closest - expected) / expected
         }
 
         var indices: [Int32] = []
@@ -637,6 +696,42 @@ final class SolarScene {
     }
 
     func node(for body: BodyId) -> SCNNode? { nodes[body] }
+
+    /**
+     What the frame loop actually did, for the probes.
+
+     The equivalent of the website's `window.__solar.debug()`. Pixel heuristics are the right
+     tool for "is anything on screen" and the wrong one for "is this node where it should be":
+     an attempt to check the orbits were centred on the Sun by comparing image centroids read
+     53% off with correct code, because the starfield dominated the sample. Geometry questions
+     get geometry answers.
+     */
+    func debug() -> [String: Any] {
+        let sun = nodes[.sun]?.presentation.worldPosition ?? SCNVector3Zero
+        let root = heliocentricRoot.presentation.worldPosition
+        // The Sun is at the heliocentric origin, so the root that carries that origin must
+        // land exactly on the Sun's node. Any gap means orbit geometry and body positions
+        // disagree about where the centre of the system is.
+        let gap = Double((
+            (sun.x - root.x) * (sun.x - root.x)
+                + (sun.y - root.y) * (sun.y - root.y)
+                + (sun.z - root.z) * (sun.z - root.z)
+        ).squareRoot())
+
+        return [
+            "focus": focus.rawValue,
+            "metresPerUnit": metresPerUnit,
+            "cameraDistanceM": cameraDistanceM,
+            "altitudeM": altitudeM,
+            "sunNode": [Double(sun.x), Double(sun.y), Double(sun.z)],
+            "heliocentricRoot": [Double(root.x), Double(root.y), Double(root.z)],
+            "sunToRootUnits": gap,
+            "orbitNodes": orbitNodes.count,
+            "maxPerihelionError": orbitPerihelionError.values.max() ?? 0,
+            "tileNodes": tileNodes.count,
+            "bodies": nodes.count,
+        ]
+    }
 
     /**
      Streams and draws surface tiles for the focused body.

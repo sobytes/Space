@@ -543,6 +543,35 @@ function useHiddenOverlay(): [boolean, (hidden: boolean) => void] {
   return [hidden, setHidden];
 }
 
+/**
+ * Back out to the whole solar system.
+ *
+ * Focusing the Sun has always been the system view, and nothing said so: someone asked how to
+ * unfocus a planet, which is the only evidence that matters about whether a route is
+ * discoverable. "The Sun" stays in the body list because it is also a body with its own data;
+ * this is the obvious route to the same place.
+ */
+function SystemViewButton() {
+  const viewport = useViewport();
+  const focus = useViewportValue(selectFocus);
+
+  return (
+    <button
+      type="button"
+      aria-label="View the whole solar system"
+      title="Back out to the whole solar system"
+      onClick={() => viewport.setFocus("sun")}
+      className={`rounded-lg border px-2.5 py-1.5 text-xs backdrop-blur-md transition ${
+        focus === "sun"
+          ? "border-amber-400/40 bg-amber-400/15 text-amber-200"
+          : "border-white/10 bg-black/70 text-zinc-400 hover:bg-white/10 hover:text-zinc-100"
+      }`}
+    >
+      Solar system
+    </button>
+  );
+}
+
 export function Hud() {
   const epoch = useViewportValue(selectEpoch);
   const [hidden, setHidden] = useHiddenOverlay();
@@ -569,15 +598,18 @@ export function Hud() {
         <BodyList />
         <div className="flex items-start gap-2">
           <BodyPanel epoch={epoch} />
-          <button
-            type="button"
-            aria-label="Hide the information overlay"
-            title="Hide the overlay (h)"
-            onClick={() => setHidden(true)}
-            className="pointer-events-auto mt-0 shrink-0 rounded-lg border border-white/10 bg-black/70 px-2.5 py-1.5 text-xs text-zinc-400 backdrop-blur-md transition hover:bg-white/10 hover:text-zinc-100"
-          >
-            Hide
-          </button>
+          <div className="pointer-events-auto flex shrink-0 flex-col gap-1.5">
+            <SystemViewButton />
+            <button
+              type="button"
+              aria-label="Hide the information overlay"
+              title="Hide the overlay (h)"
+              onClick={() => setHidden(true)}
+              className="rounded-lg border border-white/10 bg-black/70 px-2.5 py-1.5 text-xs text-zinc-400 backdrop-blur-md transition hover:bg-white/10 hover:text-zinc-100"
+            >
+              Hide
+            </button>
+          </div>
         </div>
       </div>
       <div className="flex flex-col items-center gap-2">

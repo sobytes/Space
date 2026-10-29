@@ -24,6 +24,10 @@ struct ContentView: View {
     @State private var lastTick = Date()
     @State private var lastDrag: CGSize = .zero
     @State private var lastMagnification: CGFloat = 1
+    /// `-dumpScene` logs the scene's geometry once, a few seconds in, for the probes.
+    @State private var dumpAt: Date? = CommandLine.arguments.contains("-dumpScene")
+        ? Date().addingTimeInterval(8)
+        : nil
     @State private var showingDemonstrations = false
     @State private var showingAsk = false
     @State private var showingAsteroid = false
@@ -121,6 +125,20 @@ struct ContentView: View {
                 .tint(overlayHidden ? .orange : .secondary)
 
                 if !overlayHidden {
+                    /**
+                     Back out to the whole solar system.
+
+                     Focusing the Sun has always been the system view, and nothing said so:
+                     someone asked how to unfocus a planet, which is the only evidence that
+                     matters. "The Sun" stays in the picker because it is also a body with
+                     its own data; this is the obvious route to the same place.
+                     */
+                    Button { focus = .sun } label: {
+                        Label("Solar system", systemImage: "circle.hexagongrid")
+                            .font(.system(size: 11))
+                    }
+                    .tint(focus == .sun ? .orange : .secondary)
+
                     Button { showingDemonstrations = true } label: {
                         Image(systemName: "function")
                     }
@@ -146,6 +164,20 @@ struct ContentView: View {
             AsteroidView(scene: scene, epoch: clock.epoch)
         }
         .sheet(isPresented: $showingLaunch) { LaunchView() }
+        .task {
+            /**
+             `-focusAfter <id>` switches focus a moment after launch, so a probe can exercise
+             the focus-change path rather than only the initial one. They are not the same
+             path and have not had the same bugs: orbit geometry built against a stale origin
+             is invisible when the first focus is the Sun, because the origin is zero there,
+             and wrong by an astronomical unit when you arrive from Earth. Test hook.
+             */
+            guard let i = CommandLine.arguments.firstIndex(of: "-focusAfter"),
+                  i + 1 < CommandLine.arguments.count,
+                  let later = BodyId(rawValue: CommandLine.arguments[i + 1]) else { return }
+            try? await Task.sleep(for: .seconds(3))
+            focus = later
+        }
         .onAppear {
             // onChange only fires on a change, so the scene would never be told about the
             // initial focus. It happens to match today because both default to Earth, which
@@ -160,6 +192,13 @@ struct ContentView: View {
         .onReceive(tick) { now in
             let delta = now.timeIntervalSince(lastTick)
             lastTick = now
+            if dumpAt != nil, Date() > dumpAt! {
+                dumpAt = nil
+                if let data = try? JSONSerialization.data(withJSONObject: scene.debug()),
+                   let text = String(data: data, encoding: .utf8) {
+                    NSLog("SCENEDEBUG %@", text)
+                }
+            }
             clock.advance(realSeconds: delta)
             gravity.seek(to: clock.epoch)
             scene.update(to: clock.epoch, gravity: gravity)

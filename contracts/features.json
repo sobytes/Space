@@ -594,6 +594,32 @@
       "androidtv": {
         "status": "planned"
       }
+    },
+    {
+      "id": "system-view-control",
+      "title": "An obvious way back out to the whole solar system",
+      "why": "Focusing the Sun has always been the system view and nothing said so; someone had to ask how to unfocus a planet.",
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/react/Hud.tsx"
+        ]
+      },
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/ContentView.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     }
   ]
 }
