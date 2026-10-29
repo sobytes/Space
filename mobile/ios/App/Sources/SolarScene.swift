@@ -528,6 +528,46 @@ final class SolarScene {
 
     func node(for body: BodyId) -> SCNNode? { nodes[body] }
 
+    // MARK: - Trajectory
+
+    private var trajectoryNode: SCNNode?
+
+    /**
+     Draws a propagated trajectory, in the same frame and scale as everything else.
+
+     Positions come straight from the integrator's samples and go through `renderPosition`
+     like any body, so the path and the planets cannot disagree about where anything is.
+     */
+    func showTrajectory(_ samples: [TrajectorySample]) {
+        clearTrajectory()
+        guard samples.count > 1 else { return }
+
+        let vertices = samples.map { renderPosition($0.position) }
+        var indices: [Int32] = []
+        for i in 0 ..< (vertices.count - 1) {
+            indices.append(Int32(i))
+            indices.append(Int32(i + 1))
+        }
+
+        let geometry = SCNGeometry(
+            sources: [SCNGeometrySource(vertices: vertices)],
+            elements: [SCNGeometryElement(indices: indices, primitiveType: .line)]
+        )
+        let material = SCNMaterial()
+        material.lightingModel = .constant
+        material.diffuse.contents = UIColor.systemTeal
+        geometry.materials = [material]
+
+        let node = SCNNode(geometry: geometry)
+        scene.rootNode.addChildNode(node)
+        trajectoryNode = node
+    }
+
+    func clearTrajectory() {
+        trajectoryNode?.removeFromParentNode()
+        trajectoryNode = nil
+    }
+
     // MARK: - View commands
 
     /**

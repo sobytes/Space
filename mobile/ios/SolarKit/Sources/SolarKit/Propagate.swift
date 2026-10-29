@@ -289,16 +289,29 @@ public func twoBodyModel(centralGm: Double = Constants.gmSun) -> ForceModel {
     ForceModel(centralGm: centralGm, perturbers: [], relativistic: false)
 }
 
-/// Every registry body as a perturber, positioned from the ephemeris as the integration runs.
-/// This is what makes masses matter: a body added to the registry perturbs every trajectory.
+/// Atmospheric entry counts as arrival, so Earth's capture radius includes it.
+private let entryInterfaceM: Double = 100_000
+
+/**
+ Every registry body as a perturber, positioned from the ephemeris as the integration runs.
+
+ This is what makes masses matter: a body added to the registry perturbs every trajectory,
+ whether or not the planets themselves are being integrated mutually.
+
+ The Sun is excluded, and not as a minor detail. It is the frame's origin and already the
+ central mass, so including it both double-counts its pull and divides the indirect term by
+ its own distance of zero. The result is NaN propagating silently through the trajectory
+ until something downstream trips on an undefined orbital plane, which is how this was found.
+ */
 public func perturbersFrom(startEpoch: JdTdb, include: [BodyId] = bodyIds) -> [Perturber] {
     include.compactMap { id in
+        guard id != .sun else { return nil }
         let contract = bodyContracts[id]!
         guard contract.gm > 0 else { return nil }
         return Perturber(
             id: id.rawValue,
             gm: contract.gm,
-            radiusM: contract.equatorialRadiusM,
+            radiusM: contract.equatorialRadiusM + (id == .embary ? entryInterfaceM : 0),
             positionAt: { seconds in
                 heliocentricPositionOf(id, at: JdTdb(startEpoch.value + seconds / Constants.secondsPerDay))
             }

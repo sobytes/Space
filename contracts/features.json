@@ -366,7 +366,7 @@
       },
       "ios": {
         "status": "planned",
-        "gap": "Needs deep-zoom first."
+        "gap": "Needs the tile pyramid, the streaming loader and the level-of-detail logic the website has, plus a way to ship or fetch the elevation data. The single largest remaining gap on this platform."
       },
       "android": {
         "status": "planned"
@@ -417,7 +417,11 @@
         ]
       },
       "ios": {
-        "status": "planned"
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/SolarKit/Sources/SolarKit/Asteroid.swift",
+          "mobile/ios/App/Sources/AsteroidView.swift"
+        ]
       },
       "android": {
         "status": "planned"
@@ -440,7 +444,11 @@
         ]
       },
       "ios": {
-        "status": "planned"
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/SolarKit/Sources/SolarKit/Ascent.swift",
+          "mobile/ios/App/Sources/LaunchView.swift"
+        ]
       },
       "android": {
         "status": "planned"

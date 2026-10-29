@@ -18,6 +18,8 @@ struct ContentView: View {
     @State private var lastTick = Date()
     @State private var showingDemonstrations = false
     @State private var showingAsk = false
+    @State private var showingAsteroid = false
+    @State private var showingLaunch = false
 
     private let tick = Timer.publish(every: 1.0 / 60.0, on: .main, in: .common).autoconnect()
 
@@ -51,6 +53,12 @@ struct ContentView: View {
                 Button { showingAsk = true } label: {
                     Image(systemName: "sparkles")
                 }
+                Button { showingAsteroid = true } label: {
+                    Image(systemName: "circle.dotted.and.circle")
+                }
+                Button { showingLaunch = true } label: {
+                    Image(systemName: "paperplane")
+                }
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
@@ -59,6 +67,10 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showingDemonstrations) { DemonstrationsView() }
         .sheet(isPresented: $showingAsk) { AskView() }
+        .sheet(isPresented: $showingAsteroid) {
+            AsteroidView(scene: scene, epoch: clock.epoch)
+        }
+        .sheet(isPresented: $showingLaunch) { LaunchView() }
         .onChange(of: focus) { _, body in
             scene.setFocus(body, at: clock.epoch)
             scene.update(to: clock.epoch, gravity: gravity)
