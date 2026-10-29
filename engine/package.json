@@ -1,0 +1,19 @@
+{
+  "name": "@solar/engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Physics, ephemerides and body contracts. No DOM, no renderer, no framework.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "verify": "vitest run"
+  },
+  "devDependencies": {
+    "astronomy-engine": "2.1.19"
+  }
+}

@@ -3,7 +3,12 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 
 /**
- * The engine's purity is a load-bearing architectural constraint, not a preference. The same
+ * The engine's purity is a load-bearing architectural constraint, not a preference.
+ *
+ * Since the monorepo split most of it is enforced structurally rather than by this file:
+ * `engine/` is its own package, it declares no dependency on the website, and its tsconfig
+ * leaves `dom` out of `lib` so a DOM reference will not compile. These rules stay as a second
+ * layer, because the structural ones only catch what the type checker sees. The same
  * code has to run in the browser, in a Web Worker, and in a Node route handler so that the AI
  * tools and the CI gates exercise the real engine rather than a described version of it. A
  * single stray `import * as THREE` would silently end that, and a comment will not stop it.
@@ -18,7 +23,7 @@ const CONVERSION_FENCE = {
 };
 
 const engineStaysPure = {
-  files: ["src/engine/**/*.{ts,tsx}"],
+  files: ["engine/src/**/*.{ts,tsx}"],
   rules: {
     "no-restricted-imports": [
       "error",
@@ -46,8 +51,8 @@ const engineStaysPure = {
  * block below carries this same fence inline for that reason.
  */
 const conversionHappensOnce = {
-  files: ["src/**/*.{ts,tsx}"],
-  ignores: ["src/view/core/**", "src/engine/**"],
+  files: ["website/src/**/*.{ts,tsx}"],
+  ignores: ["website/src/view/core/**"],
   rules: {
     "no-restricted-imports": ["error", { patterns: [CONVERSION_FENCE] }],
   },
@@ -57,10 +62,13 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   globalIgnores([
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
+    "**/.next/**",
+    "**/out/**",
+    "**/build/**",
+    "**/next-env.d.ts",
+    // Native client folders. Swift, Kotlin and their build output are not ESLint's business.
+    "mobile/**",
+    "tv/**",
     // Vendored agent skill packs. Not our source, and they carry their own conventions.
     ".claude/**",
     // Audit artifacts, including throwaway benchmarks kept for the decision trail.
