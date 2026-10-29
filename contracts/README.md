@@ -9,6 +9,8 @@ it afterwards. Never just change the code.
 
 | Contract | Governs |
 |---|---|
+| [physics-and-mathematics](physics-and-mathematics/SKILL.md) | **The master contract.** Gravitation, mass, orbits, perturbation, relativity, conservation, integration, uncertainty, with the source for each |
+| [feature-parity](feature-parity/SKILL.md) | What the product does, and which clients do it. Backed by `features.json` and a gate |
 | [units-and-frames](units-and-frames/SKILL.md) | SI inside, branded at the boundary, float64, J2000 ecliptic |
 | [time-scales](time-scales/SKILL.md) | UTC, TAI, TT and TDB, and which one each input and output uses |
 | [ephemeris-accuracy](ephemeris-accuracy/SKILL.md) | Where positions come from, how wrong they may be, and declaring it |
@@ -17,6 +19,11 @@ it afterwards. Never just change the code.
 | [floating-origin](floating-origin/SKILL.md) | Rendering ten orders of magnitude without jitter or clipping |
 | [numbers-come-from-the-engine](numbers-come-from-the-engine/SKILL.md) | No client and no model states a figure the engine did not compute |
 | [gravity-modes](gravity-modes/SKILL.md) | Analytic rails versus full mutual gravity, and what each must admit |
+
+The first two are the ones to read first. `physics-and-mathematics` is the
+model every client implements and the others specialise it;
+`feature-parity` is what stops a client being numerically perfect and
+missing half the product.
 
 ## Why these exist as prose
 
@@ -43,5 +50,21 @@ tests are what catches the drift.
 
 ## Adding a client
 
-Read every contract. Each ends with what a new platform has to provide,
-and a client is not done until it meets all of them.
+Read every contract, starting with `physics-and-mathematics`. Each ends
+with what a new platform has to provide, and a client is not done until it
+meets all of them.
+
+Then add your platform key to `features.json` with an entry for every
+feature. The gate will not let you leave a blank.
+
+## What is enforced, and by what
+
+Contracts are prose, but three of them have teeth:
+
+| Check | Where | Catches |
+|---|---|---|
+| Cross-language drift | `website/src/swift-port.test.ts` | A hand-port diverging from the engine |
+| Feature parity | `website/src/feature-parity.test.ts` | A client missing a feature, or a stale path |
+| Engine purity | `website/src/view/core/invariants.test.ts`, `engine/tsconfig.json` | The engine gaining a dependency on a renderer |
+
+Run them all with `./build.sh check`.

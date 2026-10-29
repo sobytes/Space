@@ -71,3 +71,4 @@ mobile/ios/*.xcworkspace
 **/DerivedData/
 *.xcuserstate
 xcuserdata/
+mobile/ios/App/Resources/Textures/

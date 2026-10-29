@@ -31,19 +31,26 @@ final class SolarScene {
     static let metresPerUnit: Double = 1.5e11
 
     /**
-     Radii are scaled up to be visible at system scale, then clamped.
+     How big a body is drawn.
 
-     One scene unit is about one au, so true radii are hopeless here: Earth is 4.2e-5 units,
-     well under a pixel, and the Sun is 4.6e-3. The planets share one exaggeration and a tight
-     clamp. The Sun gets a fixed size instead of the same treatment, because at 1,200 times it
-     came out 1.5 units across and swallowed Mercury's orbit at 0.387 and Venus's at 0.723,
-     which is worse than wrong: it reads as a Sun that really is that big.
+     One scene unit is about one astronomical unit, so true radii are hopeless: Earth is
+     4.2e-5 units, far under a pixel. Some exaggeration is unavoidable.
 
-     The panel always reports the true radius, so the exaggeration misleads nobody about a
-     number. It is a legibility choice, stated here, not a fudged figure.
+     The first attempt exaggerated by a constant and clamped hard to [0.045, 0.10]. That is a
+     2.2-fold spread across bodies whose real radii span 29-fold, Mercury's 2,441 km to
+     Jupiter's 71,492, so every planet came out the same size and the clamp, not the data, was
+     doing the talking.
+
+     A square root instead. Sizes stay ordered and the spread is 5.4-fold, enough that Jupiter
+     reads as a giant and Mercury stays visible at a few pixels. The compression is stated
+     rather than hidden, and the panel always shows the true radius, so no number is fudged.
+
+     The Sun keeps a fixed size. On the same curve it would be 10.4 Earth radii, 0.36 units,
+     which reaches Mercury's orbit at 0.387 and reads as a Sun that really is that big.
      */
-    static let bodyRadiusExaggeration: Double = 200
-    static let sunRenderRadius: CGFloat = 0.16
+    static let earthRenderRadius: Double = 0.052
+    static let earthRadiusM: Double = 6_378_137
+    static let sunRenderRadius: CGFloat = 0.15
 
     let scene = SCNScene()
     /// Handed to SceneView as the point of view. Without an explicit camera SceneKit invents
@@ -72,7 +79,7 @@ final class SolarScene {
         // One scene unit is about one au, so this frames the inner system out past Mars with
         // Jupiter at 5.2 just in shot, which is what reads legibly on a phone. Pinching out
         // reaches Neptune at 30.
-        cameraNode.position = SCNVector3(0, 4.5, 10)
+        cameraNode.position = SCNVector3(0, 3.2, 7.2)
         cameraNode.look(at: SCNVector3(0, 0, 0))
         scene.rootNode.addChildNode(cameraNode)
     }
@@ -85,13 +92,29 @@ final class SolarScene {
         )
     }
 
-    /// Radius in scene units: real radius, exaggerated, then clamped so the Sun does not
-    /// swallow Mercury's orbit and Mercury does not vanish.
+    /// Scene-unit radius: the square root of the body's size relative to Earth.
     private func renderRadius(_ metres: Double) -> CGFloat {
-        let scaled = metres * Self.bodyRadiusExaggeration / Self.metresPerUnit
-        // The floor is what makes a terrestrial planet visible at all; the ceiling stops
-        // Jupiter reading as a second sun. Both sit well inside Mercury's orbit at 0.387.
-        return CGFloat(min(max(scaled, 0.045), 0.10))
+        CGFloat(Self.earthRenderRadius * (metres / Self.earthRadiusM).squareRoot())
+    }
+
+    /**
+     A texture from the bundle, or nil.
+
+     Synced from `website/public/textures` by `sync-textures.mjs`, downsized, and chosen by
+     the body contract rather than by a name written here, so the phone and the website cannot
+     show different imagery for the same planet. Returning nil rather than failing is
+     deliberate: the body then draws at its measured geometric albedo in its measured colour,
+     which is real data and a reasonable thing to see if someone has not run the sync.
+     */
+    private static func texture(_ id: String?) -> UIImage? {
+        guard let id else { return nil }
+        for ext in ["jpg", "png"] {
+            if let url = Bundle.main.url(forResource: id, withExtension: ext, subdirectory: "Textures")
+                ?? Bundle.main.url(forResource: id, withExtension: ext) {
+                return UIImage(contentsOfFile: url.path)
+            }
+        }
+        return nil
     }
 
     private static func colour(_ hex: String) -> UIColor {
@@ -111,8 +134,9 @@ final class SolarScene {
         let material = SCNMaterial()
         // Emissive, not lit: the Sun is the light source, so shading it would be wrong.
         material.lightingModel = .constant
-        material.diffuse.contents = Self.colour(sunDisplay.tintHex)
-        material.emission.contents = Self.colour(sunDisplay.tintHex)
+        let sunTexture = Self.texture("sun")
+        material.diffuse.contents = sunTexture ?? Self.colour(sunDisplay.tintHex)
+        material.emission.contents = sunTexture ?? Self.colour(sunDisplay.tintHex)
         sphere.materials = [material]
         sunNode.geometry = sphere
 
@@ -139,22 +163,56 @@ final class SolarScene {
         for planet in Planet.allCases {
             guard let display = bodyDisplay[planet] else { continue }
             let sphere = SCNSphere(radius: renderRadius(display.equatorialRadiusM))
-            sphere.segmentCount = 36
+            sphere.segmentCount = 64
             let material = SCNMaterial()
-            material.diffuse.contents = Self.colour(display.tintHex)
+            // Imagery when there is some, and the measured geometric albedo in the measured
+            // colour when there is not. The fallback is real data, not a placeholder grey.
+            material.diffuse.contents = Self.texture(display.albedoTextureId)
+                ?? Self.colour(display.tintHex)
             material.roughness.contents = 0.95
             material.metalness.contents = 0.0
             sphere.materials = [material]
 
             let node = SCNNode(geometry: sphere)
             node.name = planet.rawValue
+            // Axial tilt, about the line of nodes. Not the full IAU pole yet; see the README
+            // for what is and is not ported.
+            node.eulerAngles.z = Float(toRadians(deg(display.axialTiltDeg)))
             scene.rootNode.addChildNode(node)
             nodes[planet] = node
+
+            if let rings = ringNode(for: display, bodyRadius: renderRadius(display.equatorialRadiusM)) {
+                node.addChildNode(rings)
+            }
 
             if let path = orbitPath(for: planet) {
                 scene.rootNode.addChildNode(path)
             }
         }
+    }
+
+    /**
+     Saturn's rings, at their real extent relative to the planet.
+
+     Drawn as a flat annulus inside the planet's own node, so it inherits the axial tilt and
+     the rings lean with the planet rather than sitting level with the ecliptic, which is what
+     makes them read as rings rather than as a disc someone dropped in.
+     */
+    private func ringNode(for display: BodyDisplay, bodyRadius: CGFloat) -> SCNNode? {
+        guard let rings = display.ringSystem, let image = Self.texture(rings.textureId) else {
+            return nil
+        }
+        let inner = bodyRadius * CGFloat(rings.innerRadiusM / display.equatorialRadiusM)
+        let outer = bodyRadius * CGFloat(rings.outerRadiusM / display.equatorialRadiusM)
+
+        let disc = SCNTube(innerRadius: inner, outerRadius: outer, height: 0.0001)
+        let material = SCNMaterial()
+        material.diffuse.contents = image
+        material.isDoubleSided = true
+        material.transparencyMode = .aOne
+        material.lightingModel = .constant
+        disc.materials = [material]
+        return SCNNode(geometry: disc)
     }
 
     /**
