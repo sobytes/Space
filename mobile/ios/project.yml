@@ -47,6 +47,12 @@ targets:
         UILaunchScreen: {}
         UIStatusBarStyle: UIStatusBarStyleLightContent
         UIUserInterfaceStyle: Dark
+        # iOS blocks cleartext HTTP by default, which silently drops every request to a
+        # local dev server: no error reaches the app, the fetch simply never arrives. This is
+        # the narrow exception, local networking only, not a blanket NSAllowsArbitraryLoads.
+        # A deployed build talks to an HTTPS host and does not need it.
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
         # iPad has to support all four orientations unless the app declares it requires full
         # screen, or the build warns and review rejects it. The scene reads fine in any
         # orientation, so supporting all four is the right answer rather than forcing one.

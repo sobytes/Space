@@ -14,7 +14,9 @@
  * Run from the repository root:  node mobile/ios/sync-assets.mjs
  * Or through:                    ./build.sh ios assets
  */
-import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from "node:fs";
+import {
+  copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync,
+} from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import sharp from "sharp";
@@ -30,6 +32,14 @@ const TARGET = join(ROOT, "mobile/ios/App/Resources/Textures");
  */
 const WIDTH = 2048;
 const QUALITY = 82;
+
+/**
+ * Normal maps get 4096, double the albedo textures.
+ *
+ * A normal map carries surface slope, and halving it halves the slope detail that produces
+ * the shading, so craters go soft a full zoom level earlier than the albedo would.
+ */
+const NORMAL_WIDTH = 4096;
 
 if (!existsSync(SOURCE)) {
   console.error(
@@ -101,6 +111,62 @@ if (existsSync(CATALOGUE)) {
 } else {
   console.error(`No star catalogue at ${CATALOGUE}. Run \`npm run stars\` first.`);
   process.exit(1);
+}
+
+/**
+ * Terrain: the manifest and the global normal map, per body that has one.
+ *
+ * The normal map is what makes craters shade correctly through the terminator at orbital
+ * range, and it is one texture rather than a pyramid, so it belongs in the bundle. The tile
+ * pyramid does not: the Moon's is 13 MB across four levels and is streamed on demand from the
+ * same host, exactly as the website streams it.
+ *
+ * Resampled to 4096 rather than the textures' 2048. A normal map carries the surface slope,
+ * and halving it halves the slope detail that produces the shading; craters go soft a full
+ * zoom level earlier.
+ */
+const TERRAIN_SOURCE = join(ROOT, "website/public/terrain");
+if (existsSync(TERRAIN_SOURCE)) {
+  const terrainTarget = join(ROOT, "mobile/ios/App/Resources/Terrain");
+  rmSync(terrainTarget, { recursive: true, force: true });
+  mkdirSync(terrainTarget, { recursive: true });
+
+  for (const body of readdirSync(TERRAIN_SOURCE)) {
+    const manifestPath = join(TERRAIN_SOURCE, body, "manifest.json");
+    const normalPath = join(TERRAIN_SOURCE, body, "normal-global.jpg");
+    if (!existsSync(manifestPath) || !existsSync(normalPath)) continue;
+
+    const resampled = await sharp(normalPath)
+      .resize({ width: NORMAL_WIDTH, withoutEnlargement: true })
+      .jpeg({ quality: 88 })
+      .toFile(join(terrainTarget, `${body}-normal.jpg`));
+
+    /**
+     * The manifest is rewritten, not copied.
+     *
+     * `globalWidth` is what the tile selector uses to decide whether the global map already
+     * out-resolves the screen, so a manifest still claiming the source's 8192 after the image
+     * was resampled to 4096 makes the app believe its texels are twice as fine as they are.
+     * It then never requests a tile, and the only symptom is detail that quietly stops
+     * improving as you descend. Flattened with the body in the filename because an iOS bundle
+     * does not preserve a nested resource tree reliably.
+     */
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+    manifest.globalWidth = resampled.width;
+    manifest.globalNormalMap = `${body}-normal.jpg`;
+    writeFileSync(
+      join(terrainTarget, `${body}-manifest.json`),
+      JSON.stringify(manifest, null, 2),
+    );
+
+    const before = statSync(normalPath).size;
+    const after = statSync(join(terrainTarget, `${body}-normal.jpg`)).size;
+    console.log(
+      `terrain ${body}: normal map ${mb(before)} MB -> ${mb(after)} MB, manifest copied`,
+    );
+  }
+} else {
+  console.log("no terrain built; run `npm run terrain` to add crater relief");
 }
 
 const missing = [...wanted].filter(

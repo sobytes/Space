@@ -1,0 +1,48 @@
+{
+  "body": "moon",
+  "tileSize": 512,
+  "levels": [
+    {
+      "level": 0,
+      "tilesX": 2,
+      "tilesY": 1,
+      "levelWidth": 1024,
+      "levelHeight": 512,
+      "metresPerTexel": 10660.552883490052
+    },
+    {
+      "level": 1,
+      "tilesX": 4,
+      "tilesY": 2,
+      "levelWidth": 2048,
+      "levelHeight": 1024,
+      "metresPerTexel": 5330.276441745026
+    },
+    {
+      "level": 2,
+      "tilesX": 8,
+      "tilesY": 4,
+      "levelWidth": 4096,
+      "levelHeight": 2048,
+      "metresPerTexel": 2665.138220872513
+    },
+    {
+      "level": 3,
+      "tilesX": 16,
+      "tilesY": 8,
+      "levelWidth": 8192,
+      "levelHeight": 4096,
+      "metresPerTexel": 1332.5691104362566
+    }
+  ],
+  "source": "LRO LOLA GDR, https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/img/ldem_64.img",
+  "globalNormalMap": "moon-normal.jpg",
+  "globalWidth": 4096,
+  "globalHeight": 4096,
+  "elevationRangeM": [
+    -9106.25,
+    10747.4169921875
+  ],
+  "referenceRadiusM": 1737400,
+  "generatedAt": "2026-10-27T08:10:33.105Z"
+}

@@ -14,7 +14,13 @@ struct ContentView: View {
     @State private var clock = Clock()
     @State private var scene = SolarScene()
     @State private var gravity = Gravity()
-    @State private var focus: BodyId = .embary
+    /// `-focus <id>` lets a screenshot run start on a chosen body. Test hook, not a feature.
+    @State private var focus: BodyId = {
+        guard let index = CommandLine.arguments.firstIndex(of: "-focus"),
+              index + 1 < CommandLine.arguments.count,
+              let id = BodyId(rawValue: CommandLine.arguments[index + 1]) else { return .embary }
+        return id
+    }()
     @State private var lastTick = Date()
     @State private var showingDemonstrations = false
     @State private var showingAsk = false
@@ -44,7 +50,7 @@ struct ContentView: View {
 
             if !overlayHidden {
                 VStack(spacing: 10) {
-                    BodyPanel(id: focus, clock: clock)
+                    BodyPanel(id: focus, clock: clock, scene: scene)
                     ViewControls(focus: focus, scene: scene, clock: clock)
                     GravityBar(gravity: gravity, clock: clock)
                     TimeBar(clock: clock)
@@ -101,6 +107,13 @@ struct ContentView: View {
             AsteroidView(scene: scene, epoch: clock.epoch)
         }
         .sheet(isPresented: $showingLaunch) { LaunchView() }
+        .onAppear {
+            // onChange only fires on a change, so the scene would never be told about the
+            // initial focus. It happens to match today because both default to Earth, which
+            // is exactly the kind of coincidence that breaks the moment one of them moves.
+            scene.setFocus(focus, at: clock.epoch)
+            scene.update(to: clock.epoch, gravity: gravity)
+        }
         .onChange(of: focus) { _, body in
             scene.setFocus(body, at: clock.epoch)
             scene.update(to: clock.epoch, gravity: gravity)
@@ -111,6 +124,7 @@ struct ContentView: View {
             clock.advance(realSeconds: delta)
             gravity.seek(to: clock.epoch)
             scene.update(to: clock.epoch, gravity: gravity)
+            scene.refreshTiles(viewportHeightPx: Double(UIScreen.main.bounds.height))
         }
     }
 }
@@ -152,6 +166,7 @@ private struct BodyPanel: View {
     /// Named `id`, not `body`: SwiftUI's View protocol already owns `body`.
     let id: BodyId
     let clock: Clock
+    let scene: SolarScene
     @State private var expanded = false
 
     private var contract: BodyContract { bodyContracts[id]! }
@@ -257,10 +272,34 @@ private struct BodyPanel: View {
                 // rail. Jupiter's contract alone runs past the top of the screen uncapped.
                 .frame(maxHeight: 240)
             }
+
+            reliefNotice
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
         .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    /**
+     Where the elevation data runs out.
+
+     Said rather than left to be discovered. Below this altitude the screen resolves finer
+     than LRO LOLA's 474 m per sample and the ground smooths out, which is the model running
+     out and not a flat Moon. The threshold is derived from the manifest's finest level, so it
+     tracks whatever data is actually shipped.
+     */
+    @ViewBuilder
+    private var reliefNotice: some View {
+        let limit = scene.reliefLimit(fovDegrees: 55, viewportHeightPx: 900)
+        if limit.has, let smoothBelow = limit.smoothBelowM {
+            Text("Surface relief is real LRO LOLA topography. Below about "
+                 + "\(Int(smoothBelow / 1_000).formatted()) km the screen out-resolves the data "
+                 + "and the ground smooths out. That is the elevation model running out, not a "
+                 + "flat surface.")
+                .font(.system(size: 10))
+                .foregroundStyle(.cyan.opacity(0.75))
+                .padding(.top, 2)
+        }
     }
 
     private var provenance: String {

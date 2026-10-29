@@ -339,7 +339,7 @@
       },
       "ios": {
         "status": "partial",
-        "gap": "The floating origin is implemented: the focused body's position is subtracted in Double and renderPosition is the single Float conversion. Surface-level tile streaming is not, so the useful range stops where a texture runs out.",
+        "gap": "The floating origin is real: the focused body's position is subtracted in Double and renderPosition is the one Float conversion. What differs from the web is continuity. The scene's scale is chosen per focused body rather than per frame, so moving between system scale and surface scale is a step at the focus change rather than a continuous fly-through. The web keeps everything in metres with a logarithmic depth buffer, which SceneKit does not expose. Both reach a surface; only one does it without a seam.",
         "paths": [
           "mobile/ios/App/Sources/SolarScene.swift"
         ]
@@ -365,8 +365,11 @@
         ]
       },
       "ios": {
-        "status": "planned",
-        "gap": "Needs the tile pyramid, the streaming loader and the level-of-detail logic the website has, plus a way to ship or fetch the elevation data. The single largest remaining gap on this platform."
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/SolarKit/Sources/SolarKit/Tiles.swift",
+          "mobile/ios/App/Sources/Terrain.swift"
+        ]
       },
       "android": {
         "status": "planned"

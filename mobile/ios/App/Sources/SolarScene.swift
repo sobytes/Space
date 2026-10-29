@@ -40,6 +40,10 @@ final class SolarScene {
     private let sunLight = SCNNode()
     private var positions: [BodyId: Vec3] = [:]
     private var origin: Vec3 = .zero
+    private let terrain = Terrain()
+    private var tileNodes: [TileId: SCNNode] = [:]
+    private var tileRoot: SCNNode?
+    private var lastTileRefresh = Date.distantPast
 
     /// Metres per scene unit for the current focus.
     private(set) var metresPerUnit: Double = Constants.auInMetres
@@ -173,6 +177,19 @@ final class SolarScene {
                 material.diffuse.contents = albedo ?? Self.colour(contract.appearance.tintHex)
                 material.roughness.contents = 0.95
                 material.metalness.contents = 0.0
+                /**
+                 Real elevation relief, where there is any.
+
+                 The global normal map comes from LRO LOLA topography, so craters shade
+                 correctly through the terminator rather than being painted on. Below about
+                 1,000 km the screen out-resolves the data at 474 m per sample and the ground
+                 smooths; the panel says so rather than leaving someone to conclude the Moon
+                 is flat.
+                 */
+                if let surface = terrain.surface(for: id) {
+                    material.normal.contents = surface.normalMap
+                    material.normal.intensity = 1.0
+                }
                 applyNightSide(to: material, contract: contract, id: id)
             }
             sphere.materials = [material]
@@ -426,6 +443,7 @@ final class SolarScene {
             sphere.radius = renderRadius(contract.equatorialRadiusM)
         }
 
+        clearTiles()
         rebuildOrbits()
         frameFocus(at: epoch)
     }
@@ -440,7 +458,15 @@ final class SolarScene {
      */
     private func frameFocus(at epoch: JdTdb?) {
         let when = epoch ?? JdTdb(Epochs.j2000)
-        let distance: Float = focus == .sun ? 7.5 : 6
+        /// `-zoom <radii>` places the camera at a chosen multiple of the body's radius, so a
+        /// screenshot run can reach the altitude band where streamed tiles are used. Test
+        /// hook, not a feature.
+        let requested: Float? = {
+            guard let i = CommandLine.arguments.firstIndex(of: "-zoom"),
+                  i + 1 < CommandLine.arguments.count else { return nil }
+            return Float(CommandLine.arguments[i + 1])
+        }()
+        let distance: Float = requested ?? (focus == .sun ? 7.5 : 6)
         let sun = sunDirection(from: focus, at: when)
         cameraNode.position = SCNVector3(
             sun.x * distance,
@@ -527,6 +553,119 @@ final class SolarScene {
     }
 
     func node(for body: BodyId) -> SCNNode? { nodes[body] }
+
+    /**
+     Streams and draws surface tiles for the focused body.
+
+     The level comes from SolarKit's ported arithmetic: the coarsest whose texel is still
+     finer than a screen pixel. Tiles arrive asynchronously and the global normal map covers
+     the gap, so a slow network degrades detail rather than leaving a hole.
+
+     Throttled, because the selection is cheap but rebuilding geometry is not, and the camera
+     moves every frame while the set of visible tiles changes far more slowly.
+     */
+    func refreshTiles(viewportHeightPx: Double) {
+        guard let surface = terrain.surface(for: focus), focus != .sun else {
+            return
+        }
+        guard Date().timeIntervalSince(lastTileRefresh) > 0.4 else { return }
+        lastTileRefresh = Date()
+
+        let fovRad = (cameraNode.camera?.fieldOfView ?? 55) * Double.pi / 180
+        let altitude = distanceToSurfaceM
+        let level = levelFor(
+            surface.manifest,
+            altitudeM: altitude,
+            verticalFovRadians: fovRad,
+            viewportHeightPx: viewportHeightPx
+        )
+
+        let globalTexel = 2 * Double.pi * bodyContracts[focus]!.equatorialRadiusM
+            / Double(surface.manifest.globalWidth)
+        let screenTexel = metresPerPixel(
+            altitudeM: altitude, verticalFovRadians: fovRad, viewportHeightPx: viewportHeightPx
+        )
+        guard globalTexel > screenTexel else {
+            clearTiles()
+            return
+        }
+
+        let centre = subCameraPoint()
+        let cap = visibleCapAngle(
+            radiusM: bodyContracts[focus]!.equatorialRadiusM, altitudeM: altitude
+        )
+        let wanted = tilesInView(level: level, centre: centre, capAngle: cap, budget: 16)
+        let wantedSet = Set(wanted)
+
+        for (id, node) in tileNodes where !wantedSet.contains(id) {
+            node.removeFromParentNode()
+            tileNodes.removeValue(forKey: id)
+        }
+
+        let root = tileRoot ?? {
+            let node = SCNNode()
+            nodes[focus]?.childNodes.first?.addChildNode(node)
+            tileRoot = node
+            return node
+        }()
+
+        for id in wanted where tileNodes[id] == nil {
+            guard let image = terrain.tile(id, body: focus, onArrival: { [weak self] in
+                self?.lastTileRefresh = .distantPast
+            }) else { continue }
+
+            let geometry = TilePatch.geometry(extent: tileExtent(level: level, tile: id))
+            let material = SCNMaterial()
+            // The body's own albedo on channel 0, sampled with global coordinates so the
+            // imagery lines up with the sphere beneath. The streamed relief on channel 1.
+            material.diffuse.contents = Self.texture(bodyContracts[focus]!.appearance.albedoTextureId)
+                ?? Self.colour(bodyContracts[focus]!.appearance.tintHex)
+            material.diffuse.mappingChannel = 0
+            material.normal.contents = image
+            material.normal.mappingChannel = 1
+            material.normal.intensity = 1.0
+            material.roughness.contents = 0.95
+            material.metalness.contents = 0.0
+            geometry.materials = [material]
+
+            let node = SCNNode(geometry: geometry)
+            root.addChildNode(node)
+            tileNodes[id] = node
+        }
+    }
+
+    private func clearTiles() {
+        for (_, node) in tileNodes { node.removeFromParentNode() }
+        tileNodes.removeAll()
+        tileRoot?.removeFromParentNode()
+        tileRoot = nil
+    }
+
+    /// Where the camera is looking down on the focused body, in its own body-fixed frame.
+    private func subCameraPoint() -> SubCameraPoint {
+        let p = cameraNode.position
+        let length = max(1e-6, (p.x * p.x + p.y * p.y + p.z * p.z).squareRoot())
+        let x = Double(p.x / length)
+        let y = Double(p.y / length)
+        let z = Double(p.z / length)
+        return SubCameraPoint(
+            latitude: asin(max(-1, min(1, y))),
+            longitude: atan2(-z, x)
+        )
+    }
+
+    /// Whether the focused body has elevation relief, and the altitude below which the data
+    /// runs out. Both read from the manifest, not hardcoded.
+    func reliefLimit(fovDegrees: Double, viewportHeightPx: Double) -> (has: Bool, smoothBelowM: Double?) {
+        (
+            terrain.hasTerrain(focus),
+            terrain.smoothBelowM(
+                for: focus,
+                verticalFovRadians: fovDegrees * Double.pi / 180,
+                viewportHeightPx: viewportHeightPx
+            )
+        )
+    }
 
     // MARK: - Trajectory
 
