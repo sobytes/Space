@@ -24,10 +24,13 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { PLANET_IDS, SHORT_SPAN, type PlanetId } from "@solar/engine/data/planets";
+import { BODY_IDS } from "@solar/engine/bodies/registry";
+import { heliocentricPositionOf } from "@solar/engine/bodies/position";
+import { orientationOf, rotationPeriodDays } from "@solar/engine/rotation";
 import { heliocentricState } from "@solar/engine/kepler";
 import { jdTdb } from "@solar/engine/time";
 import { metresToKm, normalizeAngleSigned } from "@solar/engine/units";
-import { length, type Vec3 } from "@solar/engine/vec";
+import { length, sub, type Vec3 } from "@solar/engine/vec";
 
 const ARCSEC_PER_RADIAN = 648_000 / Math.PI;
 
@@ -102,6 +105,78 @@ describe("the Swift port has not drifted from the engine", () => {
       close(longitude, row.longitudeArcsec, "longitude");
       close(latitude, row.latitudeArcsec, "latitude");
       close(distance, row.distanceKm, "distance");
+    }
+  });
+});
+
+/**
+ * The registry port: all 32 bodies, their positions and their orientations.
+ *
+ * Same reasoning as the ephemeris gate above, extended past the eight planets. A moon's
+ * position passes through mean elements, a parent-equatorial or Laplace rotation and a
+ * recursive parent lookup, which is a great deal of chain for a hand-port to get subtly wrong
+ * in a way that still renders a moon going round a planet.
+ *
+ * Positions are compared as an absolute separation rather than a relative error, because a
+ * body near the origin makes a relative measure meaningless. A metre at Neptune is 2e-13
+ * relative; a metre is the right bar for all of them.
+ */
+
+interface BodySample {
+  readonly jdTdb: number;
+  readonly x: number;
+  readonly y: number;
+  readonly z: number;
+  readonly spin: number;
+  readonly poleX: number;
+  readonly poleY: number;
+  readonly poleZ: number;
+}
+
+const BODIES = JSON.parse(
+  readFileSync(new URL("../../mobile/ios/SolarKit/bodies-snapshot.json", import.meta.url), "utf8"),
+) as { bodies: Record<string, { rotationPeriodDays: number; samples: BodySample[] }> };
+
+describe("the Swift registry port has not drifted", () => {
+  it("covers all 32 bodies at four epochs", () => {
+    expect(Object.keys(BODIES.bodies).sort()).toEqual([...BODY_IDS].sort());
+    for (const id of BODY_IDS) {
+      expect(BODIES.bodies[id].samples, id).toHaveLength(4);
+    }
+  });
+
+  it.each(BODY_IDS)("%s is in the same place as the engine puts it", (body) => {
+    for (const sample of BODIES.bodies[body].samples) {
+      const epoch = jdTdb(sample.jdTdb);
+      const engine = heliocentricPositionOf(body, epoch);
+      const swift = { x: sample.x, y: sample.y, z: sample.z };
+      const separation = length(sub(engine, swift));
+
+      // One metre, on bodies up to 4.5e12 m out. Anything a port gets wrong moves a body by
+      // kilometres at least; this is tight enough to catch a changed constant.
+      expect(
+        separation,
+        `${body} @ ${sample.jdTdb}: ${separation.toFixed(3)} m apart`,
+      ).toBeLessThan(1);
+    }
+  });
+
+  it.each(BODY_IDS)("%s is oriented the same way", (body) => {
+    expect(BODIES.bodies[body].rotationPeriodDays).toBeCloseTo(rotationPeriodDays(body), 9);
+
+    for (const sample of BODIES.bodies[body].samples) {
+      const engine = orientationOf(body, jdTdb(sample.jdTdb));
+
+      // The prime meridian wraps, so difference the angle rather than the raw values.
+      expect(
+        Math.abs(normalizeAngleSigned(engine.spin - sample.spin)),
+        `${body} @ ${sample.jdTdb} prime meridian`,
+      ).toBeLessThan(1e-9);
+
+      const poleGap = length(
+        sub(engine.poleEcliptic, { x: sample.poleX, y: sample.poleY, z: sample.poleZ }),
+      );
+      expect(poleGap, `${body} @ ${sample.jdTdb} pole direction`).toBeLessThan(1e-12);
     }
   });
 });

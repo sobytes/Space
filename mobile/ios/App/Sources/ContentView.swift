@@ -3,17 +3,17 @@ import SceneKit
 import SolarKit
 
 /**
- The app shell: the scene, a body panel, and the time controls.
+ The app shell: the scene, the body panel, the view controls and the clock.
 
  Deliberately the same information architecture as the website, because the two are meant to
- be the same product. Every figure on screen comes from SolarKit, and the ones that depend on
- the clock say what they mean at the current rate, which is the lesson from someone reading
- Earth spinning once a second as a bug.
+ be the same product and `contracts/feature-parity` says a feature on one platform is tracked
+ on all of them. Every figure comes from SolarKit, and the ones that depend on the clock say
+ what they mean at the current rate.
  */
 struct ContentView: View {
     @State private var clock = Clock()
     @State private var scene = SolarScene()
-    @State private var selected: Planet? = .embary
+    @State private var focus: BodyId = .embary
     @State private var lastTick = Date()
 
     private let tick = Timer.publish(every: 1.0 / 60.0, on: .main, in: .common).autoconnect()
@@ -23,21 +23,26 @@ struct ContentView: View {
             SceneView(
                 scene: scene.scene,
                 pointOfView: scene.cameraNode,
-                // No autoenablesDefaultLighting: it adds an omni light at the camera, which
-                // lights the night side of every planet and destroys the terminator.
+                // No autoenablesDefaultLighting: it puts an omni light at the camera, which
+                // lights the night side of every body and destroys the terminator.
                 options: [.allowsCameraControl]
             )
             .ignoresSafeArea()
 
             VStack(spacing: 10) {
-                if let selected, let display = bodyDisplay[selected] {
-                    BodyPanel(planet: selected, display: display, clock: clock)
-                }
+                BodyPanel(id: focus, clock: clock)
+                ViewControls(focus: focus, scene: scene, clock: clock)
                 TimeBar(clock: clock)
             }
             .padding(14)
         }
-        .overlay(alignment: .top) { BodyPicker(selected: $selected).padding(.top, 8) }
+        .overlay(alignment: .top) {
+            BodyPicker(focus: $focus).padding(.top, 6)
+        }
+        .onChange(of: focus) { _, body in
+            scene.setFocus(body, at: clock.epoch)
+            scene.update(to: clock.epoch)
+        }
         .onReceive(tick) { now in
             let delta = now.timeIntervalSince(lastTick)
             lastTick = now
@@ -47,21 +52,25 @@ struct ContentView: View {
     }
 }
 
+/// Every body, with moons indented under their planet so 32 entries read as a system.
 private struct BodyPicker: View {
-    @Binding var selected: Planet?
+    @Binding var focus: BodyId
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 6) {
-                ForEach(Planet.allCases, id: \.self) { planet in
-                    Button(bodyDisplay[planet]?.name ?? planet.rawValue) {
-                        selected = planet
+            HStack(spacing: 5) {
+                ForEach(bodyIds, id: \.self) { id in
+                    let contract = bodyContracts[id]!
+                    Button {
+                        focus = id
+                    } label: {
+                        Text((contract.kind == .moon ? "\u{21b3} " : "") + contract.displayName)
+                            .font(contract.kind == .moon ? .caption2 : .caption)
                     }
-                    .font(.caption)
-                    .padding(.horizontal, 10)
+                    .padding(.horizontal, 9)
                     .padding(.vertical, 5)
-                    .background(selected == planet ? Color.orange.opacity(0.9) : Color.white.opacity(0.08))
-                    .foregroundStyle(selected == planet ? Color.black : Color.white.opacity(0.85))
+                    .background(focus == id ? Color.orange.opacity(0.9) : Color.white.opacity(0.08))
+                    .foregroundStyle(focus == id ? Color.black : Color.white.opacity(0.85))
                     .clipShape(Capsule())
                 }
             }
@@ -70,69 +79,168 @@ private struct BodyPicker: View {
     }
 }
 
-private struct BodyPanel: View {
-    let planet: Planet
-    let display: BodyDisplay
-    let clock: Clock
+/**
+ Everything the contract is willing to assert about a body, with its provenance.
 
-    /// Orbital period from the element table's mean-longitude rate, not a stored constant, so
-    /// it cannot drift from the elements that position the planet.
+ The same fields as the website's panel, including the declared discrepancies, because a
+ conflict between sources is documentation rather than something to hide.
+ */
+private struct BodyPanel: View {
+    /// Named `id`, not `body`: SwiftUI's View protocol already owns `body`.
+    let id: BodyId
+    let clock: Clock
+    @State private var expanded = false
+
+    private var contract: BodyContract { bodyContracts[id]! }
+
     private var orbitDays: Double? {
-        guard let elements = shortSpan.elements[planet] else { return nil }
-        return 360 / elements.ratePerCentury.meanLongitudeDeg * Constants.daysPerJulianCentury
+        switch contract.ephemeris {
+        case .fixedAtBarycentre: return nil
+        case let .standishElements(planet):
+            guard let e = shortSpan.elements[planet] else { return nil }
+            return 360 / e.ratePerCentury.meanLongitudeDeg * Constants.daysPerJulianCentury
+        case let .meanElementsAboutParent(source): return source.periodDays
+        }
     }
 
-    private var distanceFromSun: Double? {
-        try? heliocentricPosition(planet, at: clock.epoch).length
+    private var fromSun: Double { heliocentricPositionOf(id, at: clock.epoch).length }
+
+    private var fromEarth: Double {
+        (heliocentricPositionOf(id, at: clock.epoch)
+            - heliocentricPositionOf(.embary, at: clock.epoch)).length
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(display.name).font(.headline)
-            Text(display.oneLine)
+            HStack(alignment: .firstTextBaseline) {
+                Text(contract.displayName).font(.headline)
+                Spacer()
+                Button(expanded ? "Less" : "More") { expanded.toggle() }
+                    .font(.caption2)
+            }
+            Text(contract.education.oneLine)
                 .font(.caption)
                 .foregroundStyle(.orange.opacity(0.9))
 
+            /**
+             Three rows collapsed. The panel used to show everything always and covered most
+             of the planet, which is a poor trade in an app whose whole point is looking at
+             the planet. The rest is one tap away and scrolls, so it can never grow past half
+             the screen however much a contract has to say.
+             */
             Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 4) {
-                if let distance = distanceFromSun {
-                    row("From the Sun", String(format: "%.3f au", distance / Constants.auInMetres),
-                        onScreen: orbitDays.map { $0 * Constants.secondsPerDay }, label: "one orbit")
-                }
-                row("Equatorial radius",
-                    "\(Int(display.equatorialRadiusM / 1_000).formatted()) km")
+                row("From the Sun", distance(fromSun),
+                    simulated: orbitDays.map { $0 * Constants.secondsPerDay }, label: "one orbit")
+                row("Equatorial radius", "\(Int(contract.equatorialRadiusM / 1_000).formatted()) km")
                 row("Rotation", rotationText,
-                    onScreen: abs(display.siderealRotationDays) * Constants.secondsPerDay,
+                    simulated: abs(contract.siderealRotationDays) * Constants.secondsPerDay,
                     label: "one turn")
             }
 
-            Text("Positions from the JPL Standish element tables; rotation from the IAU WGCCRE report.")
-                .font(.system(size: 10))
-                .foregroundStyle(.secondary)
+            if expanded {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 4) {
+                            if id != .embary {
+                                row("From Earth",
+                                    "\(distance(fromEarth))  (\(lightTime(fromEarth)) of light)")
+                            }
+                            row("Axial tilt", String(
+                                format: "%.2f\u{00b0}", obliquityToOrbitDeg(id, at: clock.epoch)
+                            ))
+                            row("Mean temperature",
+                                "\(Int(contract.meanTemperatureK)) K  "
+                                    + "(\(Int(contract.meanTemperatureK - 273.15)) \u{00b0}C)")
+                            if contract.confirmedMoons > 0 {
+                                row("Confirmed moons", "\(contract.confirmedMoons)")
+                            }
+                            if let atmosphere = contract.atmosphere {
+                                row("Atmosphere", atmosphere.composition
+                                    .map { "\($0.0) \(String(format: "%.1f", $0.1 * 100))%" }
+                                    .joined(separator: ", "))
+                            }
+                        }
+
+                        Text(contract.education.whyItMatters).font(.caption).padding(.top, 2)
+
+                        ForEach(contract.education.facts, id: \.self) { fact in
+                            Text("\u{2014}  " + fact)
+                                .font(.system(size: 11))
+                                .foregroundStyle(.secondary)
+                        }
+
+                        if !contract.knownDiscrepancies.isEmpty {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("SOURCES DISAGREE")
+                                    .font(.system(size: 10, weight: .medium))
+                                    .foregroundStyle(.orange.opacity(0.8))
+                                ForEach(contract.knownDiscrepancies, id: \.field) { d in
+                                    Text(d.summary).font(.system(size: 11))
+                                    Text("Using: " + d.preferred)
+                                        .font(.system(size: 10))
+                                        .foregroundStyle(.orange.opacity(0.7))
+                                }
+                            }
+                            .padding(8)
+                            .background(.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+                        }
+
+                        Text(provenance)
+                            .font(.system(size: 10))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .frame(maxHeight: 280)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(.black.opacity(0.65), in: RoundedRectangle(cornerRadius: 12))
+        .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    private var provenance: String {
+        switch contract.ephemeris {
+        case .fixedAtBarycentre:
+            return "Rotation from the IAU WGCCRE report."
+        case .standishElements:
+            return "Position from the JPL Standish element tables, rotation from the IAU WGCCRE report."
+        case .meanElementsAboutParent:
+            return "Position from JPL mean elements, good to roughly a degree, not an "
+                + "eclipse-grade theory. Rotation from the IAU WGCCRE report."
+        }
     }
 
     private var rotationText: String {
-        let hours = abs(display.siderealRotationDays) * 24
-        let base = hours < 24
+        let hours = abs(contract.siderealRotationDays) * 24
+        let base = hours < 48
             ? String(format: "%.2f h", hours)
-            : String(format: "%.4f d", abs(display.siderealRotationDays))
-        return display.siderealRotationDays < 0 ? base + " retrograde" : base
+            : String(format: "%.4f d", abs(contract.siderealRotationDays))
+        return contract.siderealRotationDays < 0 ? base + " retrograde" : base
+    }
+
+    private func distance(_ metres: Double) -> String {
+        if metres < 1_000 { return String(format: "%.0f m", metres) }
+        if metres < 1e9 { return "\(Int(metres / 1_000).formatted()) km" }
+        return String(format: "%.3f au", metres / Constants.auInMetres)
+    }
+
+    private func lightTime(_ metres: Double) -> String {
+        let seconds = metres / 299_792_458
+        if seconds < 60 { return String(format: "%.1f s", seconds) }
+        if seconds < 3_600 { return "\(Int(seconds / 60)) m \(Int(seconds.truncatingRemainder(dividingBy: 60))) s" }
+        return "\(Int(seconds / 3_600)) h \(Int(seconds.truncatingRemainder(dividingBy: 3_600) / 60)) m"
     }
 
     @ViewBuilder
     private func row(
-        _ name: String, _ value: String, onScreen simulatedSeconds: Double? = nil,
-        label: String = ""
+        _ name: String, _ value: String, simulated: Double? = nil, label: String = ""
     ) -> some View {
         GridRow {
             Text(name).font(.caption).foregroundStyle(.secondary)
             VStack(alignment: .leading, spacing: 1) {
                 Text(value).font(.caption.monospacedDigit())
-                if let simulatedSeconds {
-                    Text(onScreenText(simulatedSeconds, label))
+                if let simulated {
+                    Text(onScreen(simulated, label))
                         .font(.system(size: 10))
                         .foregroundStyle(.secondary)
                 }
@@ -140,7 +248,7 @@ private struct BodyPanel: View {
         }
     }
 
-    private func onScreenText(_ simulatedSeconds: Double, _ label: String) -> String {
+    private func onScreen(_ simulatedSeconds: Double, _ label: String) -> String {
         guard let real = clock.onScreenSeconds(forSimulated: simulatedSeconds) else {
             return "\(label) is too fast to see at this speed"
         }
@@ -157,13 +265,56 @@ private struct BodyPanel: View {
     }
 }
 
+/**
+ Where to stand relative to the Sun, and how far back.
+
+ The lighting angles exist because the thing worth seeing on a body is usually the line
+ between its day and its night, and arriving over the lit face hides it. "Fit moons" exists
+ because framing a planet against its own radius crops its moons out entirely: Earth's Moon
+ sits 60 Earth radii away, which is why the planet shrinks to a dot the moment the Moon fits
+ on screen. That emptiness is the lesson, not a framing problem.
+ */
+private struct ViewControls: View {
+    let focus: BodyId
+    let scene: SolarScene
+    let clock: Clock
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text("VIEW")
+                .font(.system(size: 10))
+                .foregroundStyle(.secondary)
+
+            if focus != .sun {
+                ForEach([("Day", 0.0), ("Terminator", 90.0), ("Night", 180.0)], id: \.0) { item in
+                    Button(item.0) { scene.setSunAngle(item.1, at: clock.epoch) }
+                        .font(.system(size: 11))
+                        .buttonStyle(.bordered)
+                        .controlSize(.mini)
+                }
+            }
+
+            if scene.focusHasMoons {
+                Button("Fit moons") { scene.frameMoons() }
+                    .font(.system(size: 11))
+                    .buttonStyle(.bordered)
+                    .controlSize(.mini)
+                    .tint(.cyan)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 12))
+    }
+}
+
 private struct TimeBar: View {
     @Bindable var clock: Clock
 
     var body: some View {
         VStack(spacing: 8) {
-            Text(clock.formattedEpoch)
-                .font(.system(.caption, design: .monospaced))
+            Text(clock.formattedEpoch).font(.system(.caption, design: .monospaced))
 
             HStack(spacing: 8) {
                 Button(clock.running ? "Pause" : "Play") { clock.running.toggle() }
@@ -184,10 +335,10 @@ private struct TimeBar: View {
                 )
                 Text(clock.direction < 0 ? "\(clock.rate.label), reversed" : clock.rate.label)
                     .font(.caption2.monospacedDigit())
-                    .frame(width: 110, alignment: .trailing)
+                    .frame(width: 112, alignment: .trailing)
             }
         }
         .padding(12)
-        .background(.black.opacity(0.65), in: RoundedRectangle(cornerRadius: 12))
+        .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 12))
     }
 }

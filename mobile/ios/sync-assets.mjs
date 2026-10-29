@@ -1,5 +1,6 @@
 /**
- * Copies the planet textures into the app bundle, downsized.
+ * Copies the website's assets into the app bundle: textures, downsized, and the star
+ * catalogue as-is.
  *
  * The website's textures are the real NASA and USGS imagery and run to 81 MB, with Mercury
  * alone at 15 MB. That is right for a browser that streams them and wrong for an app binary,
@@ -10,10 +11,10 @@
  * Which texture belongs to which body is not decided here. It comes from the body contracts,
  * so the phone and the website cannot end up showing different imagery for the same planet.
  *
- * Run from the repository root:  node mobile/ios/sync-textures.mjs
- * Or through:                    ./build.sh ios textures
+ * Run from the repository root:  node mobile/ios/sync-assets.mjs
+ * Or through:                    ./build.sh ios assets
  */
-import { existsSync, mkdirSync, readdirSync, rmSync, statSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import sharp from "sharp";
@@ -82,6 +83,25 @@ const mb = (bytes) => (bytes / 1024 / 1024).toFixed(1);
 console.log(
   `${copied} textures into App/Resources/Textures: ${mb(sourceBytes)} MB source -> ${mb(targetBytes)} MB bundled`,
 );
+
+/**
+ * The star catalogue, copied rather than transformed.
+ *
+ * 9,096 stars of the Yale Bright Star Catalogue as a flat Float32Array, four values each:
+ * right ascension and declination in radians, visual magnitude, and B-V colour index. 142 KB,
+ * so there is nothing to gain by reducing it, and both clients reading the identical bytes is
+ * worth more than the saving would be.
+ */
+const CATALOGUE = join(ROOT, "website/public/data/bsc5.bin");
+if (existsSync(CATALOGUE)) {
+  const resources = join(ROOT, "mobile/ios/App/Resources");
+  mkdirSync(resources, { recursive: true });
+  copyFileSync(CATALOGUE, join(resources, "bsc5.bin"));
+  console.log(`star catalogue: ${(statSync(CATALOGUE).size / 1024).toFixed(0)} KB`);
+} else {
+  console.error(`No star catalogue at ${CATALOGUE}. Run \`npm run stars\` first.`);
+  process.exit(1);
+}
 
 const missing = [...wanted].filter(
   (id) => !existsSync(join(TARGET, `${id}.jpg`)) && !existsSync(join(TARGET, `${id}.png`)),

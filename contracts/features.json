@@ -1,6 +1,12 @@
 {
   "note": "The canonical feature list. Machine-readable so every client can read it and so a gate can check it, rather than a table that drifts. Validated by website/src/feature-parity.test.ts. See contracts/feature-parity/SKILL.md.",
-  "platforms": ["web", "ios", "android", "tvos", "androidtv"],
+  "platforms": [
+    "web",
+    "ios",
+    "android",
+    "tvos",
+    "androidtv"
+  ],
   "statuses": {
     "shipped": "Implemented and working on this platform.",
     "partial": "Partly implemented. `gap` says what is missing.",
@@ -12,240 +18,536 @@
       "id": "system-view",
       "title": "The solar system to scale, positioned from real ephemerides",
       "why": "The product. Everything else hangs off it.",
-      "web": { "status": "shipped", "paths": ["website/src/view/core/viewport.ts"] },
-      "ios": { "status": "shipped", "paths": ["mobile/ios/App/Sources/SolarScene.swift"] },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/core/viewport.ts"
+        ]
+      },
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/SolarScene.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "all-bodies",
       "title": "All 32 bodies: Sun, 8 planets, 23 moons",
       "why": "A solar system missing Titan and the Galileans is not a true representation.",
-      "web": { "status": "shipped", "paths": ["engine/src/bodies/registry.ts"] },
-      "ios": {
-        "status": "partial",
-        "gap": "Sun and 8 planets only. The moons need the mean-element and reference-plane code ported; see contracts/satellite-reference-planes.",
-        "paths": ["mobile/ios/SolarKit/Sources/SolarKit/Generated/BodyDisplay.swift"]
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "engine/src/bodies/registry.ts"
+        ]
       },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/SolarKit/Sources/SolarKit/Position.swift",
+          "mobile/ios/SolarKit/Sources/SolarKit/Laplace.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "body-focus",
       "title": "Select and focus any body",
       "why": "Navigation. Without it the system view is a poster.",
-      "web": { "status": "shipped", "paths": ["website/src/view/react/Hud.tsx"] },
-      "ios": {
-        "status": "partial",
-        "gap": "The picker selects which body the panel describes, but the camera does not fly to it.",
-        "paths": ["mobile/ios/App/Sources/ContentView.swift"]
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/react/Hud.tsx"
+        ]
       },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/SolarScene.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "body-panel",
       "title": "Body data panel with provenance on every figure",
       "why": "contracts/numbers-come-from-the-engine. A number without its source is a guess.",
-      "web": { "status": "shipped", "paths": ["website/src/view/react/Hud.tsx"] },
-      "ios": {
-        "status": "partial",
-        "gap": "Distance, radius and rotation only. Missing axial tilt, temperature, atmosphere, moon count, education facts and declared discrepancies.",
-        "paths": ["mobile/ios/App/Sources/ContentView.swift"]
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/react/Hud.tsx"
+        ]
       },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/ContentView.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "rate-meaning",
       "title": "What the clock rate means for the body in view",
       "why": "\"1 day/s\" is accurate and tells a viewer nothing. Someone read Earth spinning once a second as a bug.",
-      "web": { "status": "shipped", "paths": ["website/src/view/react/Hud.tsx"] },
-      "ios": { "status": "shipped", "paths": ["mobile/ios/App/Sources/ContentView.swift"] },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/react/Hud.tsx"
+        ]
+      },
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/ContentView.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "time-control",
       "title": "Play, pause, reverse, jump to now, and rate presets from real time upward",
       "why": "Seeing a year pass is the point of a simulator.",
-      "web": { "status": "shipped", "paths": ["website/src/view/core/clock.ts"] },
-      "ios": { "status": "shipped", "paths": ["mobile/ios/App/Sources/Clock.swift"] },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/core/clock.ts"
+        ]
+      },
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/Clock.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "orbit-paths",
       "title": "Orbit paths sampled from the solver that positions the body",
       "why": "An idealised ellipse is decoration. Sampling the real solver draws the path the body will actually follow.",
-      "web": { "status": "shipped", "paths": ["website/src/view/react/OrbitPaths.tsx"] },
-      "ios": { "status": "shipped", "paths": ["mobile/ios/App/Sources/SolarScene.swift"] },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/react/OrbitPaths.tsx"
+        ]
+      },
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/SolarScene.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "textures",
       "title": "Real NASA and USGS surface imagery",
       "why": "A flat tint is a placeholder. The imagery is data too.",
-      "web": { "status": "shipped", "paths": ["website/src/view/react/Body.tsx"] },
-      "ios": { "status": "shipped", "paths": ["mobile/ios/sync-textures.mjs"] },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/react/Body.tsx"
+        ]
+      },
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/sync-assets.mjs"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "night-lights",
       "title": "City lights on the dark side, masked by the lighting geometry",
       "why": "The clearest evidence a simulator can give that the dark side is night rather than empty space.",
-      "web": { "status": "shipped", "paths": ["website/src/view/react/Body.tsx"] },
-      "ios": {
-        "status": "planned",
-        "gap": "The texture is already in the bundle. Needs an SCNShaderModifier masked by dot(worldNormal, sunDirection), the SceneKit equivalent of the web's onBeforeCompile."
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/react/Body.tsx"
+        ]
       },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/SolarScene.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "rings",
       "title": "Saturn's rings at their real extent, tilted with the planet",
       "why": "Saturn without rings is not Saturn.",
-      "web": { "status": "shipped", "paths": ["website/src/view/react/Body.tsx"] },
-      "ios": { "status": "shipped", "paths": ["mobile/ios/App/Sources/SolarScene.swift"] },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/react/Body.tsx"
+        ]
+      },
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/SolarScene.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "lighting-presets",
       "title": "Day, terminator and night viewing angles",
       "why": "The thing worth seeing on a planet is usually the line between its day and its night.",
-      "web": { "status": "shipped", "paths": ["website/src/view/react/CameraRig.tsx"] },
-      "ios": { "status": "planned" },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/react/CameraRig.tsx"
+        ]
+      },
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/SolarScene.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "fit-moons",
       "title": "Frame a planet together with its moons",
       "why": "Framing on the planet alone crops the Moon 1,300 pixels off screen, which reads as a missing Moon.",
-      "web": { "status": "shipped", "paths": ["website/src/view/react/CameraRig.tsx"] },
-      "ios": { "status": "planned", "gap": "Needs the moons first; see all-bodies." },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/react/CameraRig.tsx"
+        ]
+      },
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/SolarScene.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "deep-zoom",
       "title": "Continuous zoom from system scale to a surface, with a floating origin",
       "why": "Ten orders of magnitude. contracts/floating-origin.",
-      "web": { "status": "shipped", "paths": ["website/src/view/core/internal/place.ts"] },
-      "ios": {
-        "status": "planned",
-        "gap": "A fixed divisor is used instead, which is adequate for a system view and will jitter at surface range. renderPosition is the single conversion point so this lands in one function."
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/core/internal/place.ts"
+        ]
       },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "ios": {
+        "status": "partial",
+        "gap": "The floating origin is implemented: the focused body's position is subtracted in Double and renderPosition is the single Float conversion. Surface-level tile streaming is not, so the useful range stops where a texture runs out.",
+        "paths": [
+          "mobile/ios/App/Sources/SolarScene.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "terrain",
       "title": "Craters from real elevation data, streamed as tiles",
       "why": "Real LRO LOLA topography, with the resolution limit stated rather than letting someone conclude the Moon is flat.",
-      "web": { "status": "shipped", "paths": ["website/src/view/react/TerrainTiles.tsx"] },
-      "ios": { "status": "planned", "gap": "Needs deep-zoom first." },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/react/TerrainTiles.tsx"
+        ]
+      },
+      "ios": {
+        "status": "planned",
+        "gap": "Needs deep-zoom first."
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "mutual-gravity",
       "title": "Full N-body mode where every body pulls every other",
       "why": "The only mode in which a mass you add changes anything. contracts/gravity-modes.",
-      "web": { "status": "shipped", "paths": ["engine/src/nbody.ts", "engine/src/nbody-tracker.ts"] },
-      "ios": { "status": "planned", "gap": "Needs the Dormand-Prince integrator ported to SolarKit." },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "engine/src/nbody.ts",
+          "engine/src/nbody-tracker.ts"
+        ]
+      },
+      "ios": {
+        "status": "planned",
+        "gap": "Needs the Dormand-Prince integrator ported to SolarKit."
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "asteroids",
       "title": "Launch an asteroid and propagate it under real gravity",
       "why": "Where it ends up, with the impact energy, gated against Chelyabinsk, Tunguska and Chicxulub.",
-      "web": { "status": "shipped", "paths": ["engine/src/scenarios/asteroid.ts"] },
-      "ios": { "status": "planned" },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "engine/src/scenarios/asteroid.ts"
+        ]
+      },
+      "ios": {
+        "status": "planned"
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "launch",
       "title": "Rocket ascent and payload to orbit",
       "why": "Inverted gate against ULA's published figures; see the playbook's P7.",
-      "web": { "status": "shipped", "paths": ["engine/src/launch/ascent.ts"] },
-      "ios": { "status": "planned" },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "engine/src/launch/ascent.ts"
+        ]
+      },
+      "ios": {
+        "status": "planned"
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "demonstrations",
       "title": "Physics demonstrations, each reproducing a published value",
       "why": "Kepler's third law, light travel time, solar irradiance, Mercury's relativistic precession.",
-      "web": { "status": "shipped", "paths": ["engine/src/demonstrations/registry.ts"] },
-      "ios": { "status": "planned" },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "engine/src/demonstrations/registry.ts"
+        ]
+      },
+      "ios": {
+        "status": "planned"
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "ai-assistant",
       "title": "Ask about the solar system, answered through engine-backed tools",
       "why": "contracts/numbers-come-from-the-engine. The model narrates; the engine owns every figure.",
-      "web": { "status": "shipped", "paths": ["website/src/ai/tools.ts"] },
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/ai/tools.ts"
+        ]
+      },
       "ios": {
         "status": "planned",
         "gap": "Should call the website's /api/ask rather than embedding a key in a shipped binary."
       },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "starfield",
       "title": "Star background",
       "why": "Depth cue, and it should be the real sky.",
-      "web": { "status": "shipped", "paths": ["website/src/view/react/Starfield.tsx"] },
-      "ios": {
-        "status": "partial",
-        "gap": "Randomly placed points rather than a real catalogue. The web builds one from Hipparcos and this should read the same data.",
-        "paths": ["mobile/ios/App/Sources/SolarScene.swift"]
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/react/Starfield.tsx"
+        ]
       },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/SolarScene.swift",
+          "mobile/ios/sync-assets.mjs"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     },
     {
       "id": "iau-rotation",
       "title": "Orientation from the full IAU rotational elements",
       "why": "contracts/rotation-and-poles. A sidereal rate alone gives the right speed and the wrong prime meridian.",
-      "web": { "status": "shipped", "paths": ["engine/src/rotation.ts"] },
-      "ios": {
-        "status": "partial",
-        "gap": "Spins at the correct sidereal rate and applies the axial tilt, but does not place the prime meridian from W0 and W1, and does not orient to the IAU pole.",
-        "paths": ["mobile/ios/App/Sources/SolarScene.swift"]
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "engine/src/rotation.ts"
+        ]
       },
-      "android": { "status": "planned" },
-      "tvos": { "status": "planned" },
-      "androidtv": { "status": "planned" }
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/SolarKit/Sources/SolarKit/Rotation.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     }
   ]
 }
