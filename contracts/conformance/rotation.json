@@ -1,0 +1,2952 @@
+{
+  "domain": "rotation",
+  "absoluteTolerance": 1e-12,
+  "description": "IAU pole, prime meridian, derived period and axial tilt.",
+  "tolerance": 1e-11,
+  "cases": [
+    {
+      "id": "period-sun",
+      "input": {
+        "body": "sun"
+      },
+      "expected": 25.379994924001
+    },
+    {
+      "id": "orientation-sun-2378496.5",
+      "input": {
+        "body": "sun",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.122353493472328,
+          "y": -0.0310380722380719,
+          "z": 0.99200113946853
+        },
+        "spin": 0.262368365133582,
+        "tilt": 0.126566559282078,
+        "obliquityToOrbitDeg": 7.25172967435538
+      }
+    },
+    {
+      "id": "orientation-sun-2433282.5",
+      "input": {
+        "body": "sun",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.122353493472328,
+          "y": -0.0310380722380719,
+          "z": 0.99200113946853
+        },
+        "spin": 4.21620932733538,
+        "tilt": 0.126566559282078,
+        "obliquityToOrbitDeg": 7.25172967435538
+      }
+    },
+    {
+      "id": "orientation-sun-2451545",
+      "input": {
+        "body": "sun",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": 0.122353493472328,
+          "y": -0.0310380722380719,
+          "z": 0.99200113946853
+        },
+        "spin": 1.46914835115875,
+        "tilt": 0.126566559282078,
+        "obliquityToOrbitDeg": 7.25172967435538
+      }
+    },
+    {
+      "id": "orientation-sun-2460676.5",
+      "input": {
+        "body": "sun",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.122353493472328,
+          "y": -0.0310380722380719,
+          "z": 0.99200113946853
+        },
+        "spin": 0.157508983675655,
+        "tilt": 0.126566559282078,
+        "obliquityToOrbitDeg": 7.25172967435538
+      }
+    },
+    {
+      "id": "orientation-sun-2469807.5",
+      "input": {
+        "body": "sun",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.122353493472328,
+          "y": -0.0310380722380719,
+          "z": 0.99200113946853
+        },
+        "spin": 5.00527268216174,
+        "tilt": 0.126566559282078,
+        "obliquityToOrbitDeg": 7.25172967435538
+      }
+    },
+    {
+      "id": "period-mercury",
+      "input": {
+        "body": "mercury"
+      },
+      "expected": 58.646145902358
+    },
+    {
+      "id": "orientation-mercury-2378496.5",
+      "input": {
+        "body": "mercury",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0918866088505312,
+          "y": -0.0813360987247214,
+          "z": 0.992442084032208
+        },
+        "spin": 2.10473838081673,
+        "tilt": 0.123024026525117,
+        "obliquityToOrbitDeg": 7.04875749859472
+      }
+    },
+    {
+      "id": "orientation-mercury-2433282.5",
+      "input": {
+        "body": "mercury",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0915050616345215,
+          "y": -0.0815341846875247,
+          "z": 0.992461082573318
+        },
+        "spin": 3.22965001214019,
+        "tilt": 0.122869109725304,
+        "obliquityToOrbitDeg": 7.03988141978974
+      }
+    },
+    {
+      "id": "orientation-mercury-2451545",
+      "input": {
+        "body": "mercury",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0913778182082663,
+          "y": -0.0816001518144956,
+          "z": 0.992467384634552
+        },
+        "spin": 5.75258427062229,
+        "tilt": 0.122817678881758,
+        "obliquityToOrbitDeg": 7.03693464951778
+      }
+    },
+    {
+      "id": "orientation-mercury-2460676.5",
+      "input": {
+        "body": "mercury",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0913141839697468,
+          "y": -0.0816331243991105,
+          "z": 0.992470529943725
+        },
+        "spin": 3.89924305243082,
+        "tilt": 0.122792002134478,
+        "obliquityToOrbitDeg": 7.03546348026698
+      }
+    },
+    {
+      "id": "orientation-mercury-2469807.5",
+      "input": {
+        "body": "mercury",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0912505460286586,
+          "y": -0.0816660872557792,
+          "z": 0.992473671208362
+        },
+        "spin": 1.99233322192498,
+        "tilt": 0.122766353071788,
+        "obliquityToOrbitDeg": 7.03399389722641
+      }
+    },
+    {
+      "id": "period-venus",
+      "input": {
+        "body": "venus"
+      },
+      "expected": -243.018483985892
+    },
+    {
+      "id": "orientation-venus-2378496.5",
+      "input": {
+        "body": "venus",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0186908141689021,
+          "y": 0.0108723192873219,
+          "z": 0.999766195737292
+        },
+        "spin": 0.208894737129363,
+        "tilt": 0.0216246791428005,
+        "obliquityToOrbitDeg": 178.760997151793
+      }
+    },
+    {
+      "id": "orientation-venus-2433282.5",
+      "input": {
+        "body": "venus",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0186908141689021,
+          "y": 0.0108723192873219,
+          "z": 0.999766195737292
+        },
+        "spin": 3.72972864347201,
+        "tilt": 0.0216246791428005,
+        "obliquityToOrbitDeg": 178.760997151793
+      }
+    },
+    {
+      "id": "orientation-venus-2451545",
+      "input": {
+        "body": "venus",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0186908141689021,
+          "y": 0.0108723192873219,
+          "z": 0.999766195737292
+        },
+        "spin": 2.79601746169492,
+        "tilt": 0.0216246791428005,
+        "obliquityToOrbitDeg": 178.760997151793
+      }
+    },
+    {
+      "id": "orientation-venus-2460676.5",
+      "input": {
+        "body": "venus",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0186908141689021,
+          "y": 0.0108723192873219,
+          "z": 0.999766195737292
+        },
+        "spin": 5.4642908336471,
+        "tilt": 0.0216246791428005,
+        "obliquityToOrbitDeg": 178.760997151793
+      }
+    },
+    {
+      "id": "orientation-venus-2469807.5",
+      "input": {
+        "body": "venus",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0186908141689021,
+          "y": 0.0108723192873219,
+          "z": 0.999766195737292
+        },
+        "spin": 1.86230627991785,
+        "tilt": 0.0216246791428005,
+        "obliquityToOrbitDeg": 178.760997151793
+      }
+    },
+    {
+      "id": "period-embary",
+      "input": {
+        "body": "embary"
+      },
+      "expected": 0.997269632262793
+    },
+    {
+      "id": "orientation-embary-2378496.5",
+      "input": {
+        "body": "embary",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.019436477512294,
+          "y": 0.397302723496844,
+          "z": 0.917481754174929
+        },
+        "spin": 0.206450812835783,
+        "tilt": 0.40909357825868,
+        "obliquityToOrbitDeg": 23.4393354601272
+      }
+    },
+    {
+      "id": "orientation-embary-2433282.5",
+      "input": {
+        "body": "embary",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.004860646779459,
+          "y": 0.397747323980962,
+          "z": 0.917482119923254
+        },
+        "spin": 0.177985731882643,
+        "tilt": 0.409092658778878,
+        "obliquityToOrbitDeg": 23.4392827778152
+      }
+    },
+    {
+      "id": "orientation-embary-2451545",
+      "input": {
+        "body": "embary",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": 6.12323399573677e-17,
+          "y": 0.397776969112606,
+          "z": 0.917482143065242
+        },
+        "spin": 3.31869121278966,
+        "tilt": 0.409092600600583,
+        "obliquityToOrbitDeg": 23.4392794444444
+      }
+    },
+    {
+      "id": "orientation-embary-2460676.5",
+      "input": {
+        "body": "embary",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.00243042562388911,
+          "y": 0.397769557379322,
+          "z": 0.917482137293989
+        },
+        "spin": 0.180955566677888,
+        "tilt": 0.40909261510935,
+        "obliquityToOrbitDeg": 23.4392802757355
+      }
+    },
+    {
+      "id": "orientation-embary-2469807.5",
+      "input": {
+        "body": "embary",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0048606467794589,
+          "y": 0.397747323980962,
+          "z": 0.917482119923254
+        },
+        "spin": 0.17621138650933,
+        "tilt": 0.409092658778878,
+        "obliquityToOrbitDeg": 23.4392827778152
+      }
+    },
+    {
+      "id": "period-mars",
+      "input": {
+        "body": "mars"
+      },
+      "expected": 1.02595675596029
+    },
+    {
+      "id": "orientation-mars-2378496.5",
+      "input": {
+        "body": "mars",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.427541267459496,
+          "y": -0.0355617022232304,
+          "z": 0.903296092072867
+        },
+        "spin": 0.751719484088198,
+        "tilt": 0.443405012165994,
+        "obliquityToOrbitDeg": 25.4052358120584
+      }
+    },
+    {
+      "id": "orientation-mars-2433282.5",
+      "input": {
+        "body": "mars",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.42733140570075,
+          "y": -0.037807145644799,
+          "z": 0.903304206477538
+        },
+        "spin": 0.195834534121957,
+        "tilt": 0.443386097872667,
+        "obliquityToOrbitDeg": 25.4041521028783
+      }
+    },
+    {
+      "id": "orientation-mars-2451545",
+      "input": {
+        "body": "mars",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": 0.427259382168775,
+          "y": -0.0385560368265483,
+          "z": 0.903306621459727
+        },
+        "spin": 3.07264975703494,
+        "tilt": 0.443380468518001,
+        "obliquityToOrbitDeg": 25.4038295646145
+      }
+    },
+    {
+      "id": "orientation-mars-2460676.5",
+      "input": {
+        "body": "mars",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.42722298154641,
+          "y": -0.0389305649098495,
+          "z": 0.90330777432412
+        },
+        "spin": 6.04211247161803,
+        "tilt": 0.443377781152683,
+        "obliquityToOrbitDeg": 25.4036755899238
+      }
+    },
+    {
+      "id": "orientation-mars-2469807.5",
+      "input": {
+        "body": "mars",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.427186324307922,
+          "y": -0.0393051204047917,
+          "z": 0.903308890598477
+        },
+        "spin": 5.94946497994971,
+        "tilt": 0.443375179065469,
+        "obliquityToOrbitDeg": 25.4035265013085
+      }
+    },
+    {
+      "id": "period-jupiter",
+      "input": {
+        "body": "jupiter"
+      },
+      "expected": 0.413538325813062
+    },
+    {
+      "id": "orientation-jupiter-2378496.5",
+      "input": {
+        "body": "jupiter",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0145070729455305,
+          "y": -0.0359004620338207,
+          "z": 0.999250069632377
+        },
+        "spin": 0.976581529658276,
+        "tilt": 0.0387304562060562,
+        "obliquityToOrbitDeg": 2.21909167922329
+      }
+    },
+    {
+      "id": "orientation-jupiter-2433282.5",
+      "input": {
+        "body": "jupiter",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0145783730865846,
+          "y": -0.0358350924585297,
+          "z": 0.999251378376151
+        },
+        "spin": 1.41808001725283,
+        "tilt": 0.038696641927257,
+        "obliquityToOrbitDeg": 2.21715426376081
+      }
+    },
+    {
+      "id": "orientation-jupiter-2451545",
+      "input": {
+        "body": "jupiter",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0146021360355023,
+          "y": -0.0358132995653977,
+          "z": 0.999251812706607
+        },
+        "spin": 4.97331570355784,
+        "tilt": 0.0386854135142162,
+        "obliquityToOrbitDeg": 2.21651092308295
+      }
+    },
+    {
+      "id": "orientation-jupiter-2460676.5",
+      "input": {
+        "body": "jupiter",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0146140170072494,
+          "y": -0.0358024023634333,
+          "z": 0.999252029516037
+        },
+        "spin": 1.1245854502376,
+        "tilt": 0.0386798072868305,
+        "obliquityToOrbitDeg": 2.21618970991476
+      }
+    },
+    {
+      "id": "orientation-jupiter-2469807.5",
+      "input": {
+        "body": "jupiter",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0146258967764597,
+          "y": -0.0357915054534866,
+          "z": 0.999252246072461
+        },
+        "spin": 2.24536608264175,
+        "tilt": 0.038674206790794,
+        "obliquityToOrbitDeg": 2.21586882512868
+      }
+    },
+    {
+      "id": "period-saturn",
+      "input": {
+        "body": "saturn"
+      },
+      "expected": 0.444009259238849
+    },
+    {
+      "id": "orientation-saturn-2378496.5",
+      "input": {
+        "body": "saturn",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0852814925034478,
+          "y": 0.462463303436551,
+          "z": 0.882527483997488
+        },
+        "spin": 5.59413863159462,
+        "tilt": 0.489586293689463,
+        "obliquityToOrbitDeg": 28.0512283358586
+      }
+    },
+    {
+      "id": "orientation-saturn-2433282.5",
+      "input": {
+        "body": "saturn",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0854294875254618,
+          "y": 0.462446982947583,
+          "z": 0.882521722465693
+        },
+        "spin": 1.31348976557616,
+        "tilt": 0.489598545327915,
+        "obliquityToOrbitDeg": 28.0519303030341
+      }
+    },
+    {
+      "id": "orientation-saturn-2451545",
+      "input": {
+        "body": "saturn",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0854788318610715,
+          "y": 0.462441497890598,
+          "z": 0.882519818662656
+        },
+        "spin": 0.678933079025794,
+        "tilt": 0.489602593617606,
+        "obliquityToOrbitDeg": 28.0521622529476
+      }
+    },
+    {
+      "id": "orientation-saturn-2460676.5",
+      "input": {
+        "body": "saturn",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0855035068195577,
+          "y": 0.462438746894799,
+          "z": 0.882518869878671
+        },
+        "spin": 0.757817870171934,
+        "tilt": 0.489604611121774,
+        "obliquityToOrbitDeg": 28.0522778474216
+      }
+    },
+    {
+      "id": "orientation-saturn-2469807.5",
+      "input": {
+        "body": "saturn",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0855281818352951,
+          "y": 0.46243599045457,
+          "z": 0.882517923242497
+        },
+        "spin": 0.044376392492488,
+        "tilt": 0.489606624051202,
+        "obliquityToOrbitDeg": 28.0523931797823
+      }
+    },
+    {
+      "id": "period-uranus",
+      "input": {
+        "body": "uranus"
+      },
+      "expected": -0.718333333343975
+    },
+    {
+      "id": "orientation-uranus-2378496.5",
+      "input": {
+        "body": "uranus",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.211999581537799,
+          "y": -0.967989029239201,
+          "z": 0.134363003465786
+        },
+        "spin": 1.34126634553613,
+        "tilt": 1.43602571795152,
+        "obliquityToOrbitDeg": 97.721787089134
+      }
+    },
+    {
+      "id": "orientation-uranus-2433282.5",
+      "input": {
+        "body": "uranus",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.211999581537799,
+          "y": -0.967989029239201,
+          "z": 0.134363003465786
+        },
+        "spin": 0.0000830776772318131,
+        "tilt": 1.43602571795152,
+        "obliquityToOrbitDeg": 97.721787089134
+      }
+    },
+    {
+      "id": "orientation-uranus-2451545",
+      "input": {
+        "body": "uranus",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": -0.211999581537799,
+          "y": -0.967989029239201,
+          "z": 0.134363003465786
+        },
+        "spin": 3.55715554848964,
+        "tilt": 1.43602571795152,
+        "obliquityToOrbitDeg": 97.721787089134
+      }
+    },
+    {
+      "id": "orientation-uranus-2460676.5",
+      "input": {
+        "body": "uranus",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.211999581537799,
+          "y": -0.967989029239201,
+          "z": 0.134363003465786
+        },
+        "spin": 3.14896835916073,
+        "tilt": 1.43602571795152,
+        "obliquityToOrbitDeg": 97.721787089134
+      }
+    },
+    {
+      "id": "orientation-uranus-2469807.5",
+      "input": {
+        "body": "uranus",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.211999581537799,
+          "y": -0.967989029239201,
+          "z": 0.134363003465786
+        },
+        "spin": 0.831042712129239,
+        "tilt": 1.43602571795152,
+        "obliquityToOrbitDeg": 97.721787089134
+      }
+    },
+    {
+      "id": "period-neptune",
+      "input": {
+        "body": "neptune"
+      },
+      "expected": 0.665262499941565
+    },
+    {
+      "id": "orientation-neptune-2378496.5",
+      "input": {
+        "body": "neptune",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.355883256858649,
+          "y": -0.306810484384065,
+          "z": 0.882731235518318
+        },
+        "spin": 4.20751372268981,
+        "tilt": 0.489152843948266,
+        "obliquityToOrbitDeg": 28.026393495057
+      }
+    },
+    {
+      "id": "orientation-neptune-2433282.5",
+      "input": {
+        "body": "neptune",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.355883256858649,
+          "y": -0.306810484384065,
+          "z": 0.882731235518318
+        },
+        "spin": 0.782331249031934,
+        "tilt": 0.489152843948266,
+        "obliquityToOrbitDeg": 28.026393495057
+      }
+    },
+    {
+      "id": "orientation-neptune-2451545",
+      "input": {
+        "body": "neptune",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": 0.355883256858649,
+          "y": -0.306810484384065,
+          "z": 0.882731235518318
+        },
+        "spin": 4.36293915755039,
+        "tilt": 0.489152843948266,
+        "obliquityToOrbitDeg": 28.026393495057
+      }
+    },
+    {
+      "id": "orientation-neptune-2460676.5",
+      "input": {
+        "body": "neptune",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.355883256858649,
+          "y": -0.306810484384065,
+          "z": 0.882731235518318
+        },
+        "spin": 5.37281815809256,
+        "tilt": 0.489152843948266,
+        "obliquityToOrbitDeg": 28.026393495057
+      }
+    },
+    {
+      "id": "orientation-neptune-2469807.5",
+      "input": {
+        "body": "neptune",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.355883256858649,
+          "y": -0.306810484384065,
+          "z": 0.882731235518318
+        },
+        "spin": 1.66036175889312,
+        "tilt": 0.489152843948266,
+        "obliquityToOrbitDeg": 28.026393495057
+      }
+    },
+    {
+      "id": "period-moon",
+      "input": {
+        "body": "moon"
+      },
+      "expected": 27.3216617142423
+    },
+    {
+      "id": "orientation-moon-2378496.5",
+      "input": {
+        "body": "moon",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0000785996127655508,
+          "y": -0.000829373632621921,
+          "z": 0.999999652980679
+        },
+        "spin": 2.88193966690339,
+        "tilt": 0.000833089840445568,
+        "obliquityToOrbitDeg": 0.0477325318127582
+      }
+    },
+    {
+      "id": "orientation-moon-2433282.5",
+      "input": {
+        "body": "moon",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0000462198153146841,
+          "y": -0.000489048472283315,
+          "z": 0.999999879347653
+        },
+        "spin": 4.27746315187226,
+        "tilt": 0.000491227746423708,
+        "obliquityToOrbitDeg": 0.0281452766498011
+      }
+    },
+    {
+      "id": "orientation-moon-2451545",
+      "input": {
+        "body": "moon",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0000354375126287893,
+          "y": -0.000375603095438382,
+          "z": 0.999999928833246
+        },
+        "spin": 0.668832858644503,
+        "tilt": 0.000377271135040746,
+        "obliquityToOrbitDeg": 0.0216160437699449
+      }
+    },
+    {
+      "id": "orientation-moon-2460676.5",
+      "input": {
+        "body": "moon",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0000300483250383692,
+          "y": -0.00031887875169534,
+          "z": 0.999999948706719
+        },
+        "spin": 2.0636030739053,
+        "tilt": 0.000320291373091995,
+        "obliquityToOrbitDeg": 0.0183513438926213
+      }
+    },
+    {
+      "id": "orientation-moon-2469807.5",
+      "input": {
+        "body": "moon",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0000246608400856901,
+          "y": -0.000262157445980016,
+          "z": 0.999999965332658
+        },
+        "spin": 3.34338787259671,
+        "tilt": 0.000263314802206243,
+        "obliquityToOrbitDeg": 0.0150868268497398
+      }
+    },
+    {
+      "id": "period-phobos",
+      "input": {
+        "body": "phobos"
+      },
+      "expected": 0.318910104370432
+    },
+    {
+      "id": "orientation-phobos-2378496.5",
+      "input": {
+        "body": "phobos",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.446352169827338,
+          "y": -0.0524746216240878,
+          "z": 0.893317499311323
+        },
+        "spin": 2.42233338112762,
+        "tilt": 0.466122830857951,
+        "obliquityToOrbitDeg": 26.7068709428509
+      }
+    },
+    {
+      "id": "orientation-phobos-2433282.5",
+      "input": {
+        "body": "phobos",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.446153473907386,
+          "y": -0.0548117566042927,
+          "z": 0.893276412460512
+        },
+        "spin": 4.67349245749999,
+        "tilt": 0.466214243252194,
+        "obliquityToOrbitDeg": 26.7121084872362
+      }
+    },
+    {
+      "id": "orientation-phobos-2451545",
+      "input": {
+        "body": "phobos",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": 0.44608509813255,
+          "y": -0.055591224451565,
+          "z": 0.893262392014826
+        },
+        "spin": 0.614141996130197,
+        "tilt": 0.466245432948107,
+        "obliquityToOrbitDeg": 26.7138955251764
+      }
+    },
+    {
+      "id": "orientation-phobos-2460676.5",
+      "input": {
+        "body": "phobos",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.446050507513756,
+          "y": -0.0559810434915819,
+          "z": 0.893255320452285
+        },
+        "spin": 3.50998121379931,
+        "tilt": 0.466261163518197,
+        "obliquityToOrbitDeg": 26.7147968204518
+      }
+    },
+    {
+      "id": "orientation-phobos-2469807.5",
+      "input": {
+        "body": "phobos",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.446015650898671,
+          "y": -0.0563708905642238,
+          "z": 0.893248208422738
+        },
+        "spin": 2.83797684200781,
+        "tilt": 0.466276983610553,
+        "obliquityToOrbitDeg": 26.7157032449753
+      }
+    },
+    {
+      "id": "period-deimos",
+      "input": {
+        "body": "deimos"
+      },
+      "expected": 1.26244078854669
+    },
+    {
+      "id": "orientation-deimos-2378496.5",
+      "input": {
+        "body": "deimos",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.432758926958278,
+          "y": -0.0516855739398908,
+          "z": 0.900026839924468
+        },
+        "spin": 1.93995865780281,
+        "tilt": 0.450965232871822,
+        "obliquityToOrbitDeg": 25.8384045506897
+      }
+    },
+    {
+      "id": "orientation-deimos-2433282.5",
+      "input": {
+        "body": "deimos",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.432557794779363,
+          "y": -0.053939519170023,
+          "z": 0.899991267983929
+        },
+        "spin": 1.22874058549637,
+        "tilt": 0.451046844000735,
+        "obliquityToOrbitDeg": 25.8430805239377
+      }
+    },
+    {
+      "id": "orientation-deimos-2451545",
+      "input": {
+        "body": "deimos",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": 0.432488728397293,
+          "y": -0.0546912262682896,
+          "z": 0.899979093967501
+        },
+        "spin": 1.38577972434899,
+        "tilt": 0.451074771149607,
+        "obliquityToOrbitDeg": 25.8446806317019
+      }
+    },
+    {
+      "id": "orientation-deimos-2460676.5",
+      "input": {
+        "body": "deimos",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.432453815265786,
+          "y": -0.0550671589841644,
+          "z": 0.899972947184235
+        },
+        "spin": 2.7085527597985,
+        "tilt": 0.451088871236075,
+        "obliquityToOrbitDeg": 25.8454885071474
+      }
+    },
+    {
+      "id": "orientation-deimos-2469807.5",
+      "input": {
+        "body": "deimos",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.432418651360066,
+          "y": -0.0554431168007549,
+          "z": 0.899966760916957
+        },
+        "spin": 1.5428188632272,
+        "tilt": 0.451103061480413,
+        "obliquityToOrbitDeg": 25.8463015482581
+      }
+    },
+    {
+      "id": "period-io",
+      "input": {
+        "body": "io"
+      },
+      "expected": 1.76913779975412
+    },
+    {
+      "id": "orientation-io-2378496.5",
+      "input": {
+        "body": "io",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0145171697068739,
+          "y": -0.0358386724375488,
+          "z": 0.999252141024284
+        },
+        "spin": 0.65534217385742,
+        "tilt": 0.0386769236061504,
+        "obliquityToOrbitDeg": 2.21602448718232
+      }
+    },
+    {
+      "id": "orientation-io-2433282.5",
+      "input": {
+        "body": "io",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0146161614529718,
+          "y": -0.0357570740900172,
+          "z": 0.999253621197793
+        },
+        "spin": 4.59669507490589,
+        "tilt": 0.0386386249128385,
+        "obliquityToOrbitDeg": 2.21383013369468
+      }
+    },
+    {
+      "id": "orientation-io-2451545",
+      "input": {
+        "body": "io",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0146491519861687,
+          "y": -0.035729869207464,
+          "z": 0.999254111221217
+        },
+        "spin": 3.49746528807144,
+        "tilt": 0.0386259374576908,
+        "obliquityToOrbitDeg": 2.21310319606196
+      }
+    },
+    {
+      "id": "orientation-io-2460676.5",
+      "input": {
+        "body": "io",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0146656462756011,
+          "y": -0.0357162655148364,
+          "z": 0.999254355605715
+        },
+        "spin": 0.694145799875074,
+        "tilt": 0.0386196084126997,
+        "obliquityToOrbitDeg": 2.21274056849562
+      }
+    },
+    {
+      "id": "orientation-io-2469807.5",
+      "input": {
+        "body": "io",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0146821387093774,
+          "y": -0.0357026619812374,
+          "z": 0.999254599554274
+        },
+        "spin": 2.39823550124884,
+        "tilt": 0.0386132896235247,
+        "obliquityToOrbitDeg": 2.21237852854426
+      }
+    },
+    {
+      "id": "period-europa",
+      "input": {
+        "body": "europa"
+      },
+      "expected": 3.551181079177
+    },
+    {
+      "id": "orientation-europa-2378496.5",
+      "input": {
+        "body": "europa",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0142866029067637,
+          "y": -0.0356712519385431,
+          "z": 0.999261454656649
+        },
+        "spin": 5.66415908829538,
+        "tilt": 0.0384353032891278,
+        "obliquityToOrbitDeg": 2.20218066277231
+      }
+    },
+    {
+      "id": "orientation-europa-2433282.5",
+      "input": {
+        "body": "europa",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0143855962375886,
+          "y": -0.0355897017999106,
+          "z": 0.999262942246275
+        },
+        "spin": 2.79486696247049,
+        "tilt": 0.0383965705208289,
+        "obliquityToOrbitDeg": 2.19996143861993
+      }
+    },
+    {
+      "id": "orientation-europa-2451545",
+      "input": {
+        "body": "europa",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0144185873014536,
+          "y": -0.0355625129858112,
+          "z": 0.999263434740992
+        },
+        "spin": 0.628702503153397,
+        "tilt": 0.0383837386967337,
+        "obliquityToOrbitDeg": 2.19922622925582
+      }
+    },
+    {
+      "id": "orientation-europa-2460676.5",
+      "input": {
+        "body": "europa",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0144350818566804,
+          "y": -0.0355489173273269,
+          "z": 0.999263680361018
+        },
+        "spin": 3.12954360293042,
+        "tilt": 0.0383773375270072,
+        "obliquityToOrbitDeg": 2.19885946924655
+      }
+    },
+    {
+      "id": "orientation-europa-2469807.5",
+      "input": {
+        "body": "europa",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0144515745565379,
+          "y": -0.0355353218272287,
+          "z": 0.999263925544934
+        },
+        "spin": 4.74572335102128,
+        "tilt": 0.0383709466583398,
+        "obliquityToOrbitDeg": 2.19849329944448
+      }
+    },
+    {
+      "id": "period-ganymede",
+      "input": {
+        "body": "ganymede"
+      },
+      "expected": 7.15455311954703
+    },
+    {
+      "id": "orientation-ganymede-2378496.5",
+      "input": {
+        "body": "ganymede",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0133561400611126,
+          "y": -0.0346517160191618,
+          "z": 0.999310198136492
+        },
+        "spin": 0.318849089851753,
+        "tilt": 0.0371451526456405,
+        "obliquityToOrbitDeg": 2.1282604759644
+      }
+    },
+    {
+      "id": "orientation-ganymede-2433282.5",
+      "input": {
+        "body": "ganymede",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0134550648794586,
+          "y": -0.0345703597425123,
+          "z": 0.999311688842056
+        },
+        "spin": 3.46877336234964,
+        "tilt": 0.0371049898122074,
+        "obliquityToOrbitDeg": 2.1259593151154
+      }
+    },
+    {
+      "id": "orientation-ganymede-2451545",
+      "input": {
+        "body": "ganymede",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0134880331137569,
+          "y": -0.0345432355484556,
+          "z": 0.99931218237374
+        },
+        "spin": 0.769061881598781,
+        "tilt": 0.0370916834229369,
+        "obliquityToOrbitDeg": 2.12519691516965
+      }
+    },
+    {
+      "id": "orientation-ganymede-2460676.5",
+      "input": {
+        "body": "ganymede",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0135045162554911,
+          "y": -0.0345296722004292,
+          "z": 0.999312428511943
+        },
+        "spin": 2.7803507780819,
+        "tilt": 0.0370850453669022,
+        "obliquityToOrbitDeg": 2.12481658257468
+      }
+    },
+    {
+      "id": "orientation-ganymede-2469807.5",
+      "input": {
+        "body": "ganymede",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0135209975435493,
+          "y": -0.0345161090087213,
+          "z": 0.999312674213795
+        },
+        "spin": 4.35253570803087,
+        "tilt": 0.0370784178940406,
+        "obliquityToOrbitDeg": 2.12443685635088
+      }
+    },
+    {
+      "id": "period-callisto",
+      "input": {
+        "body": "callisto"
+      },
+      "expected": 16.6890179748373
+    },
+    {
+      "id": "orientation-callisto-2378496.5",
+      "input": {
+        "body": "callisto",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.00936913426675655,
+          "y": -0.0302121763258897,
+          "z": 0.999499596660621
+        },
+        "spin": 4.27768911310326,
+        "tilt": 0.0316368481004485,
+        "obliquityToOrbitDeg": 1.81265787325217
+      }
+    },
+    {
+      "id": "orientation-callisto-2433282.5",
+      "input": {
+        "body": "callisto",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.00946775732770184,
+          "y": -0.0301316546387106,
+          "z": 0.99950109802837
+        },
+        "spin": 2.7544215750478,
+        "tilt": 0.0315893482367982,
+        "obliquityToOrbitDeg": 1.80993633153757
+      }
+    },
+    {
+      "id": "orientation-callisto-2451545",
+      "input": {
+        "body": "callisto",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": -0.00950062501035154,
+          "y": -0.0301048086385893,
+          "z": 0.999501595106905
+        },
+        "spin": 4.52930394185048,
+        "tilt": 0.0315736060607083,
+        "obliquityToOrbitDeg": 1.80903437128726
+      }
+    },
+    {
+      "id": "orientation-callisto-2460676.5",
+      "input": {
+        "body": "callisto",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.009517057881804,
+          "y": -0.0300913843894309,
+          "z": 0.999501843017211
+        },
+        "spin": 5.51086668046667,
+        "tilt": 0.0315657519583249,
+        "obliquityToOrbitDeg": 1.80858436436883
+      }
+    },
+    {
+      "id": "orientation-callisto-2469807.5",
+      "input": {
+        "body": "callisto",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.00953348890694495,
+          "y": -0.0300779602877027,
+          "z": 0.999502090490156
+        },
+        "spin": 0.0210010014739836,
+        "tilt": 0.0315579097631888,
+        "obliquityToOrbitDeg": 1.80813503968541
+      }
+    },
+    {
+      "id": "period-amalthea",
+      "input": {
+        "body": "amalthea"
+      },
+      "expected": 0.498179254460797
+    },
+    {
+      "id": "orientation-amalthea-2378496.5",
+      "input": {
+        "body": "amalthea",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0145224801175218,
+          "y": -0.03601300912791,
+          "z": 0.999245795960528
+        },
+        "spin": 4.32416464380677,
+        "tilt": 0.0388406710163262,
+        "obliquityToOrbitDeg": 2.22540652269159
+      }
+    },
+    {
+      "id": "orientation-amalthea-2433282.5",
+      "input": {
+        "body": "amalthea",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.014621509155694,
+          "y": -0.0359314101202831,
+          "z": 0.999247289331714
+        },
+        "spin": 0.954778876633711,
+        "tilt": 0.0388021936528438,
+        "obliquityToOrbitDeg": 2.22320193215726
+      }
+    },
+    {
+      "id": "orientation-amalthea-2451545",
+      "input": {
+        "body": "amalthea",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0146545121204673,
+          "y": -0.0359042050156522,
+          "z": 0.999247783753712
+        },
+        "spin": 4.04340427809526,
+        "tilt": 0.0387894462473865,
+        "obliquityToOrbitDeg": 2.22247155962482
+      }
+    },
+    {
+      "id": "orientation-amalthea-2460676.5",
+      "input": {
+        "body": "amalthea",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0146710126259601,
+          "y": -0.0358906012116003,
+          "z": 0.999248030337413
+        },
+        "spin": 2.45760621804028,
+        "tilt": 0.0387830871528352,
+        "obliquityToOrbitDeg": 2.2221072103455
+      }
+    },
+    {
+      "id": "orientation-amalthea-2469807.5",
+      "input": {
+        "body": "amalthea",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.0146875112755245,
+          "y": -0.0358769975663279,
+          "z": 0.999248276484957
+        },
+        "spin": 0.84884437238275,
+        "tilt": 0.0387767382666697,
+        "obliquityToOrbitDeg": 2.22174344596361
+      }
+    },
+    {
+      "id": "period-mimas",
+      "input": {
+        "body": "mimas"
+      },
+      "expected": 0.942421810174755
+    },
+    {
+      "id": "orientation-mimas-2378496.5",
+      "input": {
+        "body": "mimas",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0854140592650777,
+          "y": 0.462723426935592,
+          "z": 0.882378302455837
+        },
+        "spin": 2.86598915131564,
+        "tilt": 0.489903430811875,
+        "obliquityToOrbitDeg": 28.0693989544998
+      }
+    },
+    {
+      "id": "orientation-mimas-2433282.5",
+      "input": {
+        "body": "mimas",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0855622484413472,
+          "y": 0.462707067088883,
+          "z": 0.882372524338595
+        },
+        "spin": 4.15212629135264,
+        "tilt": 0.489915710410566,
+        "obliquityToOrbitDeg": 28.0701025236789
+      }
+    },
+    {
+      "id": "orientation-mimas-2451545",
+      "input": {
+        "body": "mimas",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0856116575103132,
+          "y": 0.462701568890999,
+          "z": 0.882370615016244
+        },
+        "spin": 5.81997492370029,
+        "tilt": 0.489919768021743,
+        "obliquityToOrbitDeg": 28.0703350076743
+      }
+    },
+    {
+      "id": "orientation-mimas-2460676.5",
+      "input": {
+        "body": "mimas",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.085636364838894,
+          "y": 0.462698811320574,
+          "z": 0.882369663474276
+        },
+        "spin": 2.03747961005901,
+        "tilt": 0.489921790186998,
+        "obliquityToOrbitDeg": 28.0704508692088
+      }
+    },
+    {
+      "id": "orientation-mimas-2469807.5",
+      "input": {
+        "body": "mimas",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0856610722246407,
+          "y": 0.462696048303416,
+          "z": 0.882368714081436
+        },
+        "spin": 1.20463824885888,
+        "tilt": 0.4899238077774,
+        "obliquityToOrbitDeg": 28.0705664686236
+      }
+    },
+    {
+      "id": "period-enceladus",
+      "input": {
+        "body": "enceladus"
+      },
+      "expected": 1.37021808371228
+    },
+    {
+      "id": "orientation-enceladus-2378496.5",
+      "input": {
+        "body": "enceladus",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0854140592650777,
+          "y": 0.462723426935592,
+          "z": 0.882378302455837
+        },
+        "spin": 2.70791445222994,
+        "tilt": 0.489903430811875,
+        "obliquityToOrbitDeg": 28.0693989544998
+      }
+    },
+    {
+      "id": "orientation-enceladus-2433282.5",
+      "input": {
+        "body": "enceladus",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0855622484413472,
+          "y": 0.462707067088883,
+          "z": 0.882372524338595
+        },
+        "spin": 5.32331626503551,
+        "tilt": 0.489915710410566,
+        "obliquityToOrbitDeg": 28.0701025236789
+      }
+    },
+    {
+      "id": "orientation-enceladus-2451545",
+      "input": {
+        "body": "enceladus",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0856116575103132,
+          "y": 0.462701568890999,
+          "z": 0.882370615016244
+        },
+        "spin": 0.110304808726042,
+        "tilt": 0.489919768021743,
+        "obliquityToOrbitDeg": 28.0703350076743
+      }
+    },
+    {
+      "id": "orientation-enceladus-2460676.5",
+      "input": {
+        "body": "enceladus",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.085636364838894,
+          "y": 0.462698811320574,
+          "z": 0.882369663474276
+        },
+        "spin": 1.79177590867204,
+        "tilt": 0.489921790186998,
+        "obliquityToOrbitDeg": 28.0704508692088
+      }
+    },
+    {
+      "id": "orientation-enceladus-2469807.5",
+      "input": {
+        "body": "enceladus",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0856610722246407,
+          "y": 0.462696048303416,
+          "z": 0.882368714081436
+        },
+        "spin": 1.18047865960727,
+        "tilt": 0.4899238077774,
+        "obliquityToOrbitDeg": 28.0705664686236
+      }
+    },
+    {
+      "id": "period-tethys",
+      "input": {
+        "body": "tethys"
+      },
+      "expected": 1.88780256077114
+    },
+    {
+      "id": "orientation-tethys-2378496.5",
+      "input": {
+        "body": "tethys",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0854140592650777,
+          "y": 0.462723426935592,
+          "z": 0.882378302455837
+        },
+        "spin": 0.223069445173373,
+        "tilt": 0.489903430811875,
+        "obliquityToOrbitDeg": 28.0693989544998
+      }
+    },
+    {
+      "id": "orientation-tethys-2433282.5",
+      "input": {
+        "body": "tethys",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0855622484413472,
+          "y": 0.462707067088883,
+          "z": 0.882372524338595
+        },
+        "spin": 0.495604021645008,
+        "tilt": 0.489915710410566,
+        "obliquityToOrbitDeg": 28.0701025236789
+      }
+    },
+    {
+      "id": "orientation-tethys-2451545",
+      "input": {
+        "body": "tethys",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0856116575103132,
+          "y": 0.462701568890999,
+          "z": 0.882370615016244
+        },
+        "spin": 0.156206968053492,
+        "tilt": 0.489919768021743,
+        "obliquityToOrbitDeg": 28.0703350076743
+      }
+    },
+    {
+      "id": "orientation-tethys-2460676.5",
+      "input": {
+        "body": "tethys",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.085636364838894,
+          "y": 0.462698811320574,
+          "z": 0.882369663474276
+        },
+        "spin": 0.818585036259158,
+        "tilt": 0.489921790186998,
+        "obliquityToOrbitDeg": 28.0704508692088
+      }
+    },
+    {
+      "id": "orientation-tethys-2469807.5",
+      "input": {
+        "body": "tethys",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0856610722246407,
+          "y": 0.462696048303416,
+          "z": 0.882368714081436
+        },
+        "spin": 6.09999522164438,
+        "tilt": 0.4899238077774,
+        "obliquityToOrbitDeg": 28.0705664686236
+      }
+    },
+    {
+      "id": "period-dione",
+      "input": {
+        "body": "dione"
+      },
+      "expected": 2.73691555255273
+    },
+    {
+      "id": "orientation-dione-2378496.5",
+      "input": {
+        "body": "dione",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0854140592650777,
+          "y": 0.462723426935592,
+          "z": 0.882378302455837
+        },
+        "spin": 5.72728079082303,
+        "tilt": 0.489903430811875,
+        "obliquityToOrbitDeg": 28.0693989544998
+      }
+    },
+    {
+      "id": "orientation-dione-2433282.5",
+      "input": {
+        "body": "dione",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0855622484413472,
+          "y": 0.462707067088883,
+          "z": 0.882372524338595
+        },
+        "spin": 2.11030648379563,
+        "tilt": 0.489915710410566,
+        "obliquityToOrbitDeg": 28.0701025236789
+      }
+    },
+    {
+      "id": "orientation-dione-2451545",
+      "input": {
+        "body": "dione",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0856116575103132,
+          "y": 0.462701568890999,
+          "z": 0.882370615016244
+        },
+        "spin": 6.24129740513172,
+        "tilt": 0.489919768021743,
+        "obliquityToOrbitDeg": 28.0703350076743
+      }
+    },
+    {
+      "id": "orientation-dione-2460676.5",
+      "input": {
+        "body": "dione",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.085636364838894,
+          "y": 0.462698811320574,
+          "z": 0.882369663474276
+        },
+        "spin": 2.59753696807505,
+        "tilt": 0.489921790186998,
+        "obliquityToOrbitDeg": 28.0704508692088
+      }
+    },
+    {
+      "id": "orientation-dione-2469807.5",
+      "input": {
+        "body": "dione",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0856610722246407,
+          "y": 0.462696048303416,
+          "z": 0.882368714081436
+        },
+        "spin": 4.08910301929823,
+        "tilt": 0.4899238077774,
+        "obliquityToOrbitDeg": 28.0705664686236
+      }
+    },
+    {
+      "id": "period-rhea",
+      "input": {
+        "body": "rhea"
+      },
+      "expected": 4.51750262345808
+    },
+    {
+      "id": "orientation-rhea-2378496.5",
+      "input": {
+        "body": "rhea",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0853765695709965,
+          "y": 0.462053370224296,
+          "z": 0.882732985920804
+        },
+        "spin": 3.43311991513791,
+        "tilt": 0.489149118709596,
+        "obliquityToOrbitDeg": 28.0261800546035
+      }
+    },
+    {
+      "id": "orientation-rhea-2433282.5",
+      "input": {
+        "body": "rhea",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0855243815963395,
+          "y": 0.462036713898366,
+          "z": 0.882727395724503
+        },
+        "spin": 0.273354383745058,
+        "tilt": 0.489161015776555,
+        "obliquityToOrbitDeg": 28.0268617063289
+      }
+    },
+    {
+      "id": "orientation-rhea-2451545",
+      "input": {
+        "body": "rhea",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0855736647922741,
+          "y": 0.462031116881087,
+          "z": 0.882725549039811
+        },
+        "spin": 4.10431626898987,
+        "tilt": 0.489164945836188,
+        "obliquityToOrbitDeg": 28.0270868821591
+      }
+    },
+    {
+      "id": "orientation-rhea-2460676.5",
+      "input": {
+        "body": "rhea",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0855983091539946,
+          "y": 0.462028309901454,
+          "z": 0.882724628816701
+        },
+        "spin": 0.0843253332305807,
+        "tilt": 0.489166904216905,
+        "obliquityToOrbitDeg": 28.0271990891088
+      }
+    },
+    {
+      "id": "orientation-rhea-2469807.5",
+      "input": {
+        "body": "rhea",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0856229535572472,
+          "y": 0.462025497479026,
+          "z": 0.882723710740451
+        },
+        "spin": 1.65209284705406,
+        "tilt": 0.489168858021585,
+        "obliquityToOrbitDeg": 28.027311033871
+      }
+    },
+    {
+      "id": "period-titan",
+      "input": {
+        "body": "titan"
+      },
+      "expected": 15.9454475764886
+    },
+    {
+      "id": "orientation-titan-2378496.5",
+      "input": {
+        "body": "titan",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0883370480629389,
+          "y": 0.461932471781927,
+          "z": 0.882504933387324
+        },
+        "spin": 2.30899599105361,
+        "tilt": 0.489634244942358,
+        "obliquityToOrbitDeg": 28.0539757402719
+      }
+    },
+    {
+      "id": "orientation-titan-2433282.5",
+      "input": {
+        "body": "titan",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0883370480629389,
+          "y": 0.461932471781927,
+          "z": 0.882504933387324
+        },
+        "spin": 1.30108518696314,
+        "tilt": 0.489634244942358,
+        "obliquityToOrbitDeg": 28.0539757402719
+      }
+    },
+    {
+      "id": "orientation-titan-2451545",
+      "input": {
+        "body": "titan",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0883370480629389,
+          "y": 0.461932471781927,
+          "z": 0.882504933387324
+        },
+        "spin": 3.25653131147988,
+        "tilt": 0.489634244942358,
+        "obliquityToOrbitDeg": 28.0539757402719
+      }
+    },
+    {
+      "id": "orientation-titan-2460676.5",
+      "input": {
+        "body": "titan",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0883370480629389,
+          "y": 0.461932471781927,
+          "z": 0.882504933387324
+        },
+        "spin": 1.19117236522454,
+        "tilt": 0.489634244942358,
+        "obliquityToOrbitDeg": 28.0539757402719
+      }
+    },
+    {
+      "id": "orientation-titan-2469807.5",
+      "input": {
+        "body": "titan",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.0883370480629389,
+          "y": 0.461932471781927,
+          "z": 0.882504933387324
+        },
+        "spin": 5.21197743599615,
+        "tilt": 0.489634244942358,
+        "obliquityToOrbitDeg": 28.0539757402719
+      }
+    },
+    {
+      "id": "period-iapetus",
+      "input": {
+        "body": "iapetus"
+      },
+      "expected": 79.3308495725786
+    },
+    {
+      "id": "orientation-iapetus-2378496.5",
+      "input": {
+        "body": "iapetus",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.182159425543877,
+          "y": 0.275585533455214,
+          "z": 0.943859394950185
+        },
+        "spin": 1.12108564271017,
+        "tilt": 0.336671675486327,
+        "obliquityToOrbitDeg": 19.2898660869646
+      }
+    },
+    {
+      "id": "orientation-iapetus-2433282.5",
+      "input": {
+        "body": "iapetus",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.190862771617304,
+          "y": 0.239044383193564,
+          "z": 0.952065746298106
+        },
+        "spin": 4.90012767756993,
+        "tilt": 0.310876741622839,
+        "obliquityToOrbitDeg": 17.8119252437677
+      }
+    },
+    {
+      "id": "orientation-iapetus-2451545",
+      "input": {
+        "body": "iapetus",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": 0.192446082652595,
+          "y": 0.226186869373186,
+          "z": 0.954884289008269
+        },
+        "spin": 6.19940950308386,
+        "tilt": 0.301526417952424,
+        "obliquityToOrbitDeg": 17.2761911603716
+      }
+    },
+    {
+      "id": "orientation-iapetus-2460676.5",
+      "input": {
+        "body": "iapetus",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.192979860221714,
+          "y": 0.219647760224746,
+          "z": 0.956302062623029
+        },
+        "spin": 0.585665682274822,
+        "tilt": 0.296715184740828,
+        "obliquityToOrbitDeg": 17.000527803094
+      }
+    },
+    {
+      "id": "orientation-iapetus-2469807.5",
+      "input": {
+        "body": "iapetus",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.19333880812309,
+          "y": 0.213040703269926,
+          "z": 0.95772321890189
+        },
+        "spin": 1.215506021418,
+        "tilt": 0.29181526164231,
+        "obliquityToOrbitDeg": 16.7197828896102
+      }
+    },
+    {
+      "id": "period-phoebe",
+      "input": {
+        "body": "phoebe"
+      },
+      "expected": 0.386415768339453
+    },
+    {
+      "id": "orientation-phoebe-2378496.5",
+      "input": {
+        "body": "phoebe",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.211015558609928,
+          "y": 0.378308367934662,
+          "z": 0.901307501785685
+        },
+        "spin": 1.86904691596819,
+        "tilt": 0.448017845486289,
+        "obliquityToOrbitDeg": 25.6695316929086
+      }
+    },
+    {
+      "id": "orientation-phoebe-2433282.5",
+      "input": {
+        "body": "phoebe",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.211015558609928,
+          "y": 0.378308367934662,
+          "z": 0.901307501785685
+        },
+        "spin": 1.41969444677846,
+        "tilt": 0.448017845486289,
+        "obliquityToOrbitDeg": 25.6695316929086
+      }
+    },
+    {
+      "id": "orientation-phoebe-2451545",
+      "input": {
+        "body": "phoebe",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": 0.211015558609928,
+          "y": 0.378308367934662,
+          "z": 0.901307501785685
+        },
+        "spin": 3.11680897821147,
+        "tilt": 0.448017845486289,
+        "obliquityToOrbitDeg": 25.6695316929086
+      }
+    },
+    {
+      "id": "orientation-phoebe-2460676.5",
+      "input": {
+        "body": "phoebe",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.211015558609928,
+          "y": 0.378308367934662,
+          "z": 0.901307501785685
+        },
+        "spin": 4.88881558782068,
+        "tilt": 0.448017845486289,
+        "obliquityToOrbitDeg": 25.6695316929086
+      }
+    },
+    {
+      "id": "orientation-phoebe-2469807.5",
+      "input": {
+        "body": "phoebe",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.211015558609928,
+          "y": 0.378308367934662,
+          "z": 0.901307501785685
+        },
+        "spin": 4.81392350956418,
+        "tilt": 0.448017845486289,
+        "obliquityToOrbitDeg": 25.6695316929086
+      }
+    },
+    {
+      "id": "period-ariel",
+      "input": {
+        "body": "ariel"
+      },
+      "expected": -2.52037887166924
+    },
+    {
+      "id": "orientation-ariel-2378496.5",
+      "input": {
+        "body": "ariel",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 3.62192825741473,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "orientation-ariel-2433282.5",
+      "input": {
+        "body": "ariel",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 2.31445801727448,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "orientation-ariel-2451545",
+      "input": {
+        "body": "ariel",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 2.72655335746554,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "orientation-ariel-2460676.5",
+      "input": {
+        "body": "ariel",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 2.30936285315298,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "orientation-ariel-2469807.5",
+      "input": {
+        "body": "ariel",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 3.13864869766196,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "period-umbriel",
+      "input": {
+        "body": "umbriel"
+      },
+      "expected": -4.14417624616125
+    },
+    {
+      "id": "orientation-umbriel-2378496.5",
+      "input": {
+        "body": "umbriel",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 0.529343990204431,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "orientation-umbriel-2433282.5",
+      "input": {
+        "body": "umbriel",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 0.54446643392108,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "orientation-umbriel-2451545",
+      "input": {
+        "body": "umbriel",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 1.88582825677987,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "orientation-umbriel-2460676.5",
+      "input": {
+        "body": "umbriel",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 5.319064774753,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "orientation-umbriel-2469807.5",
+      "input": {
+        "body": "umbriel",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 3.22719007963864,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "period-titania",
+      "input": {
+        "body": "titania"
+      },
+      "expected": -8.70586545787208
+    },
+    {
+      "id": "orientation-titania-2378496.5",
+      "input": {
+        "body": "titania",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 5.895569193235,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "orientation-titania-2433282.5",
+      "input": {
+        "body": "titania",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 5.90374365921125,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "orientation-titania-2451545",
+      "input": {
+        "body": "titania",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 1.35681896050039,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "orientation-titania-2460676.5",
+      "input": {
+        "body": "titania",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 2.04451960677564,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "orientation-titania-2469807.5",
+      "input": {
+        "body": "titania",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 3.09307956896889,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "period-oberon",
+      "input": {
+        "body": "oberon"
+      },
+      "expected": -13.4632319807767
+    },
+    {
+      "id": "orientation-oberon-2378496.5",
+      "input": {
+        "body": "oberon",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 5.00279466717766,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "orientation-oberon-2433282.5",
+      "input": {
+        "body": "oberon",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 3.08512366010402,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "orientation-oberon-2451545",
+      "input": {
+        "body": "oberon",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 0.118158790360016,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "orientation-oberon-2460676.5",
+      "input": {
+        "body": "oberon",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 4.80118861350335,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "orientation-oberon-2469807.5",
+      "input": {
+        "body": "oberon",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210117954610063,
+          "y": -0.968194623780161,
+          "z": 0.135829362192701
+        },
+        "spin": 3.43437922779417,
+        "tilt": 1.43454579184456,
+        "obliquityToOrbitDeg": 97.8065806090542
+      }
+    },
+    {
+      "id": "period-miranda",
+      "input": {
+        "body": "miranda"
+      },
+      "expected": -1.41347923291104
+    },
+    {
+      "id": "orientation-miranda-2378496.5",
+      "input": {
+        "body": "miranda",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210137731809036,
+          "y": -0.968141938452603,
+          "z": 0.136173861953714
+        },
+        "spin": 0.0612615140678372,
+        "tilt": 1.43419806118255,
+        "obliquityToOrbitDeg": 97.8265041083947
+      }
+    },
+    {
+      "id": "orientation-miranda-2433282.5",
+      "input": {
+        "body": "miranda",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210137731809036,
+          "y": -0.968141938452603,
+          "z": 0.136173861953714
+        },
+        "spin": 2.08412410155432,
+        "tilt": 1.43419806118255,
+        "obliquityToOrbitDeg": 97.8265041083947
+      }
+    },
+    {
+      "id": "orientation-miranda-2451545",
+      "input": {
+        "body": "miranda",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210137731809036,
+          "y": -0.968141938452603,
+          "z": 0.136173861953714
+        },
+        "spin": 0.535816080362259,
+        "tilt": 1.43419806118255,
+        "obliquityToOrbitDeg": 97.8265041083947
+      }
+    },
+    {
+      "id": "orientation-miranda-2460676.5",
+      "input": {
+        "body": "miranda",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210137731809036,
+          "y": -0.968141938452603,
+          "z": 0.136173861953714
+        },
+        "spin": 4.93354960177174,
+        "tilt": 1.43419806118255,
+        "obliquityToOrbitDeg": 97.8265041083947
+      }
+    },
+    {
+      "id": "orientation-miranda-2469807.5",
+      "input": {
+        "body": "miranda",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": -0.210137731809036,
+          "y": -0.968141938452603,
+          "z": 0.136173861953714
+        },
+        "spin": 5.27069336635767,
+        "tilt": 1.43419806118255,
+        "obliquityToOrbitDeg": 97.8265041083947
+      }
+    },
+    {
+      "id": "period-triton",
+      "input": {
+        "body": "triton"
+      },
+      "expected": -5.87685407828623
+    },
+    {
+      "id": "orientation-triton-2378496.5",
+      "input": {
+        "body": "triton",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.369074624708352,
+          "y": -0.34008001974586,
+          "z": 0.864944796831592
+        },
+        "spin": 4.32418219206663,
+        "tilt": 0.525755961173041,
+        "obliquityToOrbitDeg": 149.876402370941
+      }
+    },
+    {
+      "id": "orientation-triton-2433282.5",
+      "input": {
+        "body": "triton",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.369074624708352,
+          "y": -0.34008001974586,
+          "z": 0.864944796831592
+        },
+        "spin": 2.2219493710019,
+        "tilt": 0.525755961173041,
+        "obliquityToOrbitDeg": 149.876402370941
+      }
+    },
+    {
+      "id": "orientation-triton-2451545",
+      "input": {
+        "body": "triton",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": 0.369074624708352,
+          "y": -0.34008001974586,
+          "z": 0.864944796831592
+        },
+        "spin": 5.17542483093878,
+        "tilt": 0.525755961173041,
+        "obliquityToOrbitDeg": 149.876402370941
+      }
+    },
+    {
+      "id": "orientation-triton-2460676.5",
+      "input": {
+        "body": "triton",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.369074624708352,
+          "y": -0.34008001974586,
+          "z": 0.864944796831592
+        },
+        "spin": 0.101692018147922,
+        "tilt": 0.525755961173041,
+        "obliquityToOrbitDeg": 149.876402370941
+      }
+    },
+    {
+      "id": "orientation-triton-2469807.5",
+      "input": {
+        "body": "triton",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.369074624708352,
+          "y": -0.34008001974586,
+          "z": 0.864944796831592
+        },
+        "spin": 1.84571498370003,
+        "tilt": 0.525755961173041,
+        "obliquityToOrbitDeg": 149.876402370941
+      }
+    },
+    {
+      "id": "period-proteus",
+      "input": {
+        "body": "proteus"
+      },
+      "expected": 1.12231548169225
+    },
+    {
+      "id": "orientation-proteus-2378496.5",
+      "input": {
+        "body": "proteus",
+        "jdTdb": 2378496.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.358101007207234,
+          "y": -0.315364526865572,
+          "z": 0.878811062647722
+        },
+        "spin": 5.94097151817323,
+        "tilt": 0.497431515918315,
+        "obliquityToOrbitDeg": 28.5007264589141
+      }
+    },
+    {
+      "id": "orientation-proteus-2433282.5",
+      "input": {
+        "body": "proteus",
+        "jdTdb": 2433282.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.358101007207234,
+          "y": -0.315364526865572,
+          "z": 0.878811062647722
+        },
+        "spin": 0.608179438263846,
+        "tilt": 0.497431515918315,
+        "obliquityToOrbitDeg": 28.5007264589141
+      }
+    },
+    {
+      "id": "orientation-proteus-2451545",
+      "input": {
+        "body": "proteus",
+        "jdTdb": 2451545
+      },
+      "expected": {
+        "pole": {
+          "x": 0.358101007207234,
+          "y": -0.315364526865572,
+          "z": 0.878811062647722
+        },
+        "spin": 1.62978845551231,
+        "tilt": 0.497431515918315,
+        "obliquityToOrbitDeg": 28.5007264589141
+      }
+    },
+    {
+      "id": "orientation-proteus-2460676.5",
+      "input": {
+        "body": "proteus",
+        "jdTdb": 2460676.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.358101007207234,
+          "y": -0.315364526865572,
+          "z": 0.878811062647722
+        },
+        "spin": 3.54019615273074,
+        "tilt": 0.497431515918315,
+        "obliquityToOrbitDeg": 28.5007264589141
+      }
+    },
+    {
+      "id": "orientation-proteus-2469807.5",
+      "input": {
+        "body": "proteus",
+        "jdTdb": 2469807.5
+      },
+      "expected": {
+        "pole": {
+          "x": 0.358101007207234,
+          "y": -0.315364526865572,
+          "z": 0.878811062647722
+        },
+        "spin": 2.65139747275555,
+        "tilt": 0.497431515918315,
+        "obliquityToOrbitDeg": 28.5007264589141
+      }
+    }
+  ]
+}

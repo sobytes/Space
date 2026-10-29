@@ -1,0 +1,77 @@
+{
+  "domain": "secular",
+  "absoluteTolerance": 1e-18,
+  "description": "Orbit-averaged pericentre rate, and its small-alpha closed form.",
+  "tolerance": 1e-9,
+  "cases": [
+    {
+      "id": "quadrature-venus",
+      "input": {
+        "semiMajorAxisM": 57909226541.52439,
+        "eccentricity": 0.20563593,
+        "gm": 22031870000000,
+        "perturberGm": 324858590000000,
+        "perturberSemiMajorAxisM": 108209474537.37917,
+        "samples": 600
+      },
+      "expected": 4.49863123116637e-13
+    },
+    {
+      "id": "leading-order-venus",
+      "input": {
+        "semiMajorAxisM": 57909226541.52439,
+        "eccentricity": 0.20563593,
+        "gm": 22031870000000,
+        "perturberGm": 324858590000000,
+        "perturberSemiMajorAxisM": 108209474537.37917
+      },
+      "expected": 2.2763734244607e-13
+    },
+    {
+      "id": "quadrature-jupiter",
+      "input": {
+        "semiMajorAxisM": 57909226541.52439,
+        "eccentricity": 0.20563593,
+        "gm": 22031870000000,
+        "perturberGm": 126712764100000000,
+        "perturberSemiMajorAxisM": 778340816692.7108,
+        "samples": 600
+      },
+      "expected": 2.41169206578812e-13
+    },
+    {
+      "id": "leading-order-jupiter",
+      "input": {
+        "semiMajorAxisM": 57909226541.52439,
+        "eccentricity": 0.20563593,
+        "gm": 22031870000000,
+        "perturberGm": 126712764100000000,
+        "perturberSemiMajorAxisM": 778340816692.7108
+      },
+      "expected": 2.38592047242238e-13
+    },
+    {
+      "id": "quadrature-distant",
+      "input": {
+        "semiMajorAxisM": 57909226541.52439,
+        "eccentricity": 0.20563593,
+        "gm": 22031870000000,
+        "perturberGm": 126712764100000000,
+        "perturberSemiMajorAxisM": 8975872242000,
+        "samples": 600
+      },
+      "expected": 1.55585919788582e-16
+    },
+    {
+      "id": "leading-order-distant",
+      "input": {
+        "semiMajorAxisM": 57909226541.52439,
+        "eccentricity": 0.20563593,
+        "gm": 22031870000000,
+        "perturberGm": 126712764100000000,
+        "perturberSemiMajorAxisM": 8975872242000
+      },
+      "expected": 1.55573418050869e-16
+    }
+  ]
+}

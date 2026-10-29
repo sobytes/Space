@@ -11,6 +11,7 @@
 #   ./build.sh ios device      build signed for a paired iPhone, and list what is paired
 #   ./build.sh ios test        SolarKit's gates against the JPL fixtures
 #   ./build.sh generate        regenerate the Swift tables from the TypeScript engine
+#   ./build.sh conformance     regenerate the cross-platform conformance suite
 #
 # `set -o pipefail` with explicit status capture, because a piped command's exit code is the
 # pipeline's, not the command's, and reading the wrong one is how a red build gets reported
@@ -87,6 +88,13 @@ case "${1:-}" in
 
   generate)
     generate_swift
+    ;;
+
+  conformance)
+    require node "install Node, then run npm install"
+    # The cases are committed, so regenerating is a deliberate act: it says the engine's
+    # answers changed and every port now needs to agree with the new ones.
+    npx tsx scripts/generate-conformance.mjs
     ;;
 
   website)

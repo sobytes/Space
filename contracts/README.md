@@ -9,6 +9,7 @@ it afterwards. Never just change the code.
 
 | Contract | Governs |
 |---|---|
+| [conformance](conformance/SKILL.md) | The 487-case suite every client must reproduce |
 | [physics-and-mathematics](physics-and-mathematics/SKILL.md) | **The master contract.** Gravitation, mass, orbits, perturbation, relativity, conservation, integration, uncertainty, with the source for each |
 | [feature-parity](feature-parity/SKILL.md) | What the product does, and which clients do it. Backed by `features.json` and a gate |
 | [units-and-frames](units-and-frames/SKILL.md) | SI inside, branded at the boundary, float64, J2000 ecliptic |
@@ -63,7 +64,8 @@ Contracts are prose, but three of them have teeth:
 
 | Check | Where | Catches |
 |---|---|---|
-| Cross-language drift | `website/src/swift-port.test.ts` | A hand-port diverging from the engine |
+| Conformance | `website/src/conformance.test.ts` and SolarKit's `ConformanceTests` | A port disagreeing with the engine on any of 487 cases |
+| Cross-language drift | `website/src/swift-port.test.ts` | A port diverging on the Horizons residuals |
 | Feature parity | `website/src/feature-parity.test.ts` | A client missing a feature, or a stale path |
 | Engine purity | `website/src/view/core/invariants.test.ts`, `engine/tsconfig.json` | The engine gaining a dependency on a renderer |
 

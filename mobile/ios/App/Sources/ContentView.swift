@@ -22,6 +22,8 @@ struct ContentView: View {
         return id
     }()
     @State private var lastTick = Date()
+    @State private var lastDrag: CGSize = .zero
+    @State private var lastMagnification: CGFloat = 1
     @State private var showingDemonstrations = false
     @State private var showingAsk = false
     @State private var showingAsteroid = false
@@ -39,14 +41,45 @@ struct ContentView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            SceneView(
-                scene: scene.scene,
-                pointOfView: scene.cameraNode,
-                // No autoenablesDefaultLighting: it puts an omni light at the camera, which
-                // lights the night side of every body and destroys the terminator.
-                options: [.allowsCameraControl]
-            )
-            .ignoresSafeArea()
+            /**
+             No `.allowsCameraControl`.
+
+             SceneKit's built-in controller builds its own camera and ignores the
+             `pointOfView` it is handed, so every write to the scene's camera went somewhere
+             invisible. It also holds its distance in scene units, and this scene rescales
+             per focused body, so changing focus after a gesture left it either inside the
+             body or billions of units out. The scene simply vanished, with no error.
+
+             The gestures below drive the scene's own camera instead, in metres.
+
+             No `autoenablesDefaultLighting` either: it adds an omni light at the camera,
+             which lights the night side of every body and destroys the terminator.
+             */
+            SceneView(scene: scene.scene, pointOfView: scene.cameraNode, options: [])
+                .ignoresSafeArea()
+                .gesture(
+                    DragGesture(minimumDistance: 1)
+                        .onChanged { value in
+                            let delta = CGSize(
+                                width: value.translation.width - lastDrag.width,
+                                height: value.translation.height - lastDrag.height
+                            )
+                            lastDrag = value.translation
+                            scene.orbit(deltaX: delta.width, deltaY: delta.height)
+                        }
+                        .onEnded { _ in lastDrag = .zero }
+                )
+                .simultaneousGesture(
+                    MagnifyGesture()
+                        .onChanged { value in
+                            // Relative to the last callback, so the zoom is smooth rather
+                            // than snapping back to the gesture's start on every frame.
+                            let step = value.magnification / lastMagnification
+                            lastMagnification = value.magnification
+                            scene.zoom(by: step)
+                        }
+                        .onEnded { _ in lastMagnification = 1 }
+                )
 
             if !overlayHidden {
                 VStack(spacing: 10) {
@@ -73,13 +106,19 @@ struct ContentView: View {
              button. The panel is height-capped now and the rail keeps its own row, so neither
              can reach the other.
              */
-            VStack(spacing: 6) {
+            VStack(alignment: .trailing, spacing: 6) {
+                // Labelled, not a bare icon. Someone asked where the hide control was, which
+                // is the only evidence that matters about whether an icon is discoverable.
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) { overlayHidden.toggle() }
                 } label: {
-                    Image(systemName: overlayHidden ? "eye" : "eye.slash")
+                    Label(
+                        overlayHidden ? "Show panels" : "Hide panels",
+                        systemImage: overlayHidden ? "eye" : "eye.slash"
+                    )
+                    .font(.system(size: 11))
                 }
-                .tint(overlayHidden ? .orange : .gray)
+                .tint(overlayHidden ? .orange : .secondary)
 
                 if !overlayHidden {
                     Button { showingDemonstrations = true } label: {

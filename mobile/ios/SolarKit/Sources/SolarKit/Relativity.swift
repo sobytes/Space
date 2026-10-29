@@ -54,11 +54,20 @@ public func perihelionAdvanceArcsecPerCentury(
     return perOrbit * orbitsPerCentury * Constants.arcsecPerRadian
 }
 
-/// Mercury, as the demonstration uses it.
+/**
+ Mercury, as the demonstration uses it.
+
+ Taken from the engine's own figures, not re-derived. Three of these had drifted here: a
+ semi-major axis computed from au rather than quoted, an eccentricity of 0.20563593 against
+ the engine's 0.205630, and a period of 87.9691 against 87.969257. All plausible, all wrong,
+ and nothing noticed until the conformance suite compared them.
+
+ > JPL, https://ssd.jpl.nasa.gov/planets/phys_par.html, and the Standish element table.
+ */
 public enum Mercury {
-    public static let semiMajorAxisM = 0.387_098_93 * Constants.auInMetres
-    public static let eccentricity = 0.205_635_93
-    public static let orbitalPeriodDays = 87.969_1
+    public static let semiMajorAxisM = 5.790_890_0e10
+    public static let eccentricity = 0.205_630
+    public static let orbitalPeriodDays = 87.969_257
 }
 
 /// The residual general relativity accounts for, arcsec per century.

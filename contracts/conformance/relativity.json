@@ -1,0 +1,92 @@
+{
+  "domain": "relativity",
+  "absoluteTolerance": 1e-18,
+  "description": "First post-Newtonian acceleration and the closed-form perihelion advance.",
+  "tolerance": 1e-11,
+  "cases": [
+    {
+      "id": "mercury-semi-major-axis",
+      "expected": 57908900000
+    },
+    {
+      "id": "mercury-eccentricity",
+      "expected": 0.20563
+    },
+    {
+      "id": "mercury-orbital-period-days",
+      "expected": 87.969257
+    },
+    {
+      "id": "mercury-advance-per-orbit",
+      "input": {
+        "gm": 132712440041000000000,
+        "semiMajorAxisM": 57908900000,
+        "eccentricity": 0.20563
+      },
+      "expected": 5.01867595930991e-7
+    },
+    {
+      "id": "pn-acceleration-0.4au",
+      "input": {
+        "gm": 132712440041000000000,
+        "position": {
+          "x": 59839148280,
+          "y": 0,
+          "z": 0
+        },
+        "velocity": {
+          "x": 0,
+          "y": 47093.732801268,
+          "z": 0
+        }
+      },
+      "expected": {
+        "x": 2.74376496963253e-9,
+        "y": 0,
+        "z": 0
+      }
+    },
+    {
+      "id": "pn-acceleration-1au",
+      "input": {
+        "gm": 132712440041000000000,
+        "position": {
+          "x": 149597870700,
+          "y": 0,
+          "z": 0
+        },
+        "velocity": {
+          "x": 0,
+          "y": 29784.6918342777,
+          "z": 0
+        }
+      },
+      "expected": {
+        "x": 1.75600958056482e-10,
+        "y": 0,
+        "z": 0
+      }
+    },
+    {
+      "id": "pn-acceleration-5.2au",
+      "input": {
+        "gm": 132712440041000000000,
+        "position": {
+          "x": 777908927640,
+          "y": 0,
+          "z": 0
+        },
+        "velocity": {
+          "x": 0,
+          "y": 13061.4514129209,
+          "z": 0
+        }
+      },
+      "expected": {
+        "x": 1.24886889833069e-12,
+        "y": 0,
+        "z": 0
+      }
+    }
+  ]
+}

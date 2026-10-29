@@ -1,0 +1,144 @@
+{
+  "domain": "elements",
+  "absoluteTolerance": 1e-9,
+  "description": "Osculating elements from a state vector, varpi included.",
+  "tolerance": 1e-11,
+  "cases": [
+    {
+      "id": "elements-mercury",
+      "input": {
+        "planet": "mercury",
+        "jdTdb": 2451545,
+        "gm": 132712440041000000000
+      },
+      "expected": {
+        "semiMajorAxisM": 57909448964.4246,
+        "eccentricity": 0.205631314685358,
+        "inclinationRad": 0.122260048288876,
+        "longitudeOfAscendingNodeRad": 0.843531390105793,
+        "argumentOfPericentreRad": 0.508363860308864,
+        "longitudeOfPericentreRad": 1.35189525041466,
+        "projectedPericentreLongitudeRad": 1.34871578610148
+      }
+    },
+    {
+      "id": "elements-venus",
+      "input": {
+        "planet": "venus",
+        "jdTdb": 2451545,
+        "gm": 132712440041000000000
+      },
+      "expected": {
+        "semiMajorAxisM": 108211282318.324,
+        "eccentricity": 0.0067872964629051,
+        "inclinationRad": 0.0592482985441191,
+        "longitudeOfAscendingNodeRad": 1.33831427394227,
+        "argumentOfPericentreRad": 0.96047509745919,
+        "longitudeOfPericentreRad": 2.29878937140146,
+        "projectedPericentreLongitudeRad": 2.297964302535
+      }
+    },
+    {
+      "id": "elements-embary",
+      "input": {
+        "planet": "embary",
+        "jdTdb": 2451545,
+        "gm": 132712440041000000000
+      },
+      "expected": {
+        "semiMajorAxisM": 149599832458.417,
+        "eccentricity": 0.0167215444328136,
+        "inclinationRad": 3.93965961527895e-7,
+        "longitudeOfAscendingNodeRad": -2.11922193549379,
+        "argumentOfPericentreRad": -2.36739409017583,
+        "longitudeOfPericentreRad": -4.48661602566963,
+        "projectedPericentreLongitudeRad": 1.79656928150992
+      }
+    },
+    {
+      "id": "elements-mars",
+      "input": {
+        "planet": "mars",
+        "jdTdb": 2451545,
+        "gm": 132712440041000000000
+      },
+      "expected": {
+        "semiMajorAxisM": 227952003644.246,
+        "eccentricity": 0.0934242841242741,
+        "inclinationRad": 0.0322835502135355,
+        "longitudeOfAscendingNodeRad": 0.864964342724449,
+        "argumentOfPericentreRad": -1.28272231166849,
+        "longitudeOfPericentreRad": -0.41775796894404,
+        "projectedPericentreLongitudeRad": -0.417615962409852
+      }
+    },
+    {
+      "id": "elements-jupiter",
+      "input": {
+        "planet": "jupiter",
+        "jdTdb": 2451545,
+        "gm": 132712440041000000000
+      },
+      "expected": {
+        "semiMajorAxisM": 779092400819.213,
+        "eccentricity": 0.0492491943821555,
+        "inclinationRad": 0.0227659712530599,
+        "longitudeOfAscendingNodeRad": 1.75360507435639,
+        "argumentOfPericentreRad": -1.489960595748,
+        "longitudeOfPericentreRad": 0.263644478608389,
+        "projectedPericentreLongitudeRad": 0.263665340094638
+      }
+    },
+    {
+      "id": "elements-saturn",
+      "input": {
+        "planet": "saturn",
+        "jdTdb": 2451545,
+        "gm": 132712440041000000000
+      },
+      "expected": {
+        "semiMajorAxisM": 1427186338005.23,
+        "eccentricity": 0.0541110973527064,
+        "inclinationRad": 0.0433895553850162,
+        "longitudeOfAscendingNodeRad": 1.98373696783688,
+        "argumentOfPericentreRad": -0.372134583318443,
+        "longitudeOfPericentreRad": 1.61160238451844,
+        "projectedPericentreLongitudeRad": 1.6119212177262
+      }
+    },
+    {
+      "id": "elements-uranus",
+      "input": {
+        "planet": "uranus",
+        "jdTdb": 2451545,
+        "gm": 132712440041000000000
+      },
+      "expected": {
+        "semiMajorAxisM": 2873742742286.04,
+        "eccentricity": 0.0463337356083616,
+        "inclinationRad": 0.0134822531782697,
+        "longitudeOfAscendingNodeRad": 1.29143892806211,
+        "argumentOfPericentreRad": 1.70566623938368,
+        "longitudeOfPericentreRad": 2.99710516744579,
+        "projectedPericentreLongitudeRad": 2.99711727796802
+      }
+    },
+    {
+      "id": "elements-neptune",
+      "input": {
+        "planet": "neptune",
+        "jdTdb": 2451545,
+        "gm": 132712440041000000000
+      },
+      "expected": {
+        "semiMajorAxisM": 4503807557626.79,
+        "eccentricity": 0.00846080717419796,
+        "inclinationRad": 0.0308935740767738,
+        "longitudeOfAscendingNodeRad": 2.30006645878711,
+        "argumentOfPericentreRad": -1.65571599578651,
+        "longitudeOfPericentreRad": 0.644350463000595,
+        "projectedPericentreLongitudeRad": 0.644310117422452
+      }
+    }
+  ]
+}

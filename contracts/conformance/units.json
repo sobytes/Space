@@ -1,0 +1,67 @@
+{
+  "domain": "units",
+  "absoluteTolerance": 0,
+  "description": "Defined constants and the boundary conversions every client does.",
+  "tolerance": 0,
+  "cases": [
+    {
+      "id": "au-in-metres",
+      "expected": 149597870700
+    },
+    {
+      "id": "gm-sun",
+      "expected": 132712440041000000000
+    },
+    {
+      "id": "seconds-per-day",
+      "expected": 86400
+    },
+    {
+      "id": "days-per-julian-century",
+      "expected": 36525
+    },
+    {
+      "id": "days-per-julian-year",
+      "expected": 365.25
+    },
+    {
+      "id": "speed-of-light",
+      "expected": 299792458
+    },
+    {
+      "id": "km-to-metres",
+      "input": {
+        "km": 384400
+      },
+      "expected": 384400000
+    },
+    {
+      "id": "au-to-metres",
+      "input": {
+        "au": 5.2
+      },
+      "expected": 777908927640
+    },
+    {
+      "id": "degrees-to-radians",
+      "input": {
+        "deg": 23.4392911
+      },
+      "expected": 0.4090928040284035
+    },
+    {
+      "id": "normalise-angle-signed",
+      "input": {
+        "radians": 7.5
+      },
+      "expected": 1.2168146928204138
+    },
+    {
+      "id": "normalise-angle-negative",
+      "input": {
+        "radians": -7.5
+      },
+      "expected": -1.2168146928204138
+    }
+  ]
+}

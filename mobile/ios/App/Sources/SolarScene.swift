@@ -45,6 +45,23 @@ final class SolarScene {
     private var tileRoot: SCNNode?
     private var lastTileRefresh = Date.distantPast
 
+    /**
+     The camera, owned here rather than by SceneKit.
+
+     `allowsCameraControl` builds its own camera node and ignores the `pointOfView` it is
+     given, so every write to `cameraNode` went to a node that was no longer on screen. Worse,
+     the scene's scale is chosen per focused body, and SceneKit's controller holds its distance
+     in scene units: change focus and its camera stays at the old number of units, which in the
+     new scale is either inside the body or billions of units away. The symptom is the scene
+     vanishing after a pinch, with no error.
+
+     So the orbit is held in physical terms instead. Distance is **metres from the body's
+     centre**, which survives a scale change because it does not depend on one.
+     */
+    private var cameraAzimuth: Double = 0
+    private var cameraElevation: Double = 0.28
+    private var cameraDistanceM: Double = 0
+
     /// Metres per scene unit for the current focus.
     private(set) var metresPerUnit: Double = Constants.auInMetres
 
@@ -82,8 +99,17 @@ final class SolarScene {
         )
     }
 
-    private func renderRadius(_ metres: Double) -> CGFloat {
+    private func renderRadius(_ metres: Double, isStar: Bool = false) -> CGFloat {
         if focus == .sun {
+            /**
+             The Sun gets its own size in the system view.
+
+             On the planets' curve it comes out 0.543 units, and Mercury's orbit is 0.387, so
+             it swallows the inner solar system and reads as a Sun that really is that big.
+             This is the second time that has happened here; the first was a shared
+             exaggeration constant, this time a shared compression curve.
+             */
+            if isStar { return 0.16 }
             /**
              System view. True radii are hopeless here, Earth being 4.2e-5 units, so sizes are
              compressed by a square root of the body's size relative to Earth. That keeps them
@@ -105,9 +131,58 @@ final class SolarScene {
         camera.zNear = 0.001
         camera.zFar = 6_000
         cameraNode.camera = camera
-        cameraNode.position = SCNVector3(0, 3.2, 7.2)
-        cameraNode.look(at: SCNVector3(0, 0, 0))
         scene.rootNode.addChildNode(cameraNode)
+    }
+
+    /// Closest and furthest the camera may sit from the focused body's centre, in metres.
+    private var distanceLimits: (min: Double, max: Double) {
+        let radius = bodyContracts[focus]!.equatorialRadiusM
+        if focus == .sun {
+            // The system view reaches past Neptune and no closer than the photosphere.
+            return (radius * 1.5, 1.2e13)
+        }
+        // A kilometre above the surface at the closest; far enough out to hold the moons at
+        // the widest, or a few thousand radii for a body that has none.
+        let systemRadius = satelliteSystemRadiusM(focus) ?? (radius * 400)
+        return (radius + 1_000, max(systemRadius * 4, radius * 400))
+    }
+
+    /// Writes the camera from the orbit held above. The only place its position is set.
+    private func applyCamera() {
+        let limits = distanceLimits
+        cameraDistanceM = min(limits.max, max(limits.min, cameraDistanceM))
+
+        let units = Float(cameraDistanceM / metresPerUnit)
+        let x = Float(cos(cameraElevation) * cos(cameraAzimuth)) * units
+        let y = Float(sin(cameraElevation)) * units
+        let z = Float(cos(cameraElevation) * sin(cameraAzimuth)) * units
+
+        cameraNode.position = SCNVector3(x, y, z)
+        cameraNode.look(at: SCNVector3(0, 0, 0))
+
+        // The far plane has to clear both the body system and the star shell.
+        cameraNode.camera?.zFar = Double(max(4_000, units * 12))
+        cameraNode.camera?.zNear = Double(max(0.0005, units / 20_000))
+    }
+
+    /// Drag to orbit. Elevation is clamped short of the poles so the view never flips over.
+    func orbit(deltaX: Double, deltaY: Double) {
+        cameraAzimuth -= deltaX * 0.006
+        cameraElevation = min(1.5, max(-1.5, cameraElevation + deltaY * 0.006))
+        applyCamera()
+    }
+
+    /// Pinch to zoom. Multiplicative, so each pinch covers the same proportion at any scale,
+    /// which is what makes ten orders of magnitude navigable with one gesture.
+    func zoom(by factor: Double) {
+        guard factor > 0 else { return }
+        cameraDistanceM /= factor
+        applyCamera()
+    }
+
+    /// Distance from the focused body's surface, metres.
+    var altitudeM: Double {
+        max(0, cameraDistanceM - bodyContracts[focus]!.equatorialRadiusM)
     }
 
     private func buildLight() {
@@ -458,33 +533,42 @@ final class SolarScene {
      */
     private func frameFocus(at epoch: JdTdb?) {
         let when = epoch ?? JdTdb(Epochs.j2000)
-        /// `-zoom <radii>` places the camera at a chosen multiple of the body's radius, so a
+        /// `-zoom <radii>` starts the camera at a chosen multiple of the body's radius, so a
         /// screenshot run can reach the altitude band where streamed tiles are used. Test
         /// hook, not a feature.
-        let requested: Float? = {
+        let requestedRadii: Double? = {
             guard let i = CommandLine.arguments.firstIndex(of: "-zoom"),
                   i + 1 < CommandLine.arguments.count else { return nil }
-            return Float(CommandLine.arguments[i + 1])
+            return Double(CommandLine.arguments[i + 1])
         }()
-        let distance: Float = requested ?? (focus == .sun ? 7.5 : 6)
-        let sun = sunDirection(from: focus, at: when)
-        cameraNode.position = SCNVector3(
-            sun.x * distance,
-            sun.y * distance + distance * 0.28,
-            sun.z * distance
-        )
-        cameraNode.look(at: SCNVector3(0, 0, 0))
-    }
 
-    /// Distance from the focused body's surface, in metres, for the current camera.
-    var distanceToSurfaceM: Double {
         let radius = bodyContracts[focus]!.equatorialRadiusM
-        let d = Double(
-            (cameraNode.position.x * cameraNode.position.x
-                + cameraNode.position.y * cameraNode.position.y
-                + cameraNode.position.z * cameraNode.position.z).squareRoot()
-        ) * metresPerUnit
-        return max(0, d - radius)
+        if let requestedRadii {
+            cameraDistanceM = radius * requestedRadii
+        } else if focus == .sun {
+            // Far enough out to hold Jupiter's orbit, which is what reads on a phone.
+            cameraDistanceM = 7.5 * Constants.auInMetres
+        } else {
+            /**
+             Six radii, for every body, moons or not.
+
+             Framing the whole satellite system by default looked like the thoughtful choice
+             and is the wrong one: Callisto's apoapsis is 26 Jupiter radii, so fitting it puts
+             the camera 58 radii out and Jupiter covers about one percent of the screen.
+             Measured that way, Mercury and Titan lit 88% of the centre and Jupiter lit 1.1%.
+
+             The body is the subject. "Fit moons" is there for when the system is.
+             */
+            cameraDistanceM = radius * 6
+        }
+
+        // Approach from the lit side. Arriving over the night side is a black screen and
+        // reads as a bug. The Sun direction is taken from the epoch rather than from a cached
+        // position, because changing focus does not recompute positions; the frame loop does.
+        let sun = sunDirection(from: focus, at: when)
+        cameraAzimuth = atan2(Double(sun.z), Double(sun.x))
+        cameraElevation = 0.28
+        applyCamera()
     }
 
     /**
@@ -572,7 +656,7 @@ final class SolarScene {
         lastTileRefresh = Date()
 
         let fovRad = (cameraNode.camera?.fieldOfView ?? 55) * Double.pi / 180
-        let altitude = distanceToSurfaceM
+        let altitude = altitudeM
         let level = levelFor(
             surface.manifest,
             altitudeM: altitude,
@@ -643,15 +727,7 @@ final class SolarScene {
 
     /// Where the camera is looking down on the focused body, in its own body-fixed frame.
     private func subCameraPoint() -> SubCameraPoint {
-        let p = cameraNode.position
-        let length = max(1e-6, (p.x * p.x + p.y * p.y + p.z * p.z).squareRoot())
-        let x = Double(p.x / length)
-        let y = Double(p.y / length)
-        let z = Double(p.z / length)
-        return SubCameraPoint(
-            latitude: asin(max(-1, min(1, y))),
-            longitude: atan2(-z, x)
-        )
+        SubCameraPoint(latitude: cameraElevation, longitude: -cameraAzimuth)
     }
 
     /// Whether the focused body has elevation relief, and the altitude below which the data
@@ -747,10 +823,11 @@ final class SolarScene {
         if length == 0 { return }
         d = SCNVector3(d.x / length, d.y / length, d.z / length)
 
-        let p = cameraNode.position
-        let distance = max(0.001, (p.x * p.x + p.y * p.y + p.z * p.z).squareRoot())
-        cameraNode.position = SCNVector3(d.x * distance, d.y * distance, d.z * distance)
-        cameraNode.look(at: SCNVector3(0, 0, 0))
+        // Keep the distance, change only where we stand. Choosing a lighting angle should
+        // not undo a zoom.
+        cameraAzimuth = atan2(Double(d.z), Double(d.x))
+        cameraElevation = asin(max(-1, min(1, Double(d.y))))
+        applyCamera()
     }
 
     /// Whether the focused body has moons to frame.
@@ -773,13 +850,7 @@ final class SolarScene {
         let fov = cameraNode.camera?.fieldOfView ?? 55
         let halfFovRad = fov * Double.pi / 360
         let fill = 0.72
-        let units = Float(systemRadius / metresPerUnit / tan(halfFovRad * fill))
-
-        let p = cameraNode.position
-        let current = max(0.0001, (p.x * p.x + p.y * p.y + p.z * p.z).squareRoot())
-        cameraNode.position = SCNVector3(
-            p.x / current * units, p.y / current * units, p.z / current * units
-        )
-        cameraNode.look(at: SCNVector3(0, 0, 0))
+        cameraDistanceM = systemRadius / tan(halfFovRad * fill)
+        applyCamera()
     }
 }

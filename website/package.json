@@ -15,7 +15,8 @@
     "visual:nbody": "node scripts/visual/nbody-probe.mjs",
     "visual:views": "node scripts/visual/view-probe.mjs",
     "verify:relief": "node scripts/visual/relief-sweep.mjs",
-    "visual:hide": "node scripts/visual/hide-probe.mjs"
+    "visual:hide": "node scripts/visual/hide-probe.mjs",
+    "visual:ios": "node ../mobile/ios/scripts/focus-probe.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "1.3.0",

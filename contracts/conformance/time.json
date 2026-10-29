@@ -1,0 +1,148 @@
+{
+  "domain": "time",
+  "absoluteTolerance": 1e-12,
+  "description": "UTC, TAI, TT and TDB, including leap-second boundaries.",
+  "tolerance": 1e-12,
+  "cases": [
+    {
+      "id": "tai-minus-utc-2441317.5",
+      "input": {
+        "jdUtc": 2441317.5
+      },
+      "expected": 10
+    },
+    {
+      "id": "tai-minus-utc-2443144.5",
+      "input": {
+        "jdUtc": 2443144.5
+      },
+      "expected": 16
+    },
+    {
+      "id": "tai-minus-utc-2451179.5",
+      "input": {
+        "jdUtc": 2451179.5
+      },
+      "expected": 32
+    },
+    {
+      "id": "tai-minus-utc-2457754.5",
+      "input": {
+        "jdUtc": 2457754.5
+      },
+      "expected": 37
+    },
+    {
+      "id": "tai-minus-utc-2460676.5",
+      "input": {
+        "jdUtc": 2460676.5
+      },
+      "expected": 37
+    },
+    {
+      "id": "tt-from-utc-2378496.5",
+      "input": {
+        "jdUtc": 2378496.5
+      },
+      "expected": 2378496.50048824
+    },
+    {
+      "id": "tt-from-utc-2433282.5",
+      "input": {
+        "jdUtc": 2433282.5
+      },
+      "expected": 2433282.50048824
+    },
+    {
+      "id": "tt-from-utc-2451545",
+      "input": {
+        "jdUtc": 2451545
+      },
+      "expected": 2451545.00074287
+    },
+    {
+      "id": "tt-from-utc-2460676.5",
+      "input": {
+        "jdUtc": 2460676.5
+      },
+      "expected": 2460676.50080074
+    },
+    {
+      "id": "tt-from-utc-2469807.5",
+      "input": {
+        "jdUtc": 2469807.5
+      },
+      "expected": 2469807.50080074
+    },
+    {
+      "id": "tdb-from-tt-2378496.5",
+      "input": {
+        "jdTt": 2378496.5
+      },
+      "expected": 2378496.5
+    },
+    {
+      "id": "tdb-from-tt-2433282.5",
+      "input": {
+        "jdTt": 2433282.5
+      },
+      "expected": 2433282.5
+    },
+    {
+      "id": "tdb-from-tt-2451545",
+      "input": {
+        "jdTt": 2451545
+      },
+      "expected": 2451545
+    },
+    {
+      "id": "tdb-from-tt-2460676.5",
+      "input": {
+        "jdTt": 2460676.5
+      },
+      "expected": 2460676.5
+    },
+    {
+      "id": "tdb-from-tt-2469807.5",
+      "input": {
+        "jdTt": 2469807.5
+      },
+      "expected": 2469807.5
+    },
+    {
+      "id": "julian-centuries-2378496.5",
+      "input": {
+        "jdTdb": 2378496.5
+      },
+      "expected": -1.99995893223819
+    },
+    {
+      "id": "julian-centuries-2433282.5",
+      "input": {
+        "jdTdb": 2433282.5
+      },
+      "expected": -0.5
+    },
+    {
+      "id": "julian-centuries-2451545",
+      "input": {
+        "jdTdb": 2451545
+      },
+      "expected": 0
+    },
+    {
+      "id": "julian-centuries-2460676.5",
+      "input": {
+        "jdTdb": 2460676.5
+      },
+      "expected": 0.250006844626968
+    },
+    {
+      "id": "julian-centuries-2469807.5",
+      "input": {
+        "jdTdb": 2469807.5
+      },
+      "expected": 0.5
+    }
+  ]
+}
