@@ -107,3 +107,7 @@ artifacts/
 
 # Native texture copies, generated from website/public/textures.
 **/App/Resources/Textures/
+
+# Vendored agent skill packs. Third-party work, 181 files, and no part of this project.
+# CLAUDE.md at the root stays: that is this repository's own instructions.
+.claude/skills/
