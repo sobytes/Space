@@ -10,7 +10,7 @@ import { CameraRig } from "./CameraRig";
 import { Hud } from "./Hud";
 import { AskPanel } from "./AskPanel";
 import { HeliocentricRoot } from "./HeliocentricRoot";
-import { OrbitPaths } from "./OrbitPaths";
+import { MoonOrbits, OrbitPaths } from "./OrbitPaths";
 import { PickLayer } from "./PickLayer";
 import { Starfield } from "./Starfield";
 import { ViewportBinding, ViewportProvider } from "./ViewportContext";
@@ -42,6 +42,8 @@ export function Scene() {
           <HeliocentricRoot>
             <OrbitPaths />
           </HeliocentricRoot>
+          {/* Outside the heliocentric group on purpose: a moon's ring rides its planet. */}
+          <MoonOrbits />
           <BodyMarkers />
           {/* The Sun carries its own light, inside its own group. See Body.tsx. */}
           <ambientLight intensity={0.05} />

@@ -88,6 +88,14 @@ export interface Viewport {
    */
   attachHeliocentricRoot(node: Object3D): () => void;
   /**
+   * Registers a group that must sit on a body, for geometry held relative to that body.
+   *
+   * A moon's orbit needs this and the heliocentric root cannot provide it: the root carries
+   * one origin for the whole scene, and what a satellite system needs is an origin per
+   * planet. Only the position is written, so the ring never inherits a planet's spin.
+   */
+  attachOrbitAnchor(parent: BodyId, node: Object3D): () => void;
+  /**
    * Registers the Points object that marks bodies too small to see as geometry. The Viewport
    * writes its position buffer, so the single-writer rule over scale-critical data still holds.
    */
@@ -171,6 +179,8 @@ export function createViewport(init: ViewportInit = {}): Viewport {
   let origin: Vec3 = { x: 0, y: 0, z: 0 };
 
   const nodes = new Map<BodyId, Object3D>();
+  /** Keyed by node rather than by body: one planet can carry several moons' rings. */
+  const orbitAnchors = new Map<Object3D, BodyId>();
   let heliocentricRoot: Object3D | null = null;
   let markers: Points | null = null;
   const positions = new Map<BodyId, Vec3>();
@@ -338,6 +348,16 @@ export function createViewport(init: ViewportInit = {}): Viewport {
       heliocentricRoot.matrixWorldNeedsUpdate = true;
     }
 
+    // A moon's ring holds vertices relative to its planet, so it rides the planet rather than
+    // the Sun. Position only: inheriting a planet's spin would turn the orbit with the day.
+    for (const [node, parent] of orbitAnchors) {
+      const at = positions.get(parent);
+      if (!at) continue;
+      node.position.set(at.x - origin.x, at.y - origin.y, at.z - origin.z);
+      node.updateMatrix();
+      node.matrixWorldNeedsUpdate = true;
+    }
+
     const heightPx = typeof window === "undefined" ? 1080 : window.innerHeight;
     screen.length = 0;
     for (const id of BODY_IDS) {
@@ -417,6 +437,14 @@ export function createViewport(init: ViewportInit = {}): Viewport {
       node.matrixAutoUpdate = false;
       return () => {
         heliocentricRoot = null;
+      };
+    },
+
+    attachOrbitAnchor(parent, node) {
+      orbitAnchors.set(node, parent);
+      node.matrixAutoUpdate = false;
+      return () => {
+        orbitAnchors.delete(node);
       };
     },
 

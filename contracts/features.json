@@ -175,13 +175,40 @@
     {
       "id": "orbit-paths",
       "title": "Orbit paths sampled from the solver that positions the body",
-      "why": "An idealised ellipse is decoration. Sampling the real solver draws the path the body will actually follow.",
+      "why": "An idealised ellipse is decoration. Sampling the real solver draws the path the body will actually follow. Scale decides what is drawn: planetary orbits in the system view, a satellite system's orbits only when that system is in view. Drawing all of them at once put every planet's orbit across the sky above whichever planet you were looking at.",
       "web": {
         "status": "shipped",
         "paths": [
           "website/src/view/react/OrbitPaths.tsx",
           "website/src/view/react/HeliocentricRoot.tsx",
           "website/src/view/react/CameraRig.tsx"
+        ]
+      },
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/SolarScene.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
+    },
+    {
+      "id": "moon-orbits",
+      "title": "A moon's orbit, drawn about its planet rather than about the Sun",
+      "why": "Sampled heliocentrically a moon's path over one of its own periods is its planet's motion, not its orbit: Phobos came out as a streak seventy times too long. Subtracting the parent at the same instant leaves the ellipse, and the anchor node rides the planet so the subtraction stays in float64. Gated by the periapsis check on both platforms.",
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/react/OrbitPaths.tsx",
+          "website/src/view/core/viewport.ts"
         ]
       },
       "ios": {
