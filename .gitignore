@@ -1,7 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
-/node_modules
+# dependencies. Anchored at the root would miss website/node_modules, which npm workspaces
+# creates for anything it cannot hoist, and a vitest cache inside it was staged once already.
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -93,11 +94,12 @@ mobile/ios/App/Resources/Textures/
 # machine that built them, so this also keeps a developer's home directory private.
 .next/
 
-# Downloaded planetary textures. The manifest and fetch script are the artifact, not
-# the bytes: `npm run assets 1` restores them. They are third-party and licensed
-# individually, so a public clone should fetch them under those licences rather than
-# receive a redistributed copy.
-**/public/textures/
+# Downloaded texture originals, 78 MB of 8192 x 4096 JPEGs. `npm run assets` restores
+# them from the manifest. What the browser is served is not these: it is the WebP
+# derivatives under website/public/textures, which `npm run textures` generates and
+# which ARE committed, because a deployment that has to download 78 MB mid-build to
+# show a planet is a deployment that eventually shows no planet.
+**/assets/originals/
 
 # Generated terrain pyramids. Rebuild with `npm run terrain`.
 **/public/terrain/
@@ -105,7 +107,7 @@ mobile/ios/App/Resources/Textures/
 # Visual verification output and probe screenshots.
 artifacts/
 
-# Native texture copies, generated from website/public/textures.
+# Native texture copies, generated from website/assets/originals.
 **/App/Resources/Textures/
 
 # Vendored agent skill packs. Third-party work, 181 files, and no part of this project.

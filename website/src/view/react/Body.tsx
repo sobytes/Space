@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import {
   AdditiveBlending,
@@ -16,15 +16,21 @@ import {
 } from "three";
 import { BODY_CONTRACTS, type BodyId } from "@solar/engine/bodies/registry";
 import { TerrainTiles, useTerrainManifest } from "./TerrainTiles";
-import { useViewport } from "./ViewportContext";
+import { useViewport, useViewportValue } from "./ViewportContext";
 
 /**
- * Textures are named by the body contract and the contract gate already proved those names
- * exist in the asset manifest, so a missing file here is a download problem rather than a typo.
+ * Textures are named by the body contract, and a test proves every name the contracts use has
+ * a file committed under public/textures, so a missing file here is a build that was not run
+ * rather than a typo.
+ *
+ * Two sizes exist. The plain name is 2048 across and is what every body in the scene loads.
+ * `.detail` is 4096 and is loaded only for the body the camera is focused on, because that is
+ * the only one ever big enough on screen to tell them apart. Bodies whose original is already
+ * 2048, Uranus and Neptune, have no detail file; `npm run textures` does not write one and
+ * the load simply fails back to the base image that is already on the mesh.
  */
-function textureUrl(id: string): string {
-  const extension = id === "saturn-ring" ? "png" : "jpg";
-  return `/textures/${id}.${extension}`;
+function textureUrl(id: string, detail: boolean): string {
+  return `/textures/${id}${detail ? ".detail" : ""}.webp`;
 }
 
 /**
@@ -45,33 +51,44 @@ function textureUrl(id: string): string {
  * Colour space is set by hand because drei used to do it: a planet texture sampled as linear
  * reads washed out and slightly wrong, and it looks like a lighting bug for an hour.
  */
-function useOptionalTexture(id: string | undefined): Texture | null {
+function useOptionalTexture(id: string | undefined, detail: boolean): Texture | null {
   // The id travels with the texture so a body that switches map never shows the previous
   // one during the load. Earth alone does this, flipping between day and night.
   const [loaded, setLoaded] = useState<{ id: string; texture: Texture } | null>(null);
 
+  // The base image loads for every body and the detail image only once focused, so the
+  // effect runs twice for a body you fly to. The first result is kept on the mesh the whole
+  // time the second is in flight, which is what makes the upgrade invisible rather than a
+  // flash of untextured planet at the moment you arrive.
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
     new TextureLoader().load(
-      textureUrl(id),
+      textureUrl(id, detail),
       (texture) => {
         if (cancelled) {
           texture.dispose();
           return;
         }
         texture.colorSpace = SRGBColorSpace;
-        setLoaded({ id, texture });
+        setLoaded((previous) => {
+          // The one it replaces has to go. three's loader cache is off, so every load is a
+          // fresh Texture, and a 4096 map is about 33 MB of video memory once mipmapped.
+          // Flying between a dozen planets without this leaks a few hundred megabytes.
+          previous?.texture.dispose();
+          return { id, texture };
+        });
       },
       undefined,
-      // Swallowed deliberately. A missing texture is a known state with a designed
-      // appearance, not an error anyone can act on, and three already logs the 404.
+      // Swallowed deliberately. A texture that is not there is a known state with a designed
+      // appearance, not an error anyone can act on, and three already logs the 404. It is
+      // also the normal case for `.detail` on a body that has no larger original.
       () => {},
     );
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, detail]);
 
   return loaded && loaded.id === id ? loaded.texture : null;
 }
@@ -210,10 +227,11 @@ export function Body({ id, segments = 96 }: { id: BodyId; segments?: number }) {
 
   const terrain = useTerrainManifest(id);
   const globalNormal = useGlobalNormalMap(id, terrain !== null);
-  const albedo = useOptionalTexture(contract.appearance.albedoTextureId);
-  const clouds = useOptionalTexture(contract.appearance.cloudTextureId);
-  const ring = useOptionalTexture(contract.appearance.ringSystem?.textureId);
-  const night = useOptionalTexture(contract.appearance.nightTextureId);
+  const detail = useViewportValue(useCallback((snapshot) => snapshot.focus === id, [id]));
+  const albedo = useOptionalTexture(contract.appearance.albedoTextureId, detail);
+  const clouds = useOptionalTexture(contract.appearance.cloudTextureId, detail);
+  const ring = useOptionalTexture(contract.appearance.ringSystem?.textureId, detail);
+  const night = useOptionalTexture(contract.appearance.nightTextureId, detail);
   const applyNightSide = useNightSide(id, night);
 
   useEffect(() => {
@@ -341,13 +359,20 @@ function useGlobalNormalMap(body: string, hasTerrain: boolean): Texture | null {
     if (!hasTerrain) return;
     let cancelled = false;
     const loader = new TextureLoader();
-    loader.load(`/terrain/${body}/normal-global.jpg`, (loaded) => {
-      if (cancelled) {
-        loaded.dispose();
-        return;
-      }
-      setTexture(loaded);
-    });
+    loader.load(
+      `/terrain/${body}/normal-global.jpg`,
+      (loaded) => {
+        if (cancelled) {
+          loaded.dispose();
+          return;
+        }
+        setTexture(loaded);
+      },
+      undefined,
+      // Same reason as the body textures: terrain is generated, not committed, so a
+      // deployment without it must draw a smooth planet rather than no planet.
+      () => {},
+    );
     return () => {
       cancelled = true;
     };

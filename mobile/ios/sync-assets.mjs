@@ -6,7 +6,7 @@
  * alone at 15 MB. That is right for a browser that streams them and wrong for an app binary,
  * so each one is resampled to a width a phone can actually resolve at this zoom. The source
  * files stay the single copy; these are a derived artifact and are git-ignored, the same way
- * `website/public/textures` is.
+ * `website/assets/originals` is.
  *
  * Which texture belongs to which body is not decided here. It comes from the body contracts,
  * so the phone and the website cannot end up showing different imagery for the same planet.
@@ -22,7 +22,7 @@ import { join } from "node:path";
 import sharp from "sharp";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
-const SOURCE = join(ROOT, "website/public/textures");
+const SOURCE = join(ROOT, "website/assets/originals");
 const TARGET = join(ROOT, "mobile/ios/App/Resources/Textures");
 
 /**

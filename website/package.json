@@ -8,6 +8,8 @@
     "start": "next start",
     "typecheck": "next typegen && tsc --noEmit",
     "assets": "node scripts/fetch-assets.mjs",
+    "textures": "node scripts/build-textures.mjs",
+    "textures:check": "node scripts/build-textures.mjs --check",
     "assets:list": "node scripts/fetch-assets.mjs --list",
     "stars": "node scripts/build-star-catalogue.mjs",
     "terrain": "node scripts/build-terrain.mjs",

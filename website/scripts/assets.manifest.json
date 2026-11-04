@@ -15,7 +15,7 @@
     },
     {
       "source": "nssdc.gsfc.nasa.gov Venera surface photographs",
-      "reason": "The only photographs ever taken from the surface of Venus, by the Soviet Venera 9, 10, 13 and 14 landers. NASA's NSSDCA hosts the scans and heads that section \u201cthe following images were provided to NSSDCA by what is now the Russian Space Agency and are not necessarily in the public domain\u201d. The archive holding them will not call them public domain, so this project does not host them either. The surface panel links to them instead, because linking is not copying."
+      "reason": "The only photographs ever taken from the surface of Venus, by the Soviet Venera 9, 10, 13 and 14 landers. NASA's NSSDCA hosts the scans and heads that section “the following images were provided to NSSDCA by what is now the Russian Space Agency and are not necessarily in the public domain”. The archive holding them will not call them public domain, so this project does not host them either. The surface panel links to them instead, because linking is not copying."
     }
   ],
   "licences": {
@@ -53,7 +53,11 @@
       "url": "https://www.solarsystemscope.com/textures/download/8k_sun.jpg",
       "licence": "cc-by-4.0-sss",
       "measured": "4096x2048",
-      "filenameLies": "url says 8k, file is actually 4096 wide"
+      "filenameLies": "url says 8k, file is actually 4096 wide",
+      "web": {
+        "base": 2048,
+        "detail": 4096
+      }
     },
     {
       "id": "mercury",
@@ -61,7 +65,11 @@
       "file": "mercury.jpg",
       "url": "https://www.solarsystemscope.com/textures/download/8k_mercury.jpg",
       "licence": "cc-by-4.0-sss",
-      "measured": "8192x4096"
+      "measured": "8192x4096",
+      "web": {
+        "base": 2048,
+        "detail": 4096
+      }
     },
     {
       "id": "venus-surface",
@@ -69,7 +77,11 @@
       "file": "venus-surface.jpg",
       "url": "https://www.solarsystemscope.com/textures/download/8k_venus_surface.jpg",
       "licence": "cc-by-4.0-sss",
-      "measured": "8192x4096"
+      "measured": "8192x4096",
+      "web": {
+        "base": 2048,
+        "detail": 4096
+      }
     },
     {
       "id": "venus-clouds",
@@ -77,7 +89,11 @@
       "file": "venus-clouds.jpg",
       "url": "https://www.solarsystemscope.com/textures/download/4k_venus_atmosphere.jpg",
       "licence": "cc-by-4.0-sss",
-      "measured": "4096x2048"
+      "measured": "4096x2048",
+      "web": {
+        "base": 2048,
+        "detail": 4096
+      }
     },
     {
       "id": "earth-day",
@@ -85,7 +101,11 @@
       "file": "earth-day.jpg",
       "url": "https://www.solarsystemscope.com/textures/download/8k_earth_daymap.jpg",
       "licence": "cc-by-4.0-sss",
-      "measured": "8192x4096"
+      "measured": "8192x4096",
+      "web": {
+        "base": 2048,
+        "detail": 4096
+      }
     },
     {
       "id": "earth-night",
@@ -93,7 +113,11 @@
       "file": "earth-night.jpg",
       "url": "https://www.solarsystemscope.com/textures/download/8k_earth_nightmap.jpg",
       "licence": "cc-by-4.0-sss",
-      "measured": "8192x4096"
+      "measured": "8192x4096",
+      "web": {
+        "base": 2048,
+        "detail": 4096
+      }
     },
     {
       "id": "earth-clouds",
@@ -101,7 +125,11 @@
       "file": "earth-clouds.jpg",
       "url": "https://www.solarsystemscope.com/textures/download/8k_earth_clouds.jpg",
       "licence": "cc-by-4.0-sss",
-      "measured": "8192x4096"
+      "measured": "8192x4096",
+      "web": {
+        "base": 2048,
+        "detail": 4096
+      }
     },
     {
       "id": "moon",
@@ -109,7 +137,11 @@
       "file": "moon.jpg",
       "url": "https://www.solarsystemscope.com/textures/download/8k_moon.jpg",
       "licence": "cc-by-4.0-sss",
-      "measured": "8192x4096"
+      "measured": "8192x4096",
+      "web": {
+        "base": 2048,
+        "detail": 4096
+      }
     },
     {
       "id": "mars",
@@ -117,7 +149,11 @@
       "file": "mars.jpg",
       "url": "https://www.solarsystemscope.com/textures/download/8k_mars.jpg",
       "licence": "cc-by-4.0-sss",
-      "measured": "8192x4096"
+      "measured": "8192x4096",
+      "web": {
+        "base": 2048,
+        "detail": 4096
+      }
     },
     {
       "id": "jupiter",
@@ -126,7 +162,11 @@
       "url": "https://www.solarsystemscope.com/textures/download/8k_jupiter.jpg",
       "licence": "cc-by-4.0-sss",
       "measured": "4096x2048",
-      "filenameLies": "url says 8k, file is actually 4096 wide"
+      "filenameLies": "url says 8k, file is actually 4096 wide",
+      "web": {
+        "base": 2048,
+        "detail": 4096
+      }
     },
     {
       "id": "saturn",
@@ -135,7 +175,11 @@
       "url": "https://www.solarsystemscope.com/textures/download/8k_saturn.jpg",
       "licence": "cc-by-4.0-sss",
       "measured": "4096x2048",
-      "filenameLies": "url says 8k, file is actually 4096 wide"
+      "filenameLies": "url says 8k, file is actually 4096 wide",
+      "web": {
+        "base": 2048,
+        "detail": 4096
+      }
     },
     {
       "id": "saturn-ring",
@@ -143,7 +187,11 @@
       "file": "saturn-ring.png",
       "url": "https://www.solarsystemscope.com/textures/download/8k_saturn_ring_alpha.png",
       "licence": "cc-by-4.0-sss",
-      "measured": "8192x500"
+      "measured": "8192x500",
+      "web": {
+        "base": 2048,
+        "detail": 4096
+      }
     },
     {
       "id": "uranus",
@@ -151,7 +199,10 @@
       "file": "uranus.jpg",
       "url": "https://www.solarsystemscope.com/textures/download/2k_uranus.jpg",
       "licence": "cc-by-4.0-sss",
-      "measured": "2048x1024"
+      "measured": "2048x1024",
+      "web": {
+        "base": 2048
+      }
     },
     {
       "id": "neptune",
@@ -159,7 +210,10 @@
       "file": "neptune.jpg",
       "url": "https://www.solarsystemscope.com/textures/download/2k_neptune.jpg",
       "licence": "cc-by-4.0-sss",
-      "measured": "2048x1024"
+      "measured": "2048x1024",
+      "web": {
+        "base": 2048
+      }
     },
     {
       "id": "stars-milkyway",
@@ -205,5 +259,6 @@
       "licence": "nasa-pd",
       "note": "Headerless raw int16, 23040x11520. elevation_m = sample * 0.5, relative to a 1737400 m sphere. A browser can read this directly as an Int16Array."
     }
-  ]
+  ],
+  "webNote": "An asset with a `web` block is served to the browser. scripts/build-textures.mjs resizes the original down to `base` for every body on screen and to `detail` for the one the camera is focused on, writing WebP into public/textures. Those derivatives are committed; the originals are not. Without a `web` block an asset is a build input only: an elevation model, or an image nothing references."
 }
