@@ -14,8 +14,8 @@ Positions come from the Standish Keplerian tables. Accurate over the span
 they were fitted for, cheap, exactly reversible, and nothing drifts.
 
 **A mass you add changes nothing.** The tables are analytic fits, so a new
-body cannot move Jupiter. Asteroid and spacecraft trajectories still feel
-every planet, because the propagator builds its perturber list from the
+body cannot move Jupiter. Anything integrated against these positions still
+feels every planet, because a propagator builds its perturber list from the
 body registry, but the planets themselves are on rails.
 
 ## Mutual gravity: full N-body

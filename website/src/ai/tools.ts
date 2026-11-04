@@ -18,7 +18,6 @@ import { BODY_CONTRACTS, BODY_IDS, type BodyId } from "@solar/engine/bodies/regi
 import { heliocentricPositionOf } from "@solar/engine/bodies/position";
 import { obliquityToOrbitDeg, orientationOf, rotationPeriodDays } from "@solar/engine/rotation";
 import { DEMONSTRATIONS, demonstrationById } from "@solar/engine/demonstrations/registry";
-import { DEFAULT_LAUNCH, impactEnergy, runAsteroid } from "@solar/engine/scenarios/asteroid";
 import { ACCURACY } from "@solar/engine/data/ephemeris-accuracy";
 import { SHORT_SPAN, type PlanetId } from "@solar/engine/data/planets";
 import { PHYSICAL } from "@solar/engine/data/physical";
@@ -32,9 +31,6 @@ import {
   SPEED_OF_LIGHT_M_S,
 } from "@solar/engine/units";
 import { length, sub } from "@solar/engine/vec";
-import { azimuthFor, maximumPayload, siteById } from "@solar/engine/launch/ascent";
-import { VEHICLES } from "@solar/engine/launch/vehicles";
-import { LAUNCH_SITES } from "@solar/engine/launch/reference-data";
 
 export interface ToolDefinition {
   readonly name: string;
@@ -205,133 +201,6 @@ export const TOOLS: readonly ToolDefinition[] = [
         caveats: result.caveats ?? [],
       };
     },
-  },
-  {
-    name: "launch_asteroid",
-    description:
-      "Propagates an asteroid under the Sun and every planet, and reports where it ends up: " +
-      "impact, escape, or a stable orbit, with close approaches and impact energy. Use this " +
-      "whenever asked what would happen if something were thrown through the solar system. " +
-      "Never estimate an outcome yourself; run it.",
-    input_schema: {
-      type: "object",
-      properties: {
-        originBody: BODY_ENUM,
-        speedMS: { type: "number", description: "Speed relative to the origin body, m/s." },
-        headingDeg: { type: "number", description: "0 is along the body's orbital motion." },
-        inclinationDeg: { type: "number" },
-        diameterM: { type: "number" },
-        durationYears: { type: "number" },
-        when: { type: "string" },
-      },
-      required: ["originBody", "speedMS"],
-      additionalProperties: false,
-    },
-    backedBy: "runAsteroid",
-    run: (input) => {
-      const outcome = runAsteroid({
-        ...DEFAULT_LAUNCH,
-        originBody: asBodyId(input.originBody),
-        speedMS: Number(input.speedMS),
-        headingDeg: typeof input.headingDeg === "number" ? input.headingDeg : 0,
-        inclinationDeg: typeof input.inclinationDeg === "number" ? input.inclinationDeg : 0,
-        diameterM: typeof input.diameterM === "number" ? input.diameterM : 300,
-        durationYears:
-          typeof input.durationYears === "number" ? Math.min(200, input.durationYears) : 50,
-        startEpoch: epochFrom(input),
-      });
-
-      return {
-        summary: outcome.summary,
-        fate: outcome.result.fate,
-        finalEccentricity: outcome.finalEccentricity,
-        finalSemiMajorAxisAu: outcome.finalSemiMajorAxisAu,
-        impact: outcome.impact,
-        closeApproaches: outcome.result.closeApproaches.map((a) => ({
-          body: a.body,
-          distanceAu: a.distanceM / AU_IN_METRES,
-          atYears: a.atSeconds / (86_400 * 365.25),
-        })),
-        integratorSteps: outcome.result.steps,
-        caveat:
-          "Perturbing planet positions come from the Standish tables, whose error reaches about " +
-          "20 arcseconds for Earth, roughly 14,000 km at one au. Fate is reliable; a flyby " +
-          "distance to the kilometre is not.",
-      };
-    },
-  },
-  {
-    name: "compute_launch",
-    description:
-      "Works out what a launch vehicle can lift to a given orbit from a given site, and the " +
-      "full delta-v budget behind it: orbital speed, the climb, gravity and drag losses, and " +
-      "the Earth-rotation bonus, which is negative for a retrograde or sun-synchronous launch. " +
-      "Use this for any question about rockets, payload to orbit, or launch azimuth.",
-    input_schema: {
-      type: "object",
-      properties: {
-        vehicle: { type: "string", enum: VEHICLES.map((v) => v.id) },
-        site: { type: "string", enum: LAUNCH_SITES.map((s) => s.id) },
-        altitudeKm: { type: "number" },
-        inclinationDeg: { type: "number" },
-      },
-      required: ["altitudeKm", "inclinationDeg"],
-      additionalProperties: false,
-    },
-    backedBy: "maximumPayload, ascentBudget, earthRotationBonus, azimuthFor",
-    run: (input) => {
-      const vehicle =
-        VEHICLES.find((v) => v.id === input.vehicle) ?? VEHICLES[0];
-      const site = siteById(typeof input.site === "string" ? input.site : "ksc-lc39a");
-      const target = {
-        altitudeKm: Number(input.altitudeKm),
-        inclinationDeg: Number(input.inclinationDeg),
-        site,
-      };
-
-      const result = maximumPayload(vehicle, target);
-      return {
-        vehicle: result.vehicle,
-        site: site.name,
-        orbit: `${target.altitudeKm} km circular at ${target.inclinationDeg} degrees`,
-        launchAzimuthDeg: azimuthFor(site, target.inclinationDeg),
-        payloadKg: result.payloadKg,
-        liftoffThrustToWeight: result.launchTWR,
-        budget: result.budget,
-        perStageDeltaV: result.perStage,
-        caveat:
-          "The budget uses published loss figures, and the published loss terms disagree by " +
-          "more than a kilometre per second between sources. Fed this vehicle's real masses " +
-          "and its published payload the model implies 2,654 m/s of losses, inside the 2 to 3 " +
-          "km/s band real vehicles need, but the payload it predicts under the published " +
-          "figures runs about 14% high. Only the Atlas V 401 is modelled; the 551 is excluded " +
-          "because its booster's published thrust, specific impulse, burn time and gross mass " +
-          "are mutually inconsistent.",
-      };
-    },
-  },
-  {
-    name: "estimate_impact_energy",
-    description:
-      "Kinetic energy of an impactor in megatons of TNT, with a comparison to a real event. " +
-      "Gated against Chelyabinsk, Tunguska and Chicxulub.",
-    input_schema: {
-      type: "object",
-      properties: {
-        diameterM: { type: "number" },
-        densityKgM3: { type: "number", description: "3000 for stone, 8000 for iron." },
-        speedMS: { type: "number" },
-      },
-      required: ["diameterM", "speedMS"],
-      additionalProperties: false,
-    },
-    backedBy: "impactEnergy",
-    run: (input) =>
-      impactEnergy(
-        Number(input.diameterM),
-        typeof input.densityKgM3 === "number" ? input.densityKgM3 : 3_000,
-        Number(input.speedMS),
-      ),
   },
   {
     name: "gravitational_influence",

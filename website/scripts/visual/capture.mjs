@@ -205,50 +205,6 @@ for (const name of bodies) {
 }
 
 /**
- * Exercises the asteroid feature end to end: open the panel, launch, wait for the worker, and
- * read the result out of the DOM. A propagation that silently never returns would otherwise
- * look identical to one that did.
- */
-async function exerciseAsteroid() {
-  const open = page.locator('button:has-text("Launch an asteroid")');
-  if ((await open.count()) === 0) {
-    console.log("  asteroid: panel trigger not found");
-    return false;
-  }
-  await open.click();
-  await settle(400);
-
-  const launchButton = page.locator('aside button:has-text("Launch")').first();
-  await launchButton.click();
-
-  // The worker runs tens of thousands of adaptive steps; wait for the summary to appear.
-  try {
-    await page.waitForFunction(
-      () => document.body.innerText.includes("Integrator steps"),
-      undefined,
-      { timeout: 90_000 },
-    );
-  } catch {
-    console.log("  asteroid: FAILED, no result after 90s");
-    return false;
-  }
-
-  const summary = await page.evaluate(() => {
-    const aside = [...document.querySelectorAll("aside")].find((el) =>
-      el.innerText.includes("Integrator steps"),
-    );
-    return aside ? aside.innerText.replace(/\s+/g, " ").slice(0, 400) : null;
-  });
-
-  await page.screenshot({ path: `${OUT}/asteroid.png` });
-  const stats = await analyseSceneRegion(`${OUT}/asteroid.png`);
-  shots.push({ name: "asteroid", note: "propagated trajectory", file: `${OUT}/asteroid.png`, ...stats, litFraction: stats.sceneLitFraction, meanLuminance: stats.sceneMeanLuminance });
-
-  console.log(`  asteroid: ${summary}`);
-  return true;
-}
-
-/**
  * Exercises the AI panel against the real API. Skipped without a key, because the simulation
  * is meant to work fully without one and a missing key is not a failure of the app.
  */
@@ -383,7 +339,6 @@ async function exerciseCraters() {
   return contrast > 1.5;
 }
 
-const asteroidWorked = await exerciseAsteroid();
 const cratersVisible = await exerciseCraters();
 const askWorked = await exerciseAsk();
 
@@ -392,7 +347,6 @@ const report = {
   capturedAt: new Date().toISOString(),
   shots,
   focusFailures,
-  asteroidWorked,
   cratersVisible,
   askWorked,
   starfieldOnlyBaseline: STARFIELD_ONLY_BASELINE,
@@ -428,12 +382,8 @@ if (!cratersVisible) {
   console.log("\nFAIL: no lunar surface relief at 2,000 km, where verify:relief measured it peaking");
   process.exit(1);
 }
-if (!asteroidWorked) {
-  console.log("\nFAIL: the asteroid propagation did not return a result");
-  process.exit(1);
-}
 if (!askWorked) {
   console.log("\nFAIL: the AI panel produced no tool call. Without ANTHROPIC_API_KEY this is expected.");
   process.exit(1);
 }
-console.log("\nevery shot renders, the focused body is centred, the asteroid propagated, and the AI answered from a tool");
+console.log("\nevery shot renders, the focused body is centred, the craters show relief, and the AI answered from a tool");

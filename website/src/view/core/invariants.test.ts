@@ -81,9 +81,6 @@ describe("the float64 to float32 boundary", () => {
       "unit direction vectors on a sphere, so magnitude never exceeds one",
     "website/src/view/react/BodyMarkers.tsx":
       "allocates the empty buffers the viewport writes into, and per-body colours",
-    "website/src/view/workers/asteroid.worker.ts":
-      "builds the trajectory buffer transferred to the main thread, in heliocentric metres, " +
-      "which the heliocentric group then absorbs the floating origin for",
   };
 
   it("only declared files import the conversion module, whatever spelling they use", () => {

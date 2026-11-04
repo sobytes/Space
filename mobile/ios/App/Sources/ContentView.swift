@@ -30,8 +30,6 @@ struct ContentView: View {
         : nil
     @State private var showingDemonstrations = false
     @State private var showingAsk = false
-    @State private var showingAsteroid = false
-    @State private var showingLaunch = false
     /**
      Hides every panel so the scene is unobstructed.
 
@@ -54,8 +52,7 @@ struct ContentView: View {
     @State private var showLabels = !CommandLine.arguments.contains("-noLabels")
 
     private var anySheetPresented: Bool {
-        showingDemonstrations || showingAsk || showingAsteroid || showingLaunch
-            || showingHabitability || showingSurface
+        showingDemonstrations || showingAsk || showingHabitability || showingSurface
     }
     @State private var overlayHidden = CommandLine.arguments.contains("-startHidden")
 
@@ -108,10 +105,9 @@ struct ContentView: View {
 
              Not an optimisation for its own sake. The label layer re-lays out on every frame
              of the clock, and with a sheet up that was enough to make the sheet's own
-             controls unreachable: the asteroid origin menu went back to opening and
-             discarding every tap, the same failure that passing a live epoch into the sheet
-             used to cause. Measured through the interaction gate: 9.8 seconds with labels
-             off against 251 seconds and a failure with them on.
+             controls unreachable: a picker inside a sheet went back to opening and discarding
+             every tap. Measured through the interaction gate: 9.8 seconds with labels off
+             against 251 seconds and a failure with them on.
 
              Nothing is lost, because a sheet covers the scene and the labels with it.
              */
@@ -141,9 +137,9 @@ struct ContentView: View {
         .overlay(alignment: .topTrailing) {
             /**
              The tool rail sits above the body panel in z-order and the panel used to grow up
-             underneath it, so an expanded panel's own control ended up behind the launch
-             button. The panel is height-capped now and the rail keeps its own row, so neither
-             can reach the other.
+             underneath it, so an expanded panel's own control ended up behind a rail button.
+             The panel is height-capped now and the rail keeps its own row, so neither can
+             reach the other.
              */
             VStack(alignment: .trailing, spacing: 6) {
                 // Labelled, not a bare icon. Someone asked where the hide control was, which
@@ -177,6 +173,7 @@ struct ContentView: View {
                     Button { showingDemonstrations = true } label: {
                         Image(systemName: "function")
                     }
+                    .accessibilityIdentifier("tool.demonstrations")
                     Button { showingAsk = true } label: {
                         Image(systemName: "sparkles")
                     }
@@ -202,13 +199,6 @@ struct ContentView: View {
                     }
                     .tint(.green)
                     .accessibilityIdentifier("tool.habitability")
-                    Button { showingAsteroid = true } label: {
-                        Image(systemName: "circle.dotted.and.circle")
-                    }
-                    .accessibilityIdentifier("tool.asteroid")
-                    Button { showingLaunch = true } label: {
-                        Image(systemName: "paperplane")
-                    }
                 }
             }
             .buttonStyle(.bordered)
@@ -218,10 +208,6 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showingDemonstrations) { DemonstrationsView() }
         .sheet(isPresented: $showingAsk) { AskView() }
-        .sheet(isPresented: $showingAsteroid) {
-            AsteroidView(scene: scene, clock: clock)
-        }
-        .sheet(isPresented: $showingLaunch) { LaunchView() }
         // `focus`, not `clock`: the assessment is a pure function of the body and does
         // not move with time, so the sheet is rebuilt only when the focus changes.
         .sheet(isPresented: $showingHabitability) { HabitabilityView(body_: focus) }
@@ -246,38 +232,6 @@ struct ContentView: View {
             guard CommandLine.arguments.contains("-fitMoons") else { return }
             try? await Task.sleep(for: .seconds(2))
             scene.frameMoons()
-        }
-        .task {
-            /**
-             `-rideAsteroid` launches one and rides it, so a probe can reach the onboard view
-             without driving the sheet. A short span, because the point is the camera rather
-             than the propagation, and a fifty-year integration in a debug build is not quick.
-             Test hook.
-             */
-            guard CommandLine.arguments.contains("-rideAsteroid") else { return }
-            try? await Task.sleep(for: .seconds(2))
-            let request = AsteroidLaunch(
-                originBody: focus,
-                altitudeM: bodyContracts[focus]!.equatorialRadiusM * 50,
-                speedMS: 6_000, headingDeg: 180, inclinationDeg: 0,
-                // Ten years, not two: long enough that the path wraps several times and a
-                // sampling regression would show, short enough that a debug build finishes
-                // while a probe is still watching.
-                startEpoch: clock.epoch, durationYears: 10,
-                diameterM: 300, densityKgM3: 3_000
-            )
-            let epoch = clock.epoch
-            let result = await Task.detached(priority: .userInitiated) {
-                runAsteroid(request)
-            }.value
-            scene.showTrajectory(result.result.samples, from: epoch)
-            // `-viewFromSun` leaves the camera on the system instead of the rock, which is
-            // the framing the drawn path is easiest to judge in. Test hook.
-            if CommandLine.arguments.contains("-viewFromSun") {
-                focus = .sun
-            } else {
-                scene.setRiding(true, at: epoch)
-            }
         }
         .onAppear {
             // onChange only fires on a change, so the scene would never be told about the
@@ -482,7 +436,7 @@ private struct BodyPanel: View {
                  240 was not enough. The panel is bottom-aligned, so expanding it grows the
                  top edge upwards, and at 240 the header reached y=208 on a 874 point screen
                  while the rail occupies roughly 54 to 292 on the same side. The More control
-                 ended up underneath the launch button: still reported hittable by
+                 ended up underneath the rail's last button: still reported hittable by
                  accessibility, because nothing about the view hierarchy was wrong, and
                  untappable in practice because the rail is in front. Tapping it opened a
                  sheet instead of collapsing the panel, so the panel could be expanded and
@@ -647,21 +601,6 @@ private struct ViewControls: View {
                     .buttonStyle(.bordered)
                     .controlSize(.mini)
                     .tint(.cyan)
-            }
-            /**
-             Only shown once something has been launched, because there is nothing to ride
-             otherwise, and a disabled control that never explains itself is worse than an
-             absent one.
-             */
-            if scene.trajectoryStartEpoch != nil {
-                Button(scene.riding ? "Stop riding" : "Ride it") {
-                    scene.setRiding(!scene.riding, at: clock.epoch)
-                }
-                .font(.system(size: 11))
-                .buttonStyle(.bordered)
-                .controlSize(.mini)
-                .tint(scene.riding ? .orange : .teal)
-                .accessibilityIdentifier("view.ride")
             }
             Spacer()
         }

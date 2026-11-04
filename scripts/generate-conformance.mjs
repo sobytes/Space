@@ -35,12 +35,9 @@ const planets = await import(`${ROOT}engine/src/data/planets.ts`);
 const relativity = await import(`${ROOT}engine/src/relativity.ts`);
 const nbody = await import(`${ROOT}engine/src/nbody.ts`);
 const secular = await import(`${ROOT}engine/src/secular.ts`);
-const asteroid = await import(`${ROOT}engine/src/scenarios/asteroid.ts`);
-const ascent = await import(`${ROOT}engine/src/launch/ascent.ts`);
 const propagate = await import(`${ROOT}engine/src/propagate.ts`);
 const tiles = await import(`${ROOT}website/src/view/core/tiles.ts`);
 const labels = await import(`${ROOT}engine/src/labels.ts`);
-const vehicles = await import(`${ROOT}engine/src/launch/vehicles.ts`);
 
 /** Epochs chosen to exercise the element drift, the leap table and the model seam. */
 const EPOCHS = [
@@ -318,65 +315,6 @@ domains.secular = {
   }),
 };
 
-/** Impact energies, spanning eight orders of magnitude against three real events. */
-domains.asteroid = {
-  absoluteTolerance: 1e-6,
-  description: "Impact energy against Chelyabinsk, Tunguska and Chicxulub.",
-  tolerance: 1e-11,
-  cases: [
-    { id: "chelyabinsk", d: 19, rho: 3300, v: 19160 },
-    { id: "tunguska", d: 55, rho: 3000, v: 15000 },
-    { id: "chicxulub", d: 10000, rho: 2600, v: 20000 },
-  ].map(({ id, d, rho, v }) => {
-    const e = asteroid.impactEnergy(d, rho, v);
-    return {
-      id,
-      input: { diameterM: d, densityKgM3: rho, speedMS: v },
-      expected: {
-        massKg: round(e.massKg),
-        energyJoules: round(e.energyJoules),
-        energyMegatonsTnt: round(e.energyMegatonsTnt),
-      },
-    };
-  }),
-};
-
-/** The ascent budget, where the signed rotation term is the classic error. */
-domains.ascent = {
-  absoluteTolerance: 1e-9,
-  description: "Delta-v budget, rotation bonus and delivered payload.",
-  tolerance: 1e-9,
-  cases: [
-    ...[["ksc-lc39a", 28.5], ["ksc-lc39a", 90], ["ksc-lc39a", 120], ["vandenberg-slc4e", 98]]
-      .map(([site, inclination]) => ({
-        id: `rotation-bonus-${site}-${inclination}`,
-        input: { site, inclinationDeg: inclination },
-        expected: round(ascent.earthRotationBonus(ascent.siteById(site), inclination)),
-      })),
-    ...[200, 500, 2000].map((altitudeKm) => {
-      const target = { altitudeKm, inclinationDeg: 28.5, site: ascent.siteById("ksc-lc39a") };
-      const budget = ascent.ascentBudget(target);
-      return {
-        id: `budget-${altitudeKm}km`,
-        input: { altitudeKm, inclinationDeg: 28.5, site: "ksc-lc39a" },
-        expected: {
-          circularSpeedMS: round(budget.circularSpeedMS),
-          potentialMS: round(budget.potentialMS),
-          earthRotationMS: round(budget.earthRotationMS),
-          requiredMS: round(budget.requiredMS),
-        },
-      };
-    }),
-    {
-      id: "atlas-v-401-payload-200km-28.5deg",
-      input: { vehicle: "atlas-v-401", altitudeKm: 200, inclinationDeg: 28.5, site: "ksc-lc39a" },
-      expected: round(ascent.maximumPayload(vehicles.ATLAS_V_401, {
-        altitudeKm: 200, inclinationDeg: 28.5, site: ascent.siteById("ksc-lc39a"),
-      }).payloadKg),
-    },
-  ],
-};
-
 /**
  * Propagation, which is where an integrator's agreement is actually tested.
  *
@@ -387,7 +325,7 @@ domains.ascent = {
  */
 domains.propagate = {
   absoluteTolerance: 1e-3,
-  description: "Integrated trajectories: two-body, relativistic, and with real perturbers.",
+  description: "Integrated trajectories: two-body and relativistic.",
   tolerance: 1e-7,
   cases: (() => {
     const circular = (auRadius) => {
@@ -465,26 +403,6 @@ domains.propagate = {
       }
     }
 
-    // With every registry body pulling, which is the asteroid path.
-    {
-      const launch = { ...asteroid.DEFAULT_LAUNCH, durationYears: 2 };
-      const initial = asteroid.initialStateFor(launch);
-      const result = propagate.propagate({
-        model: asteroid.asteroidForceModel(launch.startEpoch),
-        initial,
-        durationSeconds: 2 * units.SECONDS_PER_JULIAN_YEAR,
-        limits: { tolerance: 1e-9, minStepSeconds: 1, maxStepSeconds: 86_400 * 5, maxSteps: 2_000_000 },
-      });
-      const final = result.samples[result.samples.length - 1];
-      out.push({
-        id: "asteroid-default-two-years",
-        input: { durationYears: 2, tolerance: 1e-9 },
-        expected: {
-          initial: { position: vec(initial.position), velocity: vec(initial.velocity) },
-          final: { position: vec(final.position), velocity: vec(final.velocity) },
-        },
-      });
-    }
     return out;
   })(),
 };

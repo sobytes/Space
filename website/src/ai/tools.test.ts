@@ -18,7 +18,6 @@ import { BODY_CONTRACTS, BODY_IDS } from "@solar/engine/bodies/registry";
 import { heliocentricPositionOf } from "@solar/engine/bodies/position";
 import { rotationPeriodDays } from "@solar/engine/rotation";
 import { demonstrationById } from "@solar/engine/demonstrations/registry";
-import { impactEnergy } from "@solar/engine/scenarios/asteroid";
 import { apsidalPrecession, influenceOf } from "@solar/engine/nbody";
 import { SECONDS_PER_DAY, SECONDS_PER_JULIAN_YEAR } from "@solar/engine/units";
 import { jdUtcFromEpochMs, tdbFromUtc } from "@solar/engine/time";
@@ -111,28 +110,6 @@ describe("tool output comes from the engine, not from a literal", () => {
     }
   });
 
-  it("estimate_impact_energy returns exactly what the engine computes", () => {
-    const output = TOOL_BY_NAME.get("estimate_impact_energy")!.run({
-      diameterM: 250,
-      densityKgM3: 3_000,
-      speedMS: 17_000,
-    }) as Record<string, number>;
-    expect(output.energyJoules).toBe(impactEnergy(250, 3_000, 17_000).energyJoules);
-  });
-
-  it("launch_asteroid actually propagates rather than guessing a fate", () => {
-    const output = TOOL_BY_NAME.get("launch_asteroid")!.run({
-      originBody: "embary",
-      speedMS: 20_000,
-      headingDeg: 0,
-      durationYears: 40,
-      when: WHEN,
-    }) as Record<string, unknown>;
-
-    expect(output.integratorSteps as number).toBeGreaterThan(100);
-    expect(output.finalEccentricity as number).toBeGreaterThan(1);
-    expect(String(output.caveat)).toContain("arcseconds");
-  });
 });
 
 describe("the tools refuse what they cannot answer", () => {

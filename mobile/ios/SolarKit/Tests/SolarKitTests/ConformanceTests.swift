@@ -221,41 +221,6 @@ final class ConformanceTests: XCTestCase {
                 ? secularPericentreRate(config, Int(number(input, "samples")))
                 : leadingOrderPericentreRate(config))
 
-        case "asteroid":
-            let e = impactEnergy(
-                diameterM: number(input, "diameterM"),
-                densityKgM3: number(input, "densityKgM3"),
-                speedMS: number(input, "speedMS")
-            )
-            return .object([
-                "massKg": .number(e.massKg),
-                "energyJoules": .number(e.energyJoules),
-                "energyMegatonsTnt": .number(e.energyMegatonsTnt),
-            ])
-
-        case "ascent":
-            let site = launchSite(id: text(input, "site"))!
-            if c.id.hasPrefix("rotation-bonus") {
-                return value(try earthRotationBonus(
-                    site: site, inclinationDeg: number(input, "inclinationDeg")
-                ))
-            }
-            let target = AscentTarget(
-                altitudeKm: number(input, "altitudeKm"),
-                inclinationDeg: number(input, "inclinationDeg"),
-                site: site
-            )
-            if c.id.hasPrefix("budget") {
-                let b = try ascentBudget(target)
-                return .object([
-                    "circularSpeedMS": .number(b.circularSpeedMS),
-                    "potentialMS": .number(b.potentialMS),
-                    "earthRotationMS": .number(b.earthRotationMS),
-                    "requiredMS": .number(b.requiredMS),
-                ])
-            }
-            return value(try maximumPayload(vehicle(id: text(input, "vehicle"))!, target: target).payloadKg)
-
         /**
          Integrated trajectories, re-run rather than compared against a stored path.
 
@@ -313,22 +278,8 @@ final class ConformanceTests: XCTestCase {
                 ])
             }
 
-            let years = number(input, "durationYears")
-            let launch = AsteroidLaunch(durationYears: years)
-            let initialState = initialStateFor(launch)
-            let result = propagate(PropagateOptions(
-                model: asteroidForceModel(startEpoch: launch.startEpoch),
-                initial: initialState,
-                durationSeconds: years * Constants.secondsPerJulianYear,
-                limits: limits
-            ))
-            let final = result.samples[result.samples.count - 1]
-            return .object([
-                "initial": .object([
-                    "position": vec(initialState.position), "velocity": vec(initialState.velocity),
-                ]),
-                "final": .object(["position": vec(final.position), "velocity": vec(final.velocity)]),
-            ])
+            XCTFail("no runner for propagate case \"\(c.id)\"")
+            return .null
 
         /// Where a body's name is drawn, and where an off-screen pointer aims.
         case "labels":

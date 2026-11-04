@@ -24,8 +24,6 @@ const selectRunning = (s: ViewportSnapshot) => s.running;
 const selectFocus = (s: ViewportSnapshot) => s.focus;
 const selectAltitude = (s: ViewportSnapshot) => s.distanceToFocus;
 const selectGravity = (s: ViewportSnapshot) => s.gravity;
-const selectRiding = (s: ViewportSnapshot) => s.riding;
-const selectHasTrajectory = (s: ViewportSnapshot) => s.hasTrajectory;
 
 function formatEpoch(epoch: JdTdb): string {
   const ms = epochMsFromJdUtc(utcFromTdb(epoch));
@@ -577,41 +575,6 @@ function SystemViewButton() {
   );
 }
 
-/**
- * Ride the launched object, or stop riding it.
- *
- * Only shown once something has been launched, because there is nothing to ride otherwise and
- * a disabled control that never explains itself is worse than an absent one. Riding moves the
- * floating origin onto the object, so the ordinary camera controls keep working and the view
- * is simply from the rock rather than from a planet.
- */
-function RideButton() {
-  const viewport = useViewport();
-  const riding = useViewportValue(selectRiding);
-  const hasTrajectory = useViewportValue(selectHasTrajectory);
-
-  if (!hasTrajectory) return null;
-
-  return (
-    <button
-      type="button"
-      title={
-        riding
-          ? "Put the camera back on the focused body."
-          : "Put the camera on the launched object and fly with it. Speed up the clock to watch it go."
-      }
-      onClick={() => viewport.setRiding(!riding)}
-      className={`rounded-lg border px-2.5 py-1.5 text-xs backdrop-blur-md transition ${
-        riding
-          ? "border-orange-400/40 bg-orange-400/15 text-orange-200"
-          : "border-teal-400/30 bg-teal-400/10 text-teal-200 hover:bg-teal-400/20"
-      }`}
-    >
-      {riding ? "Stop riding" : "Ride it"}
-    </button>
-  );
-}
-
 export function Hud() {
   const epoch = useViewportValue(selectEpoch);
   const focus = useViewportValue(selectFocus);
@@ -666,7 +629,6 @@ export function Hud() {
             >
               Labels
             </button>
-            <RideButton />
             {/*
               Offered on the Sun too, where it answers a different and fair question: the Sun
               has no habitability ladder, and saying why in the same place is better than a

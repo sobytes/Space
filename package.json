@@ -20,8 +20,6 @@
     "verify:physics": "vitest run engine/src/demonstrations",
     "verify:contracts": "vitest run engine/src/bodies",
     "verify:propagate": "vitest run engine/src/propagate.test.ts",
-    "verify:asteroid": "vitest run engine/src/scenarios",
-    "verify:ascent": "vitest run engine/src/launch",
     "verify:nbody": "vitest run engine/src/nbody.test.ts engine/src/nbody-tracker.test.ts",
     "verify:ai-tools": "vitest run website/src/ai",
     "verify:invariants": "vitest run website/src/view/core/invariants.test.ts",

@@ -106,10 +106,10 @@ disagreement rather than massaging it.
 Build to the full potential of the idea. Resources and elapsed time are not reasons to
 deliver less than was asked for.
 
-- **Never quietly descope.** If the ask is a solar system with real gravity, real rocket
-  trajectories and real asteroid propagation, that is the deliverable. Do not substitute a
-  simplified version and present it as the thing. If part of it is genuinely blocked, finish
-  everything else in full and say plainly what is outstanding and why.
+- **Never quietly descope.** If the ask is a solar system positioned from real ephemerides,
+  with real mutual gravity and real surface imagery, that is the deliverable. Do not
+  substitute a simplified version and present it as the thing. If part of it is genuinely
+  blocked, finish everything else in full and say plainly what is outstanding and why.
 - **Never talk the idea down.** "That is too ambitious for a web app" is not an engineering
   finding, it is a shrug. Find the architecture that makes it possible. The hard constraint is
   almost always solvable by a better data structure or a better algorithm, as the 20x win from

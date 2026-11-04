@@ -34,16 +34,10 @@ import {
 } from "@solar/engine/relativity";
 import { accelerations, solarSystemAt, totalEnergy } from "@solar/engine/nbody";
 import { leadingOrderPericentreRate, secularPericentreRate } from "@solar/engine/secular";
-import { impactEnergy } from "@solar/engine/scenarios/asteroid";
-import { ascentBudget, earthRotationBonus, maximumPayload, siteById } from "@solar/engine/launch/ascent";
-import { ATLAS_V_401 } from "@solar/engine/launch/vehicles";
 import {
   propagate, sampleIntervalFor, trajectoryStateAt, twoBodyModel, type TrajectorySample,
 } from "@solar/engine/propagate";
 import { totalAngularMomentum, advance } from "@solar/engine/nbody";
-import {
-  DEFAULT_LAUNCH, asteroidForceModel, initialStateFor,
-} from "@solar/engine/scenarios/asteroid";
 import { SECONDS_PER_JULIAN_YEAR } from "@solar/engine/units";
 import type { Vec3 } from "@solar/engine/vec";
 import { placeLabels, type LabelInput } from "@solar/engine/labels";
@@ -199,36 +193,6 @@ function compute(domain: string, testCase: Case): unknown {
         : leadingOrderPericentreRate(config);
     }
 
-    case "asteroid": {
-      const e = impactEnergy(input.diameterM, input.densityKgM3, input.speedMS);
-      return {
-        massKg: e.massKg,
-        energyJoules: e.energyJoules,
-        energyMegatonsTnt: e.energyMegatonsTnt,
-      };
-    }
-
-    case "ascent": {
-      if (testCase.id.startsWith("rotation-bonus")) {
-        return earthRotationBonus(siteById(input.site), input.inclinationDeg);
-      }
-      const target = {
-        altitudeKm: input.altitudeKm,
-        inclinationDeg: input.inclinationDeg,
-        site: siteById(input.site),
-      };
-      if (testCase.id.startsWith("budget")) {
-        const budget = ascentBudget(target);
-        return {
-          circularSpeedMS: budget.circularSpeedMS,
-          potentialMS: budget.potentialMS,
-          earthRotationMS: budget.earthRotationMS,
-          requiredMS: budget.requiredMS,
-        };
-      }
-      return maximumPayload(ATLAS_V_401, target).payloadKg;
-    }
-
     /**
      * Integrated trajectories, re-run rather than compared against a stored path.
      *
@@ -279,19 +243,7 @@ function compute(domain: string, testCase: Case): unknown {
         };
       }
 
-      const launch = { ...DEFAULT_LAUNCH, durationYears: input.durationYears };
-      const initial = initialStateFor(launch);
-      const result = propagate({
-        model: asteroidForceModel(launch.startEpoch),
-        initial,
-        durationSeconds: input.durationYears * SECONDS_PER_JULIAN_YEAR,
-        limits,
-      });
-      const final = result.samples[result.samples.length - 1];
-      return {
-        initial: { position: initial.position, velocity: initial.velocity },
-        final: { position: final.position, velocity: final.velocity },
-      };
+      throw new Error(`unhandled propagate case ${testCase.id}`);
     }
 
     /** Where a body's name is drawn, and where an off-screen pointer aims. */

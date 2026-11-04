@@ -1,7 +1,7 @@
 {
   "domain": "propagate",
   "absoluteTolerance": 0.001,
-  "description": "Integrated trajectories: two-body, relativistic, and with real perturbers.",
+  "description": "Integrated trajectories: two-body and relativistic.",
   "tolerance": 1e-7,
   "cases": [
     {
@@ -109,39 +109,6 @@
           "z": 0
         },
         "pericentreLongitude": 0.0000100373844293966
-      }
-    },
-    {
-      "id": "asteroid-default-two-years",
-      "input": {
-        "durationYears": 2,
-        "tolerance": 1e-9
-      },
-      "expected": {
-        "initial": {
-          "position": {
-            "x": 213042562858.355,
-            "y": -2051436536.48033,
-            "z": -5279273209.95079
-          },
-          "velocity": {
-            "x": 899.166980476,
-            "y": 20304.5012922628,
-            "z": 403.24975499374
-          }
-        },
-        "final": {
-          "position": {
-            "x": 147778903953.824,
-            "y": -117455077555.138,
-            "z": -6091617162.58384
-          },
-          "velocity": {
-            "x": 19656.8510603342,
-            "y": 13662.9131015359,
-            "z": -196.880583480701
-          }
-        }
       }
     }
   ]

@@ -22,6 +22,12 @@ correctness claim ("accurate enough for a NASA engineer") that needs a real gate
 
 ## Phase A: Frame
 
+> **Superseded, 2026-11-04.** Asks 4 and 5, rockets and asteroids, were removed at the
+> user's request: "ok remvoe roackets and asteroids they dont give any value to the apps",
+> reaffirmed for both clients. Proofs P5 and P7 went with them, and P6 keeps its energy-
+> conservation half and loses the asteroid close approach. Everything else below stands. This
+> file is the original brief and is left as written rather than edited to match.
+
 ### What the user asked for, consolidated across four messages
 
 1. Solar system to scale, correct rotation periods and spin axes, from real NASA data.
@@ -114,8 +120,9 @@ approached to half a percent by two independent in-repo methods that agree with 
 three decimal places, which locates the remaining gap in either the recalled number or in
 physics not modelled here. Saying which needs a citation this session could not fetch.
 
-All of the user's headline asks are built and gated: the solar system, asteroids, rockets,
-the AI layer, and craters from real elevation data.
+All of the user's headline asks were built and gated at the time of writing: the solar
+system, asteroids, rockets, the AI layer, and craters from real elevation data. Asteroids and
+rockets have since been removed; see the note at the top.
 
 Two findings came out of the ascent work and both are recorded in the code rather than
 smoothed away. The Atlas V 551 is excluded from the solver because the AJ-60A's published

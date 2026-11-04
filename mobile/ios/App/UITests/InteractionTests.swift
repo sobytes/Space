@@ -5,9 +5,9 @@ import XCTest
 
  The existing iOS gates answer two questions: does the arithmetic match the engine
  (`swift test`), and does the right thing end up on screen (`scripts/focus-probe.mjs`). Neither
- can see a control that renders perfectly and ignores every tap, and two of those have now been
- reported from the phone rather than caught here: planets that would not focus on a tap, and
- the asteroid origin picker whose menu opened and then discarded the selection.
+ can see a control that renders perfectly and ignores every tap, and two of those were
+ reported from the phone rather than caught here: planets that would not focus on a tap, and a
+ picker inside a sheet whose menu opened and then discarded the selection.
 
  Both had the same shape. The view is rebuilt faster than a touch completes, so the control is
  drawn correctly every frame and no gesture ever finishes on the instance that started it. A
@@ -27,42 +27,28 @@ final class InteractionTests: XCTestCase {
     }
 
     /**
-     The asteroid origin picker keeps a selection.
+     A control inside a sheet responds to a tap, and its result lands.
 
-     Reported from the phone as "you cant click these": the menu opened, listed every body, and
-     tapping one changed nothing. The cause was that the sheet was handed `clock.epoch`, which
-     advances sixty times a second, so the entire form was rebuilt between the touch landing
-     and the menu resolving it.
+     The sheet that prompted this is gone, but the failure it caught is a property of sheets
+     over a scene that animates, not of that one feature: the sheet renders perfectly, every
+     tap is discarded, and a screenshot cannot tell the two apart. Demonstrations is the
+     remaining sheet with a control that does work and shows a result, so the coverage moves
+     here rather than disappearing with the feature that first exposed it.
 
-     The assertion is on the picker's own value rather than on the menu closing, because the
-     menu closed in the broken build too. Only the retained selection distinguishes them.
+     The assertion is on the measured value appearing, not on the button changing, because a
+     button that reverts to its idle label looks the same whether the work ran or never began.
      */
-    func testAsteroidOriginPickerKeepsSelection() {
-        app.buttons["tool.asteroid"].tap()
+    func testSheetControlRunsAndShowsItsResult() {
+        app.buttons["tool.demonstrations"].tap()
 
-        /**
-         A long wait, and the wait is itself part of the evidence.
+        let run = app.buttons["Run it"].firstMatch
+        XCTAssertTrue(run.waitForExistence(timeout: 20), "the demonstrations sheet did not open")
+        run.tap()
 
-         A SwiftUI picker row carries no accessibility `value`; its state is in the label,
-         which reads "From, Mars". Querying for it took ten seconds in the broken build,
-         because the app never reaches idle while the form is being rebuilt at sixty hertz,
-         and every accessibility snapshot raced the rebuild. In a fixed build the same query
-         resolves in well under a second.
-         */
-        let picker = app.buttons["asteroid.origin"]
-        XCTAssertTrue(picker.waitForExistence(timeout: 20), "the asteroid sheet did not open")
-        XCTAssertEqual(picker.label, "From, Mars", "expected the default origin")
-
-        picker.tap()
-        // By identifier, not label: the body rail behind the sheet also has an "Earth" button
-        // and a label query matches both.
-        let earth = app.buttons["origin.embary"]
-        XCTAssertTrue(earth.waitForExistence(timeout: 10), "the origin menu did not open")
-        earth.tap()
-
+        // Mercury integrates 60 orbits off the main thread, so this is a real wait.
         XCTAssertTrue(
-            settles(timeout: 10) { picker.label == "From, Earth" },
-            "picked Earth and the control still reads \(picker.label)"
+            app.staticTexts["Measured"].waitForExistence(timeout: 30),
+            "tapped Run it and no measured value appeared"
         )
     }
 

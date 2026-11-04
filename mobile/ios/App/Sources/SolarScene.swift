@@ -31,11 +31,11 @@ import SolarKit
 /**
  Observable, because SwiftUI will not re-evaluate a view whose inputs have not changed.
 
- `ViewControls` is handed a `BodyId` and two class references. When riding starts, none of
- those three change, so SwiftUI correctly skipped the view and the control that offers to stop
- riding never appeared. Driving it from the sixty-hertz tick instead would have worked by
- accident and broken the moment the tick was optimised. The properties written every frame,
- positions and the origin, are not read by any view, so this costs nothing.
+ `ViewControls` is handed a `BodyId` and two class references. A control whose visibility
+ depends on scene state none of those three carry was correctly skipped by SwiftUI and simply
+ never appeared. Driving it from the sixty-hertz tick instead would have worked by accident
+ and broken the moment the tick was optimised. The properties written every frame, positions
+ and the origin, are not read by any view, so this costs nothing.
  */
 @MainActor
 @Observable
@@ -190,10 +190,7 @@ final class SolarScene {
 
     /// Writes the camera from the orbit held above. The only place its position is set.
     private func applyCamera() {
-        // Riding, the floor is the rock rather than a planet's surface, and the ceiling has to
-        // reach past the far end of a two-hundred-year trajectory.
-        let limits = riding ? (min: 100.0, max: 1e13) : distanceLimits
-        cameraDistanceM = min(limits.max, max(limits.min, cameraDistanceM))
+        cameraDistanceM = min(distanceLimits.max, max(distanceLimits.min, cameraDistanceM))
 
         let units = Float(cameraDistanceM / metresPerUnit)
         let x = Float(cos(cameraElevation) * cos(cameraAzimuth)) * units
@@ -727,7 +724,6 @@ final class SolarScene {
 
         clearTiles()
         rebuildOrbits()
-        rebuildTrajectory()
         frameFocus(at: epoch)
     }
 
@@ -808,15 +804,9 @@ final class SolarScene {
             positions[id] = gravity?.heliocentricPosition(of: id)
                 ?? heliocentricPositionOf(id, at: epoch)
         }
-        /**
-         The floating origin, which is the rock while riding and the focused body otherwise.
-
-         One line, and it is the whole ride-along feature. Everything downstream already draws
-         relative to this point, so moving it onto the trajectory turns the existing camera
-         into an onboard one without touching the camera at all.
-         */
-        let rider = riderStateAt(epoch)
-        origin = (riding ? rider?.position : positions[focus]) ?? positions[focus] ?? .zero
+        // The floating origin sits on the focused body. Everything downstream draws relative
+        // to it, which is what keeps the numbers reaching Float small at any scale.
+        origin = positions[focus] ?? .zero
 
         /**
          The origin, applied once to the parent instead of to every vertex.
@@ -825,9 +815,8 @@ final class SolarScene {
          were only ever drawn in the system view: focusing the Sun puts the origin at zero, so
          a root left at the identity is accidentally correct. Everything else parented here was
          drawn at absolute heliocentric coordinates while the camera sat at the focused body,
-         which is an astronomical unit away. A moon's orbit path and a ride-along trajectory
-         both land off screen rather than wrong, so nothing looked broken, there was just
-         nothing there.
+         which is an astronomical unit away. A moon's orbit path lands off screen rather than
+         wrong, so nothing looked broken, there was just nothing there.
          */
         heliocentricRoot.position = renderPosition(.zero)
 
@@ -835,14 +824,6 @@ final class SolarScene {
         for (moon, parent) in orbitAnchors {
             guard let node = orbitNodes[moon], let at = positions[parent] else { continue }
             node.position = renderPosition(at)
-        }
-
-        if let rider {
-            let marker = ensureRiderNode()
-            marker.position = renderPosition(rider.position)
-            // Hidden when you are standing on it, which would otherwise be a teal square
-            // pinned to the middle of the screen for the whole flight.
-            marker.isHidden = riding
         }
 
         for id in bodyIds {
@@ -1148,9 +1129,6 @@ final class SolarScene {
                 }
                 return entry
             },
-            "riding": riding,
-            "trajectorySamples": trajectorySamples.count,
-            "trajectoryExtentUnits": trajectoryExtentUnits(),
             "tileNodes": tileNodes.count,
             "bodies": nodes.count,
             "bodyReport": bodyReport(),
@@ -1262,7 +1240,7 @@ final class SolarScene {
         )
     }
 
-    // MARK: - Trajectory
+    // MARK: - Markers
 
     /// Which planet each moon's orbit path is anchored to, for the per-frame reposition.
     private var orbitAnchors: [BodyId: BodyId] = [:]
@@ -1271,159 +1249,6 @@ final class SolarScene {
     /// Seven pixels, the same threshold the website uses, so the two look alike at a glance.
     private static let markerFadePx = 7.0
     private var viewportHeightPx: Double = 900
-
-    private var trajectoryNode: SCNNode?
-    /// Kept, because the drawn path is scale-dependent and the scale changes with focus.
-    private(set) var trajectorySamples: [TrajectorySample] = []
-    /// Sample times are seconds from release, so the epoch they are measured from has to be
-    /// kept with them or the rock cannot be placed on the clock the rest of the scene runs on.
-    private(set) var trajectoryStartEpoch: JdTdb?
-    private var riderNode: SCNNode?
-
-    /**
-     Riding the launched object rather than watching it.
-
-     Implemented as a focus target rather than as a second camera, which is what makes it
-     small. The scene already draws everything relative to a floating origin and already has
-     drag and pinch driving an orbit about that origin, so moving the origin onto the rock
-     gives a rider's view, keeps both gestures working unchanged, and keeps the single
-     Double-to-Float conversion in one place. A bespoke chase camera would have duplicated all
-     of that and had its own precision story.
-     */
-    private(set) var riding = false
-
-    /// Where the rock is now, on the clock the rest of the scene runs on.
-    ///
-    /// The interpolation itself lives in SolarKit, shared with the website and gated by the
-    /// conformance suite, so a rider on a phone and a rider in a browser are in the same
-    /// place. This only converts the epoch into seconds from release.
-    func riderStateAt(_ epoch: JdTdb) -> StateVector? {
-        guard let start = trajectoryStartEpoch else { return nil }
-        return trajectoryStateAt(
-            trajectorySamples, seconds: (epoch.value - start.value) * Constants.secondsPerDay
-        )
-    }
-
-    func setRiding(_ on: Bool, at epoch: JdTdb) {
-        guard trajectoryStartEpoch != nil || !on else { return }
-        riding = on
-        if on {
-            // Back off to something that frames the departure rather than sitting inside the
-            // launch site. Fifty radii out is where the rock is released, so twice that shows
-            // both the rock and the planet it came from.
-            cameraDistanceM = bodyContracts[focus]!.equatorialRadiusM * 120
-            lookBackAtDeparture(from: epoch)
-        }
-        update(to: epoch)
-        applyCamera()
-    }
-
-    /**
-     Point the ride back at the body it just left.
-
-     Without this the camera keeps whatever angle it had, which is almost never the direction
-     the planet is in, so the first thing a rider sees is empty sky. The camera is placed along
-     its orbit direction and always looks at the origin, so putting it on the far side from the
-     planet puts the planet directly behind the rock and squarely in frame.
-     */
-    private func lookBackAtDeparture(from epoch: JdTdb) {
-        guard let rider = riderStateAt(epoch) else { return }
-        let planet = heliocentricPositionOf(focus, at: epoch)
-        let toPlanet = planet - rider.position
-        guard toPlanet.length > 0 else { return }
-        let away = toPlanet * (-1 / toPlanet.length)
-        // Scene axes, not ecliptic: y is up on screen and is the ecliptic's z.
-        cameraElevation = max(-1.5, min(1.5, asin(max(-1, min(1, away.z)))))
-        cameraAzimuth = atan2(-away.y, away.x)
-    }
-
-    /**
-     Draws a propagated trajectory, in the same frame and scale as everything else.
-
-     Positions come straight from the integrator's samples, so the path and the planets
-     cannot disagree about where anything is.
-
-     The samples are retained rather than drawn once and forgotten. Scene units are per-focus
-     (one unit is Mars's radius on Mars, an astronomical unit on the Sun), so vertices baked
-     at launch time are wrong by the ratio of the two the moment focus changes: a path
-     launched from Mars and then viewed from the Sun came out 44,000 times too large, which
-     on screen is a sheaf of straight cyan lines crossing the whole system and running off
-     past Neptune rather than a closed orbit. Rebuilt on focus exactly like the orbit paths.
-     */
-    func showTrajectory(_ samples: [TrajectorySample], from epoch: JdTdb) {
-        trajectorySamples = samples
-        trajectoryStartEpoch = epoch
-        rebuildTrajectory()
-    }
-
-    private func rebuildTrajectory() {
-        trajectoryNode?.removeFromParentNode()
-        trajectoryNode = nil
-        guard trajectorySamples.count > 1 else { return }
-
-        // Plain heliocentric, with no origin subtracted, because the node hangs off
-        // `heliocentricRoot` and that parent applies the origin once per frame. Subtracting it
-        // here as well would double-count it and move the path by the focused body's distance
-        // from the Sun.
-        let vertices = trajectorySamples.map { inHeliocentricUnits($0.position) }
-        var indices: [Int32] = []
-        for i in 0 ..< (vertices.count - 1) {
-            indices.append(Int32(i))
-            indices.append(Int32(i + 1))
-        }
-
-        let geometry = SCNGeometry(
-            sources: [SCNGeometrySource(vertices: vertices)],
-            elements: [SCNGeometryElement(indices: indices, primitiveType: .line)]
-        )
-        let material = SCNMaterial()
-        material.lightingModel = .constant
-        material.diffuse.contents = UIColor.systemTeal
-        geometry.materials = [material]
-
-        let node = SCNNode(geometry: geometry)
-        heliocentricRoot.addChildNode(node)
-        trajectoryNode = node
-    }
-
-    func clearTrajectory() {
-        trajectorySamples = []
-        trajectoryStartEpoch = nil
-        riding = false
-        riderNode?.removeFromParentNode()
-        riderNode = nil
-        trajectoryNode?.removeFromParentNode()
-        trajectoryNode = nil
-    }
-
-    /**
-     A marker for the rock, sized in screen space rather than in metres.
-
-     A 300 metre body at the scale of a planetary system is far smaller than one pixel, so
-     drawn to scale it is invisible at every distance from which anything else can be seen.
-     SceneKit's billboard constraint plus a fixed unit size gives a marker that stays legible
-     while the camera covers ten orders of magnitude, which is the same reason the body markers
-     on the website exist.
-     */
-    private func ensureRiderNode() -> SCNNode {
-        if let existing = riderNode { return existing }
-        let marker = SCNNode(geometry: SCNPlane(width: 0.02, height: 0.02))
-        marker.geometry?.firstMaterial?.lightingModel = .constant
-        marker.geometry?.firstMaterial?.diffuse.contents = UIColor.systemTeal
-        marker.geometry?.firstMaterial?.isDoubleSided = true
-        marker.constraints = [SCNBillboardConstraint()]
-        scene.rootNode.addChildNode(marker)
-        riderNode = marker
-        return marker
-    }
-
-    /// The drawn path's largest distance from the Sun, in scene units. The gate's handle on
-    /// "is this path the size the integrator said it was".
-    func trajectoryExtentUnits() -> Double {
-        trajectorySamples.reduce(0) { best, sample in
-            Swift.max(best, sample.position.length / metresPerUnit)
-        }
-    }
 
     // MARK: - View commands
 

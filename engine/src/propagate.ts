@@ -3,7 +3,7 @@
  *
  * Dormand-Prince 5(4), the standard embedded Runge-Kutta pair. Two solutions of different order
  * come out of the same seven stage evaluations, their difference estimates the local error, and
- * the step size is chosen from it. That matters here because an asteroid's step needs to be
+ * the step size is chosen from it. That matters here because a small body's step needs to be
  * small near a close encounter and can be enormous in the quiet stretches between, and a fixed
  * step has to assume the worst everywhere.
  *
@@ -54,8 +54,8 @@ export interface Perturber {
 export interface ForceModel {
   readonly centralGm: number;
   readonly perturbers: readonly Perturber[];
-  /** First post-Newtonian correction from the central body. Mercury needs it; an asteroid
-   *  in the main belt does not, so it is opt-in and its cost is stated rather than assumed. */
+  /** First post-Newtonian correction from the central body. Mercury needs it; a body out in
+   *  the main belt does not, so it is opt-in and its cost is stated rather than assumed. */
   readonly relativistic: boolean;
 }
 
@@ -284,10 +284,11 @@ export function propagate(options: PropagateOptions): PropagationResult {
      * a cadence slightly finer lost samples: a request for 1000 across 3.7 years returned 987,
      * at times that were not the ones asked for.
      *
-     * Measured, the asteroid integrator runs at a 1.36 day mean step under its 1e-10
-     * tolerance, well inside the 30 day ceiling, so this was not what produced the polygonal
-     * paths; a fixed sample count was. It is still the wrong behaviour, and fixing it is what
-     * lets `sampleIntervalFor` promise a resolution rather than request one.
+     * Measured on a perturbed heliocentric orbit, the integrator ran at a 1.36 day mean step
+     * under a 1e-10 tolerance, well inside the 30 day ceiling, so this was not what produced
+     * the polygonal paths; a fixed sample count was. It is still the wrong behaviour, and
+     * fixing it is what lets `sampleIntervalFor` promise a resolution rather than request
+     * one.
      *
      * Interpolating inside the step costs no extra force evaluations and no accuracy worth
      * the name: the blend is third order in a step already controlled to 1e-10. Shrinking the

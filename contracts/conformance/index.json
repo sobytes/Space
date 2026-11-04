@@ -10,8 +10,6 @@
     "relativity",
     "nbody",
     "secular",
-    "asteroid",
-    "ascent",
     "propagate",
     "labels",
     "sample-cadence",
@@ -19,5 +17,5 @@
     "nbody-evolution",
     "tiles"
   ],
-  "totalCases": 538
+  "totalCases": 526
 }

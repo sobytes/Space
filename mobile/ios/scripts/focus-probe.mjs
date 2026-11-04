@@ -318,8 +318,8 @@ for (const { id: body, label, minimumLit, note, moons, extraArgs, orbitError } o
      * when the Sun is focused, so a root left at the identity is accidentally correct there and
      * wrong by an astronomical unit everywhere else. It stayed that way because the only
      * geometry parented to the root was planetary orbit paths, which are only drawn in the
-     * system view. The moment anything else hung off it, a moon's orbit or a ride-along
-     * trajectory, it was drawn off screen rather than visibly misplaced.
+     * system view. The moment anything else hung off it, a moon's orbit, it was drawn off
+     * screen rather than visibly misplaced.
      */
     const scene = sceneDebug(udid);
     const offset = scene?.focusUnderRootUnits ?? Infinity;

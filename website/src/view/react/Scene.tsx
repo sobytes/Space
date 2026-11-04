@@ -9,14 +9,10 @@ import { BodyMarkers } from "./BodyMarkers";
 import { CameraRig } from "./CameraRig";
 import { Hud } from "./Hud";
 import { AskPanel } from "./AskPanel";
-import { AsteroidPanel } from "./AsteroidPanel";
-import { AsteroidTrajectory } from "./AsteroidTrajectory";
 import { HeliocentricRoot } from "./HeliocentricRoot";
 import { OrbitPaths } from "./OrbitPaths";
 import { PickLayer } from "./PickLayer";
 import { Starfield } from "./Starfield";
-import { useAsteroid } from "./useAsteroid";
-import { RideBinding } from "./RideBinding";
 import { ViewportBinding, ViewportProvider } from "./ViewportContext";
 
 /**
@@ -28,8 +24,6 @@ import { ViewportBinding, ViewportProvider } from "./ViewportContext";
  * scene is driven by, without the HUD having to live inside WebGL.
  */
 export function Scene() {
-  const asteroid = useAsteroid();
-
   return (
     <ViewportProvider>
       <div className="relative h-dvh w-full overflow-hidden bg-black">
@@ -47,8 +41,6 @@ export function Scene() {
           <Starfield />
           <HeliocentricRoot>
             <OrbitPaths />
-            <AsteroidTrajectory response={asteroid.run.response} />
-            <RideBinding response={asteroid.run.response} />
           </HeliocentricRoot>
           <BodyMarkers />
           {/* The Sun carries its own light, inside its own group. See Body.tsx. */}
@@ -62,7 +54,6 @@ export function Scene() {
           <PickLayer />
         </Canvas>
         <Hud />
-        <AsteroidPanel asteroid={asteroid} />
         <AskPanel />
       </div>
     </ViewportProvider>

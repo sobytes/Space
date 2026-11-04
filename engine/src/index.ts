@@ -39,9 +39,3 @@ export * from "./bodies/position";
 export * from "./bodies/laplace";
 
 export * from "./demonstrations/registry";
-export * from "./scenarios/asteroid";
-export * from "./launch/ascent";
-export * from "./launch/lambert";
-export * from "./launch/intercept";
-export * from "./scenarios/impact";
-export * from "./launch/vehicles";

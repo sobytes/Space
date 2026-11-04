@@ -25,7 +25,7 @@ type StreamEvent = Entry | { readonly kind: "done" };
 
 const SUGGESTIONS = [
   "Why doesn't Mercury's orbit close?",
-  "Throw a 500 m asteroid at Earth from Jupiter's orbit",
+  "How far does Jupiter move the Sun?",
   "Compare Saturn and Jupiter",
   "Prove Kepler's third law",
 ];

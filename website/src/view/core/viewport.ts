@@ -23,8 +23,6 @@ import { BODY_CONTRACTS, BODY_IDS, type BodyId } from "@solar/engine/bodies/regi
 import { orientationOf } from "@solar/engine/rotation";
 import type { JdTdb } from "@solar/engine/time";
 import { length, type Vec3 } from "@solar/engine/vec";
-import { trajectoryStateAt, type TrajectorySample } from "@solar/engine/propagate";
-import { SECONDS_PER_DAY } from "@solar/engine/units";
 import { placeAnchor, relativeTo } from "./internal/place";
 import { planDepth } from "./depth";
 import { initialClock, reduceClock, tickClock, type ClockCommand, type ClockState } from "./clock";
@@ -46,19 +44,6 @@ export interface ScreenPlacement {
   readonly behindCamera: boolean;
 }
 
-/**
- * A propagated trajectory, flat, as the worker transfers it.
- *
- * Typed arrays rather than objects because this crosses a worker boundary and a few thousand
- * sample objects would be structured-cloned rather than transferred. Unpacked once on arrival.
- */
-export interface RideTrajectory {
-  readonly times: Float64Array;
-  /** Six per sample: position xyz then velocity xyz, heliocentric metres and metres a second. */
-  readonly states: Float64Array;
-  readonly startEpoch: number;
-}
-
 export interface ViewportSnapshot {
   readonly epoch: JdTdb;
   readonly secondsPerSecond: number;
@@ -71,10 +56,6 @@ export interface ViewportSnapshot {
    */
   readonly sunDirection: { readonly x: number; readonly y: number; readonly z: number };
   readonly gravity: GravitySnapshot;
-  /** Whether the floating origin is currently sitting on a launched object. */
-  readonly riding: boolean;
-  /** Whether there is anything to ride. */
-  readonly hasTrajectory: boolean;
 }
 
 /**
@@ -125,16 +106,6 @@ export interface Viewport {
   /** The camera rig subscribes here. Returns an unsubscribe function. */
   subscribeView(listener: (command: ViewCommand) => void): () => void;
   setFocus(id: BodyId): void;
-  /**
-   * Hand the viewport a propagated trajectory to ride, or null to put it away.
-   *
-   * Riding is implemented by moving the floating origin onto the object rather than by adding
-   * a second camera. Everything downstream already draws relative to that origin, so the
-   * existing controls, the existing precision story and the existing distance limits all keep
-   * working, and the feature is one branch in the frame loop.
-   */
-  setRide(ride: RideTrajectory | null): void;
-  setRiding(on: boolean): void;
   /** Camera distance from the focused body's surface, metres. Driven by the controls. */
   setDistanceToSurface(metres: number): void;
   /**
@@ -198,9 +169,6 @@ export function createViewport(init: ViewportInit = {}): Viewport {
   let focus: BodyId = init.initialFocus ?? "embary";
   let distanceToSurface = BODY_CONTRACTS[focus].equatorialRadiusM * 8;
   let origin: Vec3 = { x: 0, y: 0, z: 0 };
-  let ride: RideTrajectory | null = null;
-  let rideSamples: TrajectorySample[] = [];
-  let riding = false;
 
   const nodes = new Map<BodyId, Object3D>();
   let heliocentricRoot: Object3D | null = null;
@@ -235,22 +203,7 @@ export function createViewport(init: ViewportInit = {}): Viewport {
       distanceToFocus: distanceToSurface,
       sunDirection: sunDirectionFromFocus(),
       gravity,
-      riding,
-      hasTrajectory: rideSamples.length > 1,
     };
-  }
-
-  /**
-   * Where the ridden object is at this epoch, in heliocentric metres.
-   *
-   * The interpolation itself is `trajectoryStateAt` in the engine, shared with the iOS client
-   * and gated by the conformance suite, so a rider in a browser and a rider on a phone are in
-   * the same place. This only converts the epoch into seconds from release.
-   */
-  function riderAt(epoch: JdTdb): Vec3 | null {
-    if (!ride || rideSamples.length < 2) return null;
-    const seconds = (epoch - ride.startEpoch) * SECONDS_PER_DAY;
-    return trajectoryStateAt(rideSamples, seconds)?.position ?? null;
   }
 
   /** The Sun sits at the heliocentric origin, so it is at minus the floating origin. */
@@ -353,10 +306,8 @@ export function createViewport(init: ViewportInit = {}): Viewport {
     resolvePositions();
 
     // The origin tracks the focused body, so the deltas handed to the GPU stay small no matter
-    // how far from the Sun the camera is. Riding moves it onto the launched object instead,
-    // which is the whole of that feature.
-    const rider = riding ? riderAt(clock.epoch) : null;
-    origin = rider ?? positions.get(focus) ?? { x: 0, y: 0, z: 0 };
+    // how far from the Sun the camera is.
+    origin = positions.get(focus) ?? { x: 0, y: 0, z: 0 };
 
     for (const id of BODY_IDS) {
       const node = nodes.get(id);
@@ -511,31 +462,6 @@ export function createViewport(init: ViewportInit = {}): Viewport {
 
     setFocus(id) {
       focus = id;
-      publish(true);
-    },
-
-    setRide(next) {
-      ride = next;
-      riding = false;
-      rideSamples = [];
-      if (next) {
-        // Unpacked once into the shape the shared interpolation takes, rather than per frame.
-        // The buffers arrive from the worker as flat typed arrays to transfer cheaply.
-        rideSamples = Array.from({ length: next.times.length }, (_, i) => ({
-          t: next.times[i],
-          position: { x: next.states[i * 6], y: next.states[i * 6 + 1], z: next.states[i * 6 + 2] },
-          velocity: {
-            x: next.states[i * 6 + 3],
-            y: next.states[i * 6 + 4],
-            z: next.states[i * 6 + 5],
-          },
-        }));
-      }
-      publish(true);
-    },
-
-    setRiding(on) {
-      riding = on && rideSamples.length > 1;
       publish(true);
     },
 
