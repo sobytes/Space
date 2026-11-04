@@ -11,7 +11,13 @@
     "nbody",
     "secular",
     "asteroid",
-    "ascent"
+    "ascent",
+    "propagate",
+    "labels",
+    "sample-cadence",
+    "trajectory-interpolation",
+    "nbody-evolution",
+    "tiles"
   ],
-  "totalCases": 487
+  "totalCases": 538
 }

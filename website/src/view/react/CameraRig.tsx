@@ -42,6 +42,19 @@ export function CameraRig() {
     instance.maxDistance = isSystemView ? 2e13 : radius * 4_000;
     instance.dollySpeed = 0.6;
     instance.truckSpeed = 0;
+
+    /**
+     * Up is the ecliptic pole, which in render space is z.
+     *
+     * three.js defaults a camera's up to y, and here y lies in the ecliptic plane. The result
+     * was that focusing any body put the camera in the plane with the plane's own direction
+     * as screen-vertical, so every other planet's orbit ran straight up and down the screen.
+     * Reported as "when i focus on a planet the lines are vertical, i would expect them to be
+     * horizontal", which is correct: an orbit seen edge-on from within the plane is a
+     * horizontal line, and it was only vertical because the camera was rolled ninety degrees.
+     */
+    instance.camera.up.set(0, 0, 1);
+    instance.updateCameraUp();
     void instance.setTarget(0, 0, 0, false);
 
     /**
@@ -55,10 +68,38 @@ export function CameraRig() {
      */
     const sunDirection = viewport.sunDirectionFor(focus);
     const distance = isSystemView ? 1.6e12 : radius * 6;
+
+    if (isSystemView) {
+      /**
+       * An orrery angle, not a plan view.
+       *
+       * The system view used to sit 76 degrees above the ecliptic, almost straight down the
+       * pole, which is the one orientation where it does not matter which way is up. That is
+       * why this bug survived: the only view anyone checked was the one that could not show
+       * it. Sixteen degrees is the angle the iOS client uses, it reads as a solar system
+       * rather than a diagram, and it is far enough from the pole for the up vector to mean
+       * something.
+       */
+      const elevation = 0.28;
+      void instance.setLookAt(
+        Math.cos(elevation) * distance,
+        Math.cos(elevation) * distance * 0.35,
+        Math.sin(elevation) * distance,
+        0,
+        0,
+        0,
+        true,
+      );
+      return;
+    }
+
+    // Lifted along z, the ecliptic pole, so the lift actually leaves the plane. Adding it to
+    // y moved the camera sideways within the ecliptic and left the terminator edge-on, which
+    // is exactly what this was written to avoid.
     void instance.setLookAt(
       sunDirection.x * distance,
-      sunDirection.y * distance + distance * 0.25,
-      sunDirection.z * distance,
+      sunDirection.y * distance,
+      sunDirection.z * distance + distance * 0.25,
       0,
       0,
       0,
@@ -114,10 +155,19 @@ export function CameraRig() {
         const t = (command.degrees * Math.PI) / 180;
         const cos = Math.cos(t);
         const sin = Math.sin(t);
-        // Ecliptic north in render space. The scene's y axis is the ecliptic pole.
+        /**
+         * Ecliptic north in render space, which is z and not y.
+         *
+         * This said y, and the comment asserting it was the only thing that made it look
+         * right. Render space is the engine's frame unswizzled, `placeAnchor` writes x, y and
+         * z straight through, and `contracts/units-and-frames` is explicit that z is ecliptic
+         * north. Rotating about y swung the viewpoint about an axis lying in the ecliptic
+         * plane, so Day, Terminator and Night moved the camera out of the plane rather than
+         * around it and none of the three landed where it claimed.
+         */
         const nx = 0;
-        const ny = 1;
-        const nz = 0;
+        const ny = 0;
+        const nz = 1;
         const dot = nx * sun.x + ny * sun.y + nz * sun.z;
         const crossX = ny * sun.z - nz * sun.y;
         const crossY = nz * sun.x - nx * sun.z;

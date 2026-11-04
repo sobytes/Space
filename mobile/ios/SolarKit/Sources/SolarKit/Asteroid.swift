@@ -143,7 +143,11 @@ public func runAsteroid(_ launch: AsteroidLaunch) -> AsteroidOutcome {
         initial: initial,
         durationSeconds: launch.durationYears * Constants.secondsPerJulianYear,
         limits: PropagationLimits(tolerance: 1e-9, maxStepSeconds: 5 * Constants.secondsPerDay),
-        sampleIntervalSeconds: launch.durationYears * Constants.secondsPerJulianYear / 600
+        sampleIntervalSeconds: sampleIntervalFor(
+            gm: Constants.gmSun,
+            initial: initial,
+            durationSeconds: launch.durationYears * Constants.secondsPerJulianYear
+        )
     ))
 
     var impact: ImpactEstimate?

@@ -37,6 +37,9 @@ const nbody = await import(`${ROOT}engine/src/nbody.ts`);
 const secular = await import(`${ROOT}engine/src/secular.ts`);
 const asteroid = await import(`${ROOT}engine/src/scenarios/asteroid.ts`);
 const ascent = await import(`${ROOT}engine/src/launch/ascent.ts`);
+const propagate = await import(`${ROOT}engine/src/propagate.ts`);
+const tiles = await import(`${ROOT}website/src/view/core/tiles.ts`);
+const labels = await import(`${ROOT}engine/src/labels.ts`);
 const vehicles = await import(`${ROOT}engine/src/launch/vehicles.ts`);
 
 /** Epochs chosen to exercise the element drift, the leap table and the model seam. */
@@ -372,6 +375,357 @@ domains.ascent = {
       }).payloadKg),
     },
   ],
+};
+
+/**
+ * Propagation, which is where an integrator's agreement is actually tested.
+ *
+ * The force-law cases above check one evaluation. These check thousands, compounded, with an
+ * adaptive step: two implementations can agree perfectly on a single acceleration and diverge
+ * over an integration if their step controllers disagree about anything. Spans are kept short
+ * enough that the comparison is about the method rather than about chaos.
+ */
+domains.propagate = {
+  absoluteTolerance: 1e-3,
+  description: "Integrated trajectories: two-body, relativistic, and with real perturbers.",
+  tolerance: 1e-7,
+  cases: (() => {
+    const circular = (auRadius) => {
+      const r = auRadius * units.AU_IN_METRES;
+      return {
+        position: { x: r, y: 0, z: 0 },
+        velocity: { x: 0, y: Math.sqrt(units.GM_SUN / r), z: 0 },
+      };
+    };
+    const out = [];
+
+    // A closed orbit: the exactly solvable reference. After one period it must return.
+    for (const auRadius of [0.39, 1.0, 5.2]) {
+      const initial = circular(auRadius);
+      const r = auRadius * units.AU_IN_METRES;
+      const period = 2 * Math.PI * Math.sqrt(r ** 3 / units.GM_SUN);
+      const result = propagate.propagate({
+        model: propagate.twoBodyModel(),
+        initial,
+        durationSeconds: period,
+        limits: { tolerance: 1e-12, minStepSeconds: 1, maxStepSeconds: 86_400 * 5, maxSteps: 2_000_000 },
+      });
+      const final = result.samples[result.samples.length - 1];
+      out.push({
+        id: `two-body-one-period-${auRadius}au`,
+        input: { radiusAu: auRadius, durationSeconds: period, tolerance: 1e-12 },
+        /**
+         * Scaled to the orbit, because the interesting component is pure round-off.
+         *
+         * A closed orbit returns to x = r and y = 0, so the y the integrator actually reaches
+         * is not a physical quantity at all: it is the accumulated error, about 1.5 metres out
+         * of 1.5e11. Two integrators in two languages take different step sequences and will
+         * never agree on it to the domain's 1e-3 metres, and demanding that they do gates on
+         * the noise rather than on the physics. One part in 1e9 of the orbit radius says what
+         * is actually being claimed, which is that both close the orbit equally well.
+         */
+        absoluteTolerance: r * 1e-9,
+        expected: { position: vec(final.position), velocity: vec(final.velocity) },
+      });
+    }
+
+    // Mercury with the relativistic term on, which is the demonstration's own path.
+    {
+      const a = relativity.MERCURY.semiMajorAxisMetres;
+      const e = relativity.MERCURY.eccentricity;
+      const period = 2 * Math.PI * Math.sqrt(a ** 3 / units.GM_SUN);
+      const initial = {
+        position: { x: a * (1 - e), y: 0, z: 0 },
+        velocity: { x: 0, y: Math.sqrt((units.GM_SUN * (1 + e)) / (a * (1 - e))), z: 0 },
+      };
+      for (const relativistic of [false, true]) {
+        const result = propagate.propagate({
+          model: { centralGm: units.GM_SUN, perturbers: [], relativistic },
+          initial,
+          durationSeconds: 20 * period,
+          limits: { tolerance: 1e-13, minStepSeconds: 1, maxStepSeconds: 3_600, maxSteps: 2_000_000 },
+        });
+        const final = result.samples[result.samples.length - 1];
+        out.push({
+          id: `mercury-20-orbits-${relativistic ? "relativistic" : "newtonian"}`,
+          input: { relativistic, orbits: 20, tolerance: 1e-13 },
+          // As above. The quantity this case exists to check is the pericentre longitude,
+          // which is well conditioned and keeps the domain's own tolerance.
+          absoluteTolerance: a * 1e-9,
+          expected: {
+            position: vec(final.position),
+            velocity: vec(final.velocity),
+            // The quantity the demonstration actually measures.
+            pericentreLongitude: round(
+              elements.osculatingElements(units.GM_SUN, final.position, final.velocity)
+                .longitudeOfPericentreRad,
+            ),
+          },
+        });
+      }
+    }
+
+    // With every registry body pulling, which is the asteroid path.
+    {
+      const launch = { ...asteroid.DEFAULT_LAUNCH, durationYears: 2 };
+      const initial = asteroid.initialStateFor(launch);
+      const result = propagate.propagate({
+        model: asteroid.asteroidForceModel(launch.startEpoch),
+        initial,
+        durationSeconds: 2 * units.SECONDS_PER_JULIAN_YEAR,
+        limits: { tolerance: 1e-9, minStepSeconds: 1, maxStepSeconds: 86_400 * 5, maxSteps: 2_000_000 },
+      });
+      const final = result.samples[result.samples.length - 1];
+      out.push({
+        id: "asteroid-default-two-years",
+        input: { durationYears: 2, tolerance: 1e-9 },
+        expected: {
+          initial: { position: vec(initial.position), velocity: vec(initial.velocity) },
+          final: { position: vec(final.position), velocity: vec(final.velocity) },
+        },
+      });
+    }
+    return out;
+  })(),
+};
+
+/**
+ * Label placement, including the off-screen pointers.
+ *
+ * Gated because the decisions are judgement calls with numbers in them, and two clients
+ * making them separately is exactly how the marker threshold came to exist on the web and
+ * not on the phone. The clamped cases matter most: a pointer that disagrees between clients
+ * sends two viewers in different directions for the same body.
+ */
+domains.labels = {
+  absoluteTolerance: 1e-9,
+  description: "Where a body's name is drawn, and where an off-screen pointer aims.",
+  tolerance: 1e-12,
+  cases: (() => {
+    const viewport = { viewportWidthPx: 402, viewportHeightPx: 874 };
+    const base = {
+      ndcX: 0, ndcY: 0, radiusPx: 4, distance: 1e9,
+      behindCamera: false, relevance: "other",
+    };
+    const scenarios = [
+      { id: "on-screen-large", inputs: [{ ...base, id: "mars", radiusPx: 300, relevance: "focus" }] },
+      { id: "off-right", inputs: [{ ...base, id: "moon", ndcX: 4, relevance: "satellite-of-focus" }] },
+      { id: "off-diagonal", inputs: [{ ...base, id: "io", ndcX: 6, ndcY: 3, relevance: "satellite-of-focus" }] },
+      { id: "behind-camera", inputs: [{ ...base, id: "moon", ndcX: 0.5, behindCamera: true, relevance: "satellite-of-focus" }] },
+      {
+        id: "thinning",
+        inputs: [
+          { ...base, id: "io", distance: 1e9 },
+          { ...base, id: "europa", distance: 2e9 },
+          { ...base, id: "ganymede", distance: 3e9 },
+        ],
+      },
+      {
+        // A moon sits on its planet from the system view, and the planet must win the label.
+        id: "planet-beats-its-moon",
+        inputs: [
+          { ...base, id: "callisto", distance: 1e9 },
+          { ...base, id: "jupiter", distance: 2e9 },
+        ],
+      },
+      {
+        id: "mixed-relevance",
+        inputs: [
+          { ...base, id: "embary", relevance: "focus" },
+          { ...base, id: "moon", ndcX: 3, relevance: "satellite-of-focus", distance: 2e9 },
+          { ...base, id: "neptune", ndcX: 9, relevance: "other", distance: 3e9 },
+        ],
+      },
+    ];
+    return scenarios.map(({ id, inputs }) => ({
+      id,
+      input: { inputs, ...viewport },
+      expected: labels.placeLabels(inputs, viewport).map((p) => ({
+        id: p.id,
+        x: round(p.x),
+        y: round(p.y),
+        clamped: p.clamped,
+        bearingRadians: p.bearingRadians === null ? null : round(p.bearingRadians),
+      })),
+    }));
+  })(),
+};
+
+/**
+ * How densely a trajectory is recorded, which decides what the drawn path looks like.
+ *
+ * Worth its own domain because the clients disagreed here for the whole life of the feature
+ * and nothing could catch it: one recorded 2000 points per run and the other 600, so the same
+ * launch drew a smooth ellipse in a browser and a dodecagon on a phone. Neither number was
+ * written down anywhere, so there was nothing for a conformance suite to compare. Stating the
+ * cadence as cases makes a future divergence a failed build.
+ */
+domains["sample-cadence"] = {
+  absoluteTolerance: 1e-6,
+  description: "Recording interval for a propagated path, from the orbit rather than the span.",
+  tolerance: 1e-12,
+  cases: (() => {
+    const circular = (auRadius) => {
+      const r = auRadius * units.AU_IN_METRES;
+      return {
+        position: { x: r, y: 0, z: 0 },
+        velocity: { x: 0, y: Math.sqrt(units.GM_SUN / r), z: 0 },
+      };
+    };
+    const out = [];
+    for (const auRadius of [0.39, 1, 5.2]) {
+      for (const years of [2, 50, 200]) {
+        const seconds = years * units.SECONDS_PER_JULIAN_YEAR;
+        out.push({
+          id: `interval-${auRadius}au-${years}y`,
+          input: { ...circular(auRadius), durationSeconds: seconds },
+          expected: round(propagate.sampleIntervalFor(units.GM_SUN, circular(auRadius), seconds)),
+        });
+      }
+    }
+    // Unbound, where there is no period to divide and the fallback applies.
+    const r = units.AU_IN_METRES;
+    const escape = {
+      position: { x: r, y: 0, z: 0 },
+      velocity: { x: 0, y: 2 * Math.sqrt(units.GM_SUN / r), z: 0 },
+    };
+    const seconds = 10 * units.SECONDS_PER_JULIAN_YEAR;
+    out.push({
+      id: "interval-escape-10y",
+      input: { ...escape, durationSeconds: seconds },
+      expected: round(propagate.sampleIntervalFor(units.GM_SUN, escape, seconds)),
+    });
+    return out;
+  })(),
+};
+
+/**
+ * Trajectory interpolation, which is what puts a rider on a path.
+ *
+ * Small and worth gating, because both clients call it every frame to place a camera and a
+ * disagreement would show as an object drifting off its own drawn path rather than as an
+ * error. The samples are a curved path with inconsistent endpoint velocities, so the Hermite
+ * terms all contribute; a linear fallback misses by kilometres on these.
+ */
+domains["trajectory-interpolation"] = {
+  absoluteTolerance: 1e-9,
+  description: "Cubic Hermite placement of an object between integrator samples.",
+  tolerance: 1e-12,
+  cases: (() => {
+    const samples = [
+      { t: 0, position: { x: 0, y: 0, z: 0 }, velocity: { x: 1_000, y: 2_000, z: -500 } },
+      { t: 3_600, position: { x: 5.1e6, y: 6.4e6, z: -1.2e6 }, velocity: { x: 1_400, y: 1_100, z: -900 } },
+      { t: 7_200, position: { x: 1.1e7, y: 9.9e6, z: -4.4e6 }, velocity: { x: 1_900, y: 300, z: -1_500 } },
+    ];
+    const input = { samples };
+    return [0, 900, 3_600, 5_400, 7_200, -500, 99_999].map((seconds) => {
+      const state = propagate.trajectoryStateAt(samples, seconds);
+      return {
+        id: `at-${seconds}s`,
+        input: { ...input, seconds },
+        expected: { position: vec(state.position), velocity: vec(state.velocity) },
+      };
+    });
+  })(),
+};
+
+/**
+ * N-body evolution, and the conserved quantities that are never handed to the integrator.
+ *
+ * The drifts are included as cases rather than asserted loosely, so a port whose integrator
+ * is subtly worse shows up as a different number rather than as a looser pass.
+ */
+domains["nbody-evolution"] = {
+  absoluteTolerance: 1e-3,
+  description: "Mutual gravity over years, with energy, momentum and angular momentum.",
+  tolerance: 1e-7,
+  cases: [1, 5].map((years) => {
+    const system = nbody.solarSystemAt(time.jdTdb(2451545));
+    const before = {
+      energy: nbody.totalEnergy(system),
+      angular: nbody.totalAngularMomentum(system),
+    };
+    nbody.advance(system, years * units.SECONDS_PER_JULIAN_YEAR, {
+      tolerance: 1e-13, minStepSeconds: 60, maxStepSeconds: units.SECONDS_PER_DAY,
+    });
+    const after = nbody.totalEnergy(system);
+    return {
+      id: `advance-${years}-years`,
+      input: { jdTdb: 2451545, years, tolerance: 1e-13 },
+      expected: {
+        state: Array.from(system.state).map(round),
+        energyDrift: round(Math.abs((after - before.energy) / before.energy)),
+        angularDrift: round(
+          Math.hypot(
+            nbody.totalAngularMomentum(system).x - before.angular.x,
+            nbody.totalAngularMomentum(system).y - before.angular.y,
+            nbody.totalAngularMomentum(system).z - before.angular.z,
+          ) / Math.hypot(before.angular.x, before.angular.y, before.angular.z),
+        ),
+      },
+    };
+  }),
+};
+
+/** Tile selection, which decides what a viewer actually sees on a surface. */
+domains.tiles = {
+  absoluteTolerance: 0,
+  description: "Level choice, visible cap and tile extents for a surface pyramid.",
+  tolerance: 1e-12,
+  cases: (() => {
+    const manifest = {
+      body: "moon",
+      tileSize: 512,
+      levels: [0, 1, 2, 3].map((level) => ({
+        level,
+        tilesX: 2 * 2 ** level,
+        tilesY: 1 * 2 ** level,
+        levelWidth: 1024 * 2 ** level,
+        levelHeight: 512 * 2 ** level,
+        metresPerTexel: 10660.552883490052 / 2 ** level,
+      })),
+      globalNormalMap: "normal-global.jpg",
+      globalWidth: 8192,
+      referenceRadiusM: 1737400,
+      elevationRangeM: [-9106, 10747],
+      source: "LRO LOLA",
+    };
+    const fov = (55 * Math.PI) / 180;
+    const out = [];
+
+    for (const altitude of [1e4, 1e5, 1e6, 1e7, 1e8]) {
+      out.push({
+        id: `metres-per-pixel-${altitude}`,
+        input: { altitudeM: altitude, verticalFovRadians: fov, viewportHeightPx: 900 },
+        expected: round(tiles.metresPerPixel(altitude, fov, 900)),
+      });
+      out.push({
+        id: `level-for-${altitude}`,
+        input: { altitudeM: altitude, verticalFovRadians: fov, viewportHeightPx: 900 },
+        expected: tiles.levelFor(manifest, altitude, fov, 900).level,
+      });
+      out.push({
+        id: `visible-cap-${altitude}`,
+        input: { radiusM: 1737400, altitudeM: altitude },
+        expected: round(tiles.visibleCapAngle(1737400, altitude)),
+      });
+    }
+
+    for (const level of manifest.levels) {
+      const extent = tiles.tileExtent(level, { level: level.level, x: 1, y: 0 });
+      out.push({
+        id: `tile-extent-level-${level.level}`,
+        input: { level: level.level, tilesX: level.tilesX, tilesY: level.tilesY, x: 1, y: 0 },
+        expected: {
+          phiStart: round(extent.phiStart),
+          phiLength: round(extent.phiLength),
+          thetaStart: round(extent.thetaStart),
+          thetaLength: round(extent.thetaLength),
+        },
+      });
+    }
+    return out;
+  })(),
 };
 
 let total = 0;

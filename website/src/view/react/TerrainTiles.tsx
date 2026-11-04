@@ -35,8 +35,14 @@ const MAX_CACHED_TILES = 64;
 export function useTerrainManifest(body: BodyId): TerrainManifest | null {
   const [manifest, setManifest] = useState<TerrainManifest | null>(null);
 
+  const declared = BODY_CONTRACTS[body].appearance.hasTerrain === true;
+
   useEffect(() => {
     let cancelled = false;
+    // Ask only for what the contract says exists. Not a `setManifest(null)` early return:
+    // calling setState synchronously inside an effect cascades a render, and the hook
+    // already reports null for an undeclared body without touching state at all.
+    if (!declared) return () => { cancelled = true; };
 
     // No synchronous reset here. Setting state synchronously inside an effect cascades a
     // render, and the only reason to do it would be to clear a stale manifest, which the
@@ -53,9 +59,17 @@ export function useTerrainManifest(body: BodyId): TerrainManifest | null {
     return () => {
       cancelled = true;
     };
-  }, [body]);
+  }, [body, declared]);
 
-  return manifest;
+  /**
+   * Null for a body the contract does not claim, without storing it.
+   *
+   * The client used to request `/terrain/<id>/manifest.json` for every body and get a 404
+   * for all but the Moon, so one page load produced 31 failed requests. The requests were
+   * cheap; the harm was a console so full of expected failures that a real one would never
+   * be noticed. `terrain-coverage.test.ts` keeps the claim and the shipped data in step.
+   */
+  return declared ? manifest : null;
 }
 
 /** Loads tile textures once and keeps a bounded cache, so panning does not refetch. */

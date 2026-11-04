@@ -12,7 +12,7 @@
  * A refactor that moves a file turns this red, so the manifest cannot become fiction.
  */
 
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -164,5 +164,56 @@ describe("the parity table", () => {
     // Printed above. The assertion is only here so the table runs on a passing suite too:
     // a gap nobody is shown is a gap nobody closes.
     expect(MANIFEST.features.length).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * Can a feature exist without the contract knowing about it?
+ *
+ * It could, and one did. `BodyMarkers.tsx` has drawn a dot for every body too small to
+ * resolve since early on, and it was never written into `features.json`. The parity gate
+ * compares what each platform claims about a listed feature, so an unlisted one is invisible
+ * to it: iOS shipped without markers, every gate stayed green, and the gap surfaced when
+ * someone asked why they could not see any moons.
+ *
+ * The fix cannot be more diligence. It has to be structural, so this reads the directory and
+ * requires every view component to be claimed by some feature or named as infrastructure.
+ * Adding a component now forces a decision about what it is for.
+ */
+describe("every view component belongs to a feature", () => {
+  /**
+   * Files that implement no feature of their own.
+   *
+   * Deliberately short and enumerated rather than pattern-matched, because a pattern is how
+   * this check would quietly stop applying. Each entry is wiring: a composition root, a
+   * dependency-injection boundary, or a transform node that exists to serve a contract rather
+   * than to do anything a user could name.
+   */
+  const INFRASTRUCTURE = new Set([
+    "Scene.tsx",
+    "ViewportContext.tsx",
+  ]);
+
+  it("claims every component in website/src/view/react", () => {
+    const dir = fileURLToPath(new URL("./view/react", import.meta.url));
+    const components = readdirSync(dir).filter((f) => f.endsWith(".tsx"));
+    expect(components.length).toBeGreaterThan(10);
+
+    const claimed = new Set<string>();
+    for (const feature of MANIFEST.features) {
+      for (const platform of MANIFEST.platforms) {
+        for (const path of entryFor(feature, platform).paths ?? []) claimed.add(path);
+      }
+    }
+
+    const orphans = components.filter(
+      (file) =>
+        !INFRASTRUCTURE.has(file) && !claimed.has(`website/src/view/react/${file}`),
+    );
+    expect(
+      orphans,
+      `these components implement something no feature claims, so parity cannot be checked `
+        + `for them: ${orphans.join(", ")}`,
+    ).toEqual([]);
   });
 });

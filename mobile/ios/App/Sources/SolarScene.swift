@@ -28,7 +28,17 @@ import SolarKit
  scale is chosen from what is focused: the system view puts one unit at one au, and focusing a
  body puts one unit at a few of its radii. Both keep the numbers reaching Float small.
  */
+/**
+ Observable, because SwiftUI will not re-evaluate a view whose inputs have not changed.
+
+ `ViewControls` is handed a `BodyId` and two class references. When riding starts, none of
+ those three change, so SwiftUI correctly skipped the view and the control that offers to stop
+ riding never appeared. Driving it from the sixty-hertz tick instead would have worked by
+ accident and broken the moment the tick was optimised. The properties written every frame,
+ positions and the origin, are not read by any view, so this costs nothing.
+ */
 @MainActor
+@Observable
 final class SolarScene {
     let scene = SCNScene()
     let cameraNode = SCNNode()
@@ -180,7 +190,9 @@ final class SolarScene {
 
     /// Writes the camera from the orbit held above. The only place its position is set.
     private func applyCamera() {
-        let limits = distanceLimits
+        // Riding, the floor is the rock rather than a planet's surface, and the ceiling has to
+        // reach past the far end of a two-hundred-year trajectory.
+        let limits = riding ? (min: 100.0, max: 1e13) : distanceLimits
         cameraDistanceM = min(limits.max, max(limits.min, cameraDistanceM))
 
         let units = Float(cameraDistanceM / metresPerUnit)
@@ -316,6 +328,65 @@ final class SolarScene {
 
             scene.rootNode.addChildNode(node)
             nodes[id] = node
+            markerNodes[id] = buildMarker(for: contract, under: node)
+        }
+    }
+
+    /**
+     A dot for a body too small to see as geometry.
+
+     From anywhere useful in the solar system most bodies are well under a pixel across, and
+     drawing them larger than they are would be a lie about scale, which is the one thing this
+     project will not do. Phobos focused from six Mars radii has an apparent radius of 0.46
+     pixels: it is drawn, it is in frame, it is correct, and it is invisible. Reported as "why
+     dont i see moons".
+
+     So each body gets a soft dot in its own colour that fades in exactly as the real sphere
+     stops being resolvable. Scale stays honest and nothing disappears. The website has done
+     this since the beginning; it was never written into `features.json`, so the parity gate
+     had nothing to compare and the gap survived every audit.
+
+     Parented to the body, so it inherits the position the one Double-to-Float conversion
+     already produced rather than computing a second one that could disagree.
+     */
+    private func buildMarker(for contract: BodyContract, under parent: SCNNode) -> SCNNode {
+        let plane = SCNPlane(width: 1, height: 1)
+        let material = SCNMaterial()
+        material.lightingModel = .constant
+        material.diffuse.contents = Self.markerImage(Self.colour(contract.appearance.tintHex))
+        material.blendMode = .add
+        material.writesToDepthBuffer = false
+        // Depth testing off, so a marker is never hidden inside the body it marks or behind
+        // a ring. It is an overlay, not geometry.
+        material.readsFromDepthBuffer = false
+        plane.firstMaterial = material
+
+        let node = SCNNode(geometry: plane)
+        node.constraints = [SCNBillboardConstraint()]
+        node.opacity = 0
+        node.renderingOrder = 100
+        parent.addChildNode(node)
+        return node
+    }
+
+    /// A radial falloff, drawn once and shared. A hard-edged quad reads as a square sprite at
+    /// the two or three pixels these occupy, which looks like a rendering fault rather than a
+    /// marker.
+    private static func markerImage(_ tint: UIColor) -> UIImage {
+        let size = 64
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: size, height: size))
+        return renderer.image { context in
+            let centre = CGPoint(x: size / 2, y: size / 2)
+            let colours = [tint.withAlphaComponent(1).cgColor, tint.withAlphaComponent(0).cgColor]
+            guard let gradient = CGGradient(
+                colorsSpace: CGColorSpaceCreateDeviceRGB(),
+                colors: colours as CFArray,
+                locations: [0, 1]
+            ) else { return }
+            context.cgContext.drawRadialGradient(
+                gradient, startCenter: centre, startRadius: 0,
+                endCenter: centre, endRadius: CGFloat(size) / 2, options: []
+            )
         }
     }
 
@@ -354,26 +425,48 @@ final class SolarScene {
         nightMaterials[id] = material
     }
 
-    /// Saturn's rings at their real extent, inside the body's node so they lean with the planet.
+    /**
+     Saturn's rings at their real extent, inside the body's node so they lean with the planet.
+
+     The geometry is built in **planet radii**, from the contract: the A ring's outer edge is
+     136,775 km against a 60,268 km equatorial radius, so it reaches 2.27 radii. The node is
+     then scaled by whatever the planet is drawn at, which is what converts those ratios into
+     scene units.
+
+     Leaving that scale off is why the rings once rendered about ten times too wide. A ratio
+     of 2.27 was read as 2.27 scene units while Saturn itself was 0.16, so the rings spanned
+     a quarter of the inner solar system and looked, plausibly, like a stylistic choice.
+     */
     private func ringNode(for contract: BodyContract) -> SCNNode? {
         guard let rings = contract.appearance.ringSystem,
               let image = Self.texture(rings.textureId) else { return nil }
 
-        let inner = CGFloat(rings.innerRadiusM / contract.equatorialRadiusM)
-        let outer = CGFloat(rings.outerRadiusM / contract.equatorialRadiusM)
-        let disc = SCNTube(innerRadius: inner, outerRadius: outer, height: 0.001)
+        let inner = rings.innerRadiusM / contract.equatorialRadiusM
+        let outer = rings.outerRadiusM / contract.equatorialRadiusM
 
         let material = SCNMaterial()
         material.diffuse.contents = image
+        material.diffuse.wrapS = .clamp
+        material.diffuse.wrapT = .repeat
         material.isDoubleSided = true
-        material.transparencyMode = .aOne
         material.lightingModel = .constant
+        material.blendMode = .alpha
+        material.transparencyMode = .aOne
         material.writesToDepthBuffer = false
-        disc.materials = [material]
 
-        let node = SCNNode(geometry: disc)
+        let geometry = TilePatch.annulus(innerRadius: inner, outerRadius: outer)
+        geometry.materials = [material]
+
+        let node = SCNNode(geometry: geometry)
         node.name = "rings"
+        // Scaled to the body's drawn radius in `setFocus`, which is where that is known.
         return node
+    }
+
+    /// The rings are drawn in planet radii, so they scale with however large the planet is.
+    private func rescaleRings(_ id: BodyId, to radius: CGFloat) {
+        guard let rings = nodes[id]?.childNodes.first(where: { $0.name == "rings" }) else { return }
+        rings.scale = SCNVector3(Float(radius), Float(radius), Float(radius))
     }
 
     /**
@@ -387,12 +480,25 @@ final class SolarScene {
         orbitNodes.removeAll()
         orbitPerihelionError.removeAll()
 
+        orbitAnchors.removeAll()
         for id in bodyIds {
             let contract = bodyContracts[id]!
             guard let path = orbitPath(for: id, contract: contract) else { continue }
-            // Parented to the heliocentric root, not the scene, so the origin is applied once
-            // per frame to the parent rather than baked into every vertex.
-            heliocentricRoot.addChildNode(path)
+            if case .meanElementsAboutParent = contract.ephemeris, let parent = contract.parent {
+                /**
+                 A moon's orbit hangs off the scene and is moved to its planet each frame.
+
+                 Its vertices are relative to the planet, so the node has to sit on the planet.
+                 The heliocentric root cannot do that: it carries one origin for the whole
+                 scene, and what this needs is a different origin per moon system.
+                 */
+                scene.rootNode.addChildNode(path)
+                orbitAnchors[id] = parent
+            } else {
+                // Parented to the heliocentric root, so the origin is applied once per frame
+                // to the parent rather than baked into every vertex.
+                heliocentricRoot.addChildNode(path)
+            }
             orbitNodes[id] = path
         }
     }
@@ -415,12 +521,30 @@ final class SolarScene {
             periodDays = source.periodDays
         }
 
+        /**
+         A moon's orbit is drawn about its planet, not about the Sun.
+
+         Sampled heliocentrically, a moon's path over one of its own periods is dominated by
+         where its planet went in that time, not by the orbit. Phobos goes round Mars in 7.7
+         hours, during which Mars travels 660,000 km along its own orbit while Phobos stays
+         within 9,400 km of it: the drawn path came out as a nearly straight streak seventy
+         times longer than the orbit it was meant to show, which is why no moon ever appeared
+         to have one. Subtracting the parent at the same instant leaves the ellipse.
+         */
+        let parent: BodyId? = {
+            if case .meanElementsAboutParent = contract.ephemeris { return contract.parent }
+            return nil
+        }()
+
         var vertices: [SCNVector3] = []
         let start = Epochs.j2000
         for i in 0 ..< samples {
             let jd = JdTdb(start + periodDays * Double(i) / Double(samples))
-            // Plain heliocentric, with no origin subtracted. The parent node carries that.
-            vertices.append(inHeliocentricUnits(heliocentricPositionOf(id, at: jd)))
+            let position = heliocentricPositionOf(id, at: jd)
+            // Planets: plain heliocentric, with the root carrying the origin. Moons: relative
+            // to the planet, with the node carrying the planet's position each frame.
+            let relative = parent.map { position - heliocentricPositionOf($0, at: jd) } ?? position
+            vertices.append(inHeliocentricUnits(relative))
         }
 
         /**
@@ -435,16 +559,35 @@ final class SolarScene {
          biases it toward aphelion by (3/2) a e, so Uranus reads 1.36 units from the Sun with
          entirely correct geometry, and that is indistinguishable from a one-au offset.
          */
-        if case let .standishElements(planet) = contract.ephemeris,
-           let at = shortSpan.elements[planet]?.atJ2000 {
-            let expected = toMetres(au(at.semiMajorAxisAu)) * (1 - at.eccentricity) / metresPerUnit
+        /**
+         The same check for a moon, which is where it would have mattered first.
+
+         A moon's vertices are relative to its planet, so the closest vertex to the node's own
+         origin is the periapsis and the arithmetic is identical. Drawn heliocentrically, as
+         they were, Phobos's path was a 660,000 km streak of Mars's own motion with a closest
+         approach nowhere near its 9,234 km periapsis. This reads that as a factor of seventy
+         rather than as a missing line.
+         */
+        func periapsisError(expected: Double) -> Double {
             var closest = Double.infinity
             for v in vertices {
                 closest = Swift.min(closest, Double(
                     (v.x * v.x + v.y * v.y + v.z * v.z).squareRoot()
                 ))
             }
-            orbitPerihelionError[id] = abs(closest - expected) / expected
+            return abs(closest - expected) / expected
+        }
+
+        if case let .meanElementsAboutParent(source) = contract.ephemeris {
+            orbitPerihelionError[id] = periapsisError(
+                expected: source.semiMajorAxisM * (1 - source.eccentricity) / metresPerUnit
+            )
+        }
+
+        if case let .standishElements(planet) = contract.ephemeris,
+           let at = shortSpan.elements[planet]?.atJ2000 {
+            let expected = toMetres(au(at.semiMajorAxisAu)) * (1 - at.eccentricity) / metresPerUnit
+            orbitPerihelionError[id] = periapsisError(expected: expected)
         }
 
         var indices: [Int32] = []
@@ -574,11 +717,17 @@ final class SolarScene {
             let contract = bodyContracts[id]!
             guard let node = nodes[id], let sphere = node.childNodes.first?.geometry as? SCNSphere
             else { continue }
-            sphere.radius = renderRadius(contract.equatorialRadiusM)
+            let radius = renderRadius(
+                contract.equatorialRadiusM, isStar: contract.kind == .star
+            )
+            sphere.radius = radius
+            // The rings are built in planet radii, so they scale with the body.
+            rescaleRings(id, to: radius)
         }
 
         clearTiles()
         rebuildOrbits()
+        rebuildTrajectory()
         frameFocus(at: epoch)
     }
 
@@ -659,7 +808,42 @@ final class SolarScene {
             positions[id] = gravity?.heliocentricPosition(of: id)
                 ?? heliocentricPositionOf(id, at: epoch)
         }
-        origin = positions[focus] ?? .zero
+        /**
+         The floating origin, which is the rock while riding and the focused body otherwise.
+
+         One line, and it is the whole ride-along feature. Everything downstream already draws
+         relative to this point, so moving it onto the trajectory turns the existing camera
+         into an onboard one without touching the camera at all.
+         */
+        let rider = riderStateAt(epoch)
+        origin = (riding ? rider?.position : positions[focus]) ?? positions[focus] ?? .zero
+
+        /**
+         The origin, applied once to the parent instead of to every vertex.
+
+         This assignment was missing, and the gap was invisible for as long as orbit paths
+         were only ever drawn in the system view: focusing the Sun puts the origin at zero, so
+         a root left at the identity is accidentally correct. Everything else parented here was
+         drawn at absolute heliocentric coordinates while the camera sat at the focused body,
+         which is an astronomical unit away. A moon's orbit path and a ride-along trajectory
+         both land off screen rather than wrong, so nothing looked broken, there was just
+         nothing there.
+         */
+        heliocentricRoot.position = renderPosition(.zero)
+
+        // Moon orbits carry vertices relative to their planet, so each one rides its planet.
+        for (moon, parent) in orbitAnchors {
+            guard let node = orbitNodes[moon], let at = positions[parent] else { continue }
+            node.position = renderPosition(at)
+        }
+
+        if let rider {
+            let marker = ensureRiderNode()
+            marker.position = renderPosition(rider.position)
+            // Hidden when you are standing on it, which would otherwise be a teal square
+            // pinned to the middle of the screen for the whole flight.
+            marker.isHidden = riding
+        }
 
         for id in bodyIds {
             guard let node = nodes[id], let position = positions[id] else { continue }
@@ -693,6 +877,107 @@ final class SolarScene {
                 )
             }
         }
+
+        updateMarkers()
+    }
+
+    /**
+     Fade each marker in as its body stops being resolvable.
+
+     The apparent radius is the same expression the website uses, so the two clients cross the
+     threshold at the same moment rather than at two thresholds that merely sound alike:
+     radius over the distance times the tangent of the half field of view, scaled to half the
+     viewport height.
+
+     The marker's own size is set in the same breath, because a billboard at a fixed scene size
+     grows and shrinks with distance like everything else, and a dot that does that is not a
+     marker. Holding it at a constant pixel size is the entire point.
+     */
+    private func updateMarkers() {
+        let fovRadians = (cameraNode.camera?.fieldOfView ?? 55) * Double.pi / 180
+        let tanHalf = tan(fovRadians / 2)
+        let cameraPosition = cameraNode.position
+
+        for id in bodyIds {
+            guard let node = nodes[id],
+                  let marker = markerNodes[id],
+                  let sphere = node.childNodes.first?.geometry as? SCNSphere
+            else { continue }
+
+            let dx = Double(node.position.x - cameraPosition.x)
+            let dy = Double(node.position.y - cameraPosition.y)
+            let dz = Double(node.position.z - cameraPosition.z)
+            let depth = (dx * dx + dy * dy + dz * dz).squareRoot()
+            guard depth > 0 else { marker.opacity = 0; continue }
+
+            let apparentPx = (Double(sphere.radius) / (depth * tanHalf)) * (viewportHeightPx / 2)
+            let fade = apparentPx < Self.markerFadePx ? 1 - apparentPx / Self.markerFadePx : 0
+            marker.opacity = CGFloat(fade)
+            guard fade > 0 else { continue }
+
+            // Six pixels across, held constant by cancelling the perspective divide. Divided
+            // by the body's own scale, because the marker hangs off the body node and would
+            // otherwise inherit it.
+            let widthScene = (2 * Self.markerFadePx * depth * tanHalf) / viewportHeightPx
+            let scale = Float(widthScene) / max(node.scale.x, 1e-9)
+            marker.scale = SCNVector3(scale, scale, scale)
+        }
+    }
+
+    /// The HUD reports the live viewport, because the marker threshold is in pixels and a
+    /// hardcoded height puts the fade at the wrong distance on every device but one.
+    func setViewportHeight(_ px: Double) {
+        guard px > 0 else { return }
+        viewportHeightPx = px
+    }
+
+    // MARK: - Labels
+
+    /**
+     Project every body to normalised device coordinates, for the label layer.
+
+     Done with the camera's own transform rather than through `SCNView.projectPoint`, because
+     the view belongs to SwiftUI's `SceneView` and is not reachable from here. Inverting the
+     camera's world transform gives the view matrix, and the projection is the standard
+     perspective one built from the camera's own field of view and the supplied aspect; both
+     numbers come from the camera that is actually rendering, so this cannot disagree with
+     what is on screen.
+
+     `behindCamera` is reported rather than filtered. A body behind the camera projects to a
+     mirrored point, which is mathematically correct and visually a lie, and the label layer
+     needs to know in order to point the right way.
+     */
+    func labelInputs(aspect: Double) -> [LabelInput] {
+        let view = simd_inverse(cameraNode.simdWorldTransform)
+        let fovRadians = (cameraNode.camera?.fieldOfView ?? 55) * Double.pi / 180
+        let tanHalf = tan(fovRadians / 2)
+        let satellites = Set(childrenOf(focus))
+
+        return bodyIds.compactMap { id -> LabelInput? in
+            guard let node = nodes[id],
+                  let sphere = node.childNodes.first?.geometry as? SCNSphere
+            else { return nil }
+
+            let world = SIMD4<Float>(node.position.x, node.position.y, node.position.z, 1)
+            let eye = view * world
+            // SceneKit looks down its own negative z, so a visible body has negative eye z.
+            let depth = -Double(eye.z)
+            let behind = depth <= 0
+            let safeDepth = max(abs(depth), 1e-9)
+
+            let relevance: LabelRelevance =
+                id == focus ? .focus : (satellites.contains(id) ? .satelliteOfFocus : .other)
+
+            return LabelInput(
+                id: id,
+                ndcX: Double(eye.x) / (safeDepth * tanHalf * aspect),
+                ndcY: Double(eye.y) / (safeDepth * tanHalf),
+                radiusPx: (Double(sphere.radius) / (safeDepth * tanHalf)) * (viewportHeightPx / 2),
+                distance: safeDepth * metresPerUnit,
+                behindCamera: behind,
+                relevance: relevance
+            )
+        }
     }
 
     func node(for body: BodyId) -> SCNNode? { nodes[body] }
@@ -706,7 +991,103 @@ final class SolarScene {
      53% off with correct code, because the starfield dominated the sample. Geometry questions
      get geometry answers.
      */
+    /// How far the drawn rings reach, in planet radii. Saturn's contract says 2.27.
+    private func ringExtentInPlanetRadii(_ id: BodyId) -> Double? {
+        guard let node = nodes[id]?.childNodes.first(where: { $0.name == "rings" }),
+              let sphere = nodes[id]?.childNodes.first?.geometry as? SCNSphere,
+              sphere.radius > 0
+        else { return nil }
+        // The annulus is built in planet radii, so its bounding box gives the outer edge
+        // directly. Measured from the geometry rather than recomputed from the contract,
+        // which would only prove the contract agrees with itself.
+        let (_, max) = node.boundingBox
+        let extent = Double(Swift.max(abs(max.x), abs(max.z)))
+        return extent * Double(node.scale.x) / Double(sphere.radius)
+    }
+
+    /**
+     Where each body ended up, in scene units from the focused body.
+
+     Enough to answer "why can I not see X" without squinting at a screenshot: a body that is
+     missing, one that is behind another, and one that is simply too small to resolve are
+     three different problems with the same appearance.
+     */
+    private func bodyReport() -> [String: Any] {
+        var report: [String: Any] = [:]
+        for id in bodyIds {
+            guard let node = nodes[id],
+                  let sphere = node.childNodes.first?.geometry as? SCNSphere else { continue }
+            let p = node.position
+            let distance = Double((p.x * p.x + p.y * p.y + p.z * p.z).squareRoot())
+            report[id.rawValue] = [
+                "distanceUnits": distance,
+                "radiusUnits": Double(sphere.radius),
+                /**
+                 How big it actually looks, and whether anything is drawn for it.
+
+                 "Why dont i see moons" had two separate causes and the same appearance.
+                 Phobos from six Mars radii is 0.46 pixels across: drawn, in frame, correct,
+                 invisible. The Galileans from the same framing are simply outside the
+                 frustum. A probe that only measures lit pixels cannot tell those apart, or
+                 tell either of them from a moon that is not being positioned at all.
+                 */
+                "apparentRadiusPx": apparentRadiusPx(of: id),
+                "markerOpacity": Double(markerNodes[id]?.opacity ?? 0),
+                // What fraction of the way to the body the drawn Sun reaches. Over one means
+                // the Sun's disc swallows it from this viewpoint.
+                "sunRadiiAway": distance / Double(
+                    (nodes[.sun]?.childNodes.first?.geometry as? SCNSphere)?.radius ?? 1
+                ),
+            ]
+        }
+        return report
+    }
+
+    /// Apparent radius on screen, pixels. The same expression the marker fade uses, so the
+    /// probe and the renderer cannot disagree about whether something is resolvable.
+    private func apparentRadiusPx(of id: BodyId) -> Double {
+        guard let node = nodes[id],
+              let sphere = node.childNodes.first?.geometry as? SCNSphere
+        else { return 0 }
+        let p = node.position
+        let c = cameraNode.position
+        let dx = Double(p.x - c.x), dy = Double(p.y - c.y), dz = Double(p.z - c.z)
+        let depth = (dx * dx + dy * dy + dz * dz).squareRoot()
+        guard depth > 0 else { return 0 }
+        let tanHalf = tan(((cameraNode.camera?.fieldOfView ?? 55) * Double.pi / 180) / 2)
+        return (Double(sphere.radius) / (depth * tanHalf)) * (viewportHeightPx / 2)
+    }
+
+    /**
+     Make a report encodable, and say what had to be changed.
+
+     `JSONSerialization` rejects NaN and infinity outright, and the whole report is one
+     object, so a single bad number anywhere produced no file at all. The probe then reported
+     "no scene debug output", which reads as a missing feature rather than as a malformed
+     number, and the actual value that went wrong was never seen by anyone.
+
+     Non-finite values become strings naming themselves. The report still encodes, the probe
+     still runs, and the bad number arrives as "nan" in the field that produced it instead of
+     taking the whole diagnostic down with it.
+     */
+    private static func jsonSafe(_ value: Any) -> Any {
+        switch value {
+        case let d as Double:
+            return d.isFinite ? d : (d.isNaN ? "nan" : (d > 0 ? "inf" : "-inf"))
+        case let dict as [String: Any]:
+            return dict.mapValues { jsonSafe($0) }
+        case let array as [Any]:
+            return array.map { jsonSafe($0) }
+        default:
+            return value
+        }
+    }
+
     func debug() -> [String: Any] {
+        Self.jsonSafe(rawDebug()) as? [String: Any] ?? [:]
+    }
+
+    private func rawDebug() -> [String: Any] {
         let sun = nodes[.sun]?.presentation.worldPosition ?? SCNVector3Zero
         let root = heliocentricRoot.presentation.worldPosition
         // The Sun is at the heliocentric origin, so the root that carries that origin must
@@ -728,8 +1109,51 @@ final class SolarScene {
             "sunToRootUnits": gap,
             "orbitNodes": orbitNodes.count,
             "maxPerihelionError": orbitPerihelionError.values.max() ?? 0,
+            "saturnRingOuterInPlanetRadii": ringExtentInPlanetRadii(.saturn) ?? 0,
+            /**
+             Does the root that carries the origin actually carry it?
+
+             A point drawn under `heliocentricRoot` at the focused body's heliocentric position
+             must land on the camera origin, because that is where the focused body is. If the
+             root is left at the identity this reads as the body's distance from the Sun in
+             scene units instead of zero, which is how the missing assignment went unnoticed:
+             the one focus anyone screenshotted was the Sun, where both answers are zero.
+             */
+            "focusUnderRootUnits": {
+                let p = positions[focus] ?? .zero
+                let inUnits = inHeliocentricUnits(p)
+                let r = heliocentricRoot.position
+                let dx = Double(r.x + inUnits.x)
+                let dy = Double(r.y + inUnits.y)
+                let dz = Double(r.z + inUnits.z)
+                return (dx * dx + dy * dy + dz * dz).squareRoot()
+            }(),
+            /// Label geometry, so a probe can check a pointer points at the body it names
+            /// rather than squinting at an eight-pixel triangle in a screenshot.
+            "labels": placeLabels(
+                labelInputs(aspect: 1206.0 / 2622.0),
+                options: LabelOptions(viewportWidthPx: 402, viewportHeightPx: 874)
+            ).map { placement -> [String: Any] in
+                var entry: [String: Any] = [
+                    "id": placement.id.rawValue,
+                    "x": placement.x,
+                    "y": placement.y,
+                    "clamped": placement.clamped,
+                ]
+                // Omitted rather than filled with a sentinel. An on-screen label has no
+                // bearing, and a "nan" or a 1000 in that field is a value every reader has
+                // to know to ignore.
+                if let bearing = placement.bearingRadians {
+                    entry["bearingDeg"] = bearing * 180 / Double.pi
+                }
+                return entry
+            },
+            "riding": riding,
+            "trajectorySamples": trajectorySamples.count,
+            "trajectoryExtentUnits": trajectoryExtentUnits(),
             "tileNodes": tileNodes.count,
             "bodies": nodes.count,
+            "bodyReport": bodyReport(),
         ]
     }
 
@@ -840,19 +1264,108 @@ final class SolarScene {
 
     // MARK: - Trajectory
 
+    /// Which planet each moon's orbit path is anchored to, for the per-frame reposition.
+    private var orbitAnchors: [BodyId: BodyId] = [:]
+    private var markerNodes: [BodyId: SCNNode] = [:]
+    /// Above this apparent radius the real sphere is resolvable and the marker fades out.
+    /// Seven pixels, the same threshold the website uses, so the two look alike at a glance.
+    private static let markerFadePx = 7.0
+    private var viewportHeightPx: Double = 900
+
     private var trajectoryNode: SCNNode?
+    /// Kept, because the drawn path is scale-dependent and the scale changes with focus.
+    private(set) var trajectorySamples: [TrajectorySample] = []
+    /// Sample times are seconds from release, so the epoch they are measured from has to be
+    /// kept with them or the rock cannot be placed on the clock the rest of the scene runs on.
+    private(set) var trajectoryStartEpoch: JdTdb?
+    private var riderNode: SCNNode?
+
+    /**
+     Riding the launched object rather than watching it.
+
+     Implemented as a focus target rather than as a second camera, which is what makes it
+     small. The scene already draws everything relative to a floating origin and already has
+     drag and pinch driving an orbit about that origin, so moving the origin onto the rock
+     gives a rider's view, keeps both gestures working unchanged, and keeps the single
+     Double-to-Float conversion in one place. A bespoke chase camera would have duplicated all
+     of that and had its own precision story.
+     */
+    private(set) var riding = false
+
+    /// Where the rock is now, on the clock the rest of the scene runs on.
+    ///
+    /// The interpolation itself lives in SolarKit, shared with the website and gated by the
+    /// conformance suite, so a rider on a phone and a rider in a browser are in the same
+    /// place. This only converts the epoch into seconds from release.
+    func riderStateAt(_ epoch: JdTdb) -> StateVector? {
+        guard let start = trajectoryStartEpoch else { return nil }
+        return trajectoryStateAt(
+            trajectorySamples, seconds: (epoch.value - start.value) * Constants.secondsPerDay
+        )
+    }
+
+    func setRiding(_ on: Bool, at epoch: JdTdb) {
+        guard trajectoryStartEpoch != nil || !on else { return }
+        riding = on
+        if on {
+            // Back off to something that frames the departure rather than sitting inside the
+            // launch site. Fifty radii out is where the rock is released, so twice that shows
+            // both the rock and the planet it came from.
+            cameraDistanceM = bodyContracts[focus]!.equatorialRadiusM * 120
+            lookBackAtDeparture(from: epoch)
+        }
+        update(to: epoch)
+        applyCamera()
+    }
+
+    /**
+     Point the ride back at the body it just left.
+
+     Without this the camera keeps whatever angle it had, which is almost never the direction
+     the planet is in, so the first thing a rider sees is empty sky. The camera is placed along
+     its orbit direction and always looks at the origin, so putting it on the far side from the
+     planet puts the planet directly behind the rock and squarely in frame.
+     */
+    private func lookBackAtDeparture(from epoch: JdTdb) {
+        guard let rider = riderStateAt(epoch) else { return }
+        let planet = heliocentricPositionOf(focus, at: epoch)
+        let toPlanet = planet - rider.position
+        guard toPlanet.length > 0 else { return }
+        let away = toPlanet * (-1 / toPlanet.length)
+        // Scene axes, not ecliptic: y is up on screen and is the ecliptic's z.
+        cameraElevation = max(-1.5, min(1.5, asin(max(-1, min(1, away.z)))))
+        cameraAzimuth = atan2(-away.y, away.x)
+    }
 
     /**
      Draws a propagated trajectory, in the same frame and scale as everything else.
 
-     Positions come straight from the integrator's samples and go through `renderPosition`
-     like any body, so the path and the planets cannot disagree about where anything is.
-     */
-    func showTrajectory(_ samples: [TrajectorySample]) {
-        clearTrajectory()
-        guard samples.count > 1 else { return }
+     Positions come straight from the integrator's samples, so the path and the planets
+     cannot disagree about where anything is.
 
-        let vertices = samples.map { renderPosition($0.position) }
+     The samples are retained rather than drawn once and forgotten. Scene units are per-focus
+     (one unit is Mars's radius on Mars, an astronomical unit on the Sun), so vertices baked
+     at launch time are wrong by the ratio of the two the moment focus changes: a path
+     launched from Mars and then viewed from the Sun came out 44,000 times too large, which
+     on screen is a sheaf of straight cyan lines crossing the whole system and running off
+     past Neptune rather than a closed orbit. Rebuilt on focus exactly like the orbit paths.
+     */
+    func showTrajectory(_ samples: [TrajectorySample], from epoch: JdTdb) {
+        trajectorySamples = samples
+        trajectoryStartEpoch = epoch
+        rebuildTrajectory()
+    }
+
+    private func rebuildTrajectory() {
+        trajectoryNode?.removeFromParentNode()
+        trajectoryNode = nil
+        guard trajectorySamples.count > 1 else { return }
+
+        // Plain heliocentric, with no origin subtracted, because the node hangs off
+        // `heliocentricRoot` and that parent applies the origin once per frame. Subtracting it
+        // here as well would double-count it and move the path by the focused body's distance
+        // from the Sun.
+        let vertices = trajectorySamples.map { inHeliocentricUnits($0.position) }
         var indices: [Int32] = []
         for i in 0 ..< (vertices.count - 1) {
             indices.append(Int32(i))
@@ -869,13 +1382,47 @@ final class SolarScene {
         geometry.materials = [material]
 
         let node = SCNNode(geometry: geometry)
-        scene.rootNode.addChildNode(node)
+        heliocentricRoot.addChildNode(node)
         trajectoryNode = node
     }
 
     func clearTrajectory() {
+        trajectorySamples = []
+        trajectoryStartEpoch = nil
+        riding = false
+        riderNode?.removeFromParentNode()
+        riderNode = nil
         trajectoryNode?.removeFromParentNode()
         trajectoryNode = nil
+    }
+
+    /**
+     A marker for the rock, sized in screen space rather than in metres.
+
+     A 300 metre body at the scale of a planetary system is far smaller than one pixel, so
+     drawn to scale it is invisible at every distance from which anything else can be seen.
+     SceneKit's billboard constraint plus a fixed unit size gives a marker that stays legible
+     while the camera covers ten orders of magnitude, which is the same reason the body markers
+     on the website exist.
+     */
+    private func ensureRiderNode() -> SCNNode {
+        if let existing = riderNode { return existing }
+        let marker = SCNNode(geometry: SCNPlane(width: 0.02, height: 0.02))
+        marker.geometry?.firstMaterial?.lightingModel = .constant
+        marker.geometry?.firstMaterial?.diffuse.contents = UIColor.systemTeal
+        marker.geometry?.firstMaterial?.isDoubleSided = true
+        marker.constraints = [SCNBillboardConstraint()]
+        scene.rootNode.addChildNode(marker)
+        riderNode = marker
+        return marker
+    }
+
+    /// The drawn path's largest distance from the Sun, in scene units. The gate's handle on
+    /// "is this path the size the integrator said it was".
+    func trajectoryExtentUnits() -> Double {
+        trajectorySamples.reduce(0) { best, sample in
+            Swift.max(best, sample.position.length / metresPerUnit)
+        }
     }
 
     // MARK: - View commands

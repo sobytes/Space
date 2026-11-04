@@ -39,6 +39,24 @@ struct ContentView: View {
      they are covering it. One small control stays visible, because an overlay with no way
      back is a trap rather than a decluttered view.
      */
+    /// `-showHabitability` opens the panel at launch, so a screenshot probe can capture it
+    /// without driving a tap. The same reason `-focus` exists.
+    @State private var showingHabitability = CommandLine.arguments.contains("-showHabitability")
+    @State private var showingSurface = CommandLine.arguments.contains("-showSurface")
+    /**
+     Labels on by default.
+
+     Asked for because the Moon could not be found while focused on Earth, which is the
+     off-screen case: there is nothing on screen to look harder at. Defaulting them off would
+     leave that unsolved for anyone who does not go looking for a toggle, and the people most
+     likely to need a name for something are the least likely to know the control exists.
+     */
+    @State private var showLabels = !CommandLine.arguments.contains("-noLabels")
+
+    private var anySheetPresented: Bool {
+        showingDemonstrations || showingAsk || showingAsteroid || showingLaunch
+            || showingHabitability || showingSurface
+    }
     @State private var overlayHidden = CommandLine.arguments.contains("-startHidden")
 
     private let tick = Timer.publish(every: 1.0 / 60.0, on: .main, in: .common).autoconnect()
@@ -84,6 +102,23 @@ struct ContentView: View {
                         }
                         .onEnded { _ in lastMagnification = 1 }
                 )
+
+            /**
+             Suspended while a sheet covers the scene.
+
+             Not an optimisation for its own sake. The label layer re-lays out on every frame
+             of the clock, and with a sheet up that was enough to make the sheet's own
+             controls unreachable: the asteroid origin menu went back to opening and
+             discarding every tap, the same failure that passing a live epoch into the sheet
+             used to cause. Measured through the interaction gate: 9.8 seconds with labels
+             off against 251 seconds and a failure with them on.
+
+             Nothing is lost, because a sheet covers the scene and the labels with it.
+             */
+            if showLabels && !anySheetPresented {
+                LabelLayer(scene: scene, epoch: clock.epoch)
+                    .ignoresSafeArea()
+            }
 
             if !overlayHidden {
                 VStack(spacing: 10) {
@@ -145,9 +180,32 @@ struct ContentView: View {
                     Button { showingAsk = true } label: {
                         Image(systemName: "sparkles")
                     }
+                    // Labelled, like the hide control, because an unlabelled tag icon is
+                    // exactly the kind of thing someone asks about rather than finds.
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.15)) { showLabels.toggle() }
+                    } label: {
+                        Label("Labels", systemImage: showLabels ? "tag.fill" : "tag")
+                            .font(.system(size: 11))
+                    }
+                    .tint(showLabels ? .orange : .secondary)
+                    .accessibilityIdentifier("tool.labels")
+
+                    Button { showingSurface = true } label: {
+                        Image(systemName: "camera.viewfinder")
+                    }
+                    .tint(.cyan)
+                    .accessibilityIdentifier("tool.surface")
+
+                    Button { showingHabitability = true } label: {
+                        Image(systemName: "leaf")
+                    }
+                    .tint(.green)
+                    .accessibilityIdentifier("tool.habitability")
                     Button { showingAsteroid = true } label: {
                         Image(systemName: "circle.dotted.and.circle")
                     }
+                    .accessibilityIdentifier("tool.asteroid")
                     Button { showingLaunch = true } label: {
                         Image(systemName: "paperplane")
                     }
@@ -161,9 +219,13 @@ struct ContentView: View {
         .sheet(isPresented: $showingDemonstrations) { DemonstrationsView() }
         .sheet(isPresented: $showingAsk) { AskView() }
         .sheet(isPresented: $showingAsteroid) {
-            AsteroidView(scene: scene, epoch: clock.epoch)
+            AsteroidView(scene: scene, clock: clock)
         }
         .sheet(isPresented: $showingLaunch) { LaunchView() }
+        // `focus`, not `clock`: the assessment is a pure function of the body and does
+        // not move with time, so the sheet is rebuilt only when the focus changes.
+        .sheet(isPresented: $showingHabitability) { HabitabilityView(body_: focus) }
+        .sheet(isPresented: $showingSurface) { SurfacePhotographsView(body_: focus) }
         .task {
             /**
              `-focusAfter <id>` switches focus a moment after launch, so a probe can exercise
@@ -177,6 +239,45 @@ struct ContentView: View {
                   let later = BodyId(rawValue: CommandLine.arguments[i + 1]) else { return }
             try? await Task.sleep(for: .seconds(3))
             focus = later
+        }
+        .task {
+            // `-fitMoons` pulls back to frame the satellite system at launch, so a probe can
+            // check that the moons are actually visible there. Test hook.
+            guard CommandLine.arguments.contains("-fitMoons") else { return }
+            try? await Task.sleep(for: .seconds(2))
+            scene.frameMoons()
+        }
+        .task {
+            /**
+             `-rideAsteroid` launches one and rides it, so a probe can reach the onboard view
+             without driving the sheet. A short span, because the point is the camera rather
+             than the propagation, and a fifty-year integration in a debug build is not quick.
+             Test hook.
+             */
+            guard CommandLine.arguments.contains("-rideAsteroid") else { return }
+            try? await Task.sleep(for: .seconds(2))
+            let request = AsteroidLaunch(
+                originBody: focus,
+                altitudeM: bodyContracts[focus]!.equatorialRadiusM * 50,
+                speedMS: 6_000, headingDeg: 180, inclinationDeg: 0,
+                // Ten years, not two: long enough that the path wraps several times and a
+                // sampling regression would show, short enough that a debug build finishes
+                // while a probe is still watching.
+                startEpoch: clock.epoch, durationYears: 10,
+                diameterM: 300, densityKgM3: 3_000
+            )
+            let epoch = clock.epoch
+            let result = await Task.detached(priority: .userInitiated) {
+                runAsteroid(request)
+            }.value
+            scene.showTrajectory(result.result.samples, from: epoch)
+            // `-viewFromSun` leaves the camera on the system instead of the rock, which is
+            // the framing the drawn path is easiest to judge in. Test hook.
+            if CommandLine.arguments.contains("-viewFromSun") {
+                focus = .sun
+            } else {
+                scene.setRiding(true, at: epoch)
+            }
         }
         .onAppear {
             // onChange only fires on a change, so the scene would never be told about the
@@ -194,15 +295,46 @@ struct ContentView: View {
             lastTick = now
             if dumpAt != nil, Date() > dumpAt! {
                 dumpAt = nil
-                if let data = try? JSONSerialization.data(withJSONObject: scene.debug()),
-                   let text = String(data: data, encoding: .utf8) {
-                    NSLog("SCENEDEBUG %@", text)
+                /**
+                 Written to a file, not logged.
+
+                 `log show` wraps and truncates a long message, and the report grew past that
+                 the moment it carried all 32 bodies. A truncated line parses as malformed
+                 JSON, which at least fails loudly; a line truncated at a brace boundary would
+                 not have. The probe reads this out of the app container.
+                 */
+                let url = URL.documentsDirectory.appendingPathComponent("scene-debug.json")
+                let report = scene.debug()
+                /**
+                 Report a failed dump instead of swallowing it.
+
+                 This was `try?` around both the encode and the write, so a report containing
+                 a single NaN produced no file and no log line, and the probe that reads it
+                 said "no scene debug output" rather than "the report is malformed". A
+                 diagnostic that fails silently is worse than no diagnostic, because it
+                 reports the absence of a problem.
+                 */
+                if !JSONSerialization.isValidJSONObject(report) {
+                    for (key, value) in report where !JSONSerialization.isValidJSONObject([key: value]) {
+                        NSLog("SCENEDEBUG unencodable key: %@", key)
+                    }
+                }
+                do {
+                    let data = try JSONSerialization.data(
+                        withJSONObject: report, options: [.prettyPrinted, .sortedKeys]
+                    )
+                    try data.write(to: url)
+                    NSLog("SCENEDEBUG written to %@", url.path)
+                } catch {
+                    NSLog("SCENEDEBUG failed: %@", String(describing: error))
                 }
             }
             clock.advance(realSeconds: delta)
             gravity.seek(to: clock.epoch)
             scene.update(to: clock.epoch, gravity: gravity)
-            scene.refreshTiles(viewportHeightPx: Double(UIScreen.main.bounds.height))
+            let heightPx = Double(UIScreen.main.bounds.height)
+            scene.setViewportHeight(heightPx)
+            scene.refreshTiles(viewportHeightPx: heightPx)
         }
     }
 }
@@ -268,12 +400,8 @@ private struct BodyPanel: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(contract.displayName).font(.headline)
-                Spacer()
-                Button(expanded ? "Less" : "More") { expanded.toggle() }
-                    .font(.caption2)
-            }
+            Text(contract.displayName).font(.headline)
+                .accessibilityIdentifier("panel.title")
             Text(contract.education.oneLine)
                 .font(.caption)
                 .foregroundStyle(.orange.opacity(0.9))
@@ -348,10 +476,47 @@ private struct BodyPanel: View {
                 }
                 // Capped so a body with a lot to say cannot push the panel up into the tool
                 // rail. Jupiter's contract alone runs past the top of the screen uncapped.
-                .frame(maxHeight: 240)
+                /**
+                 Capped so the panel's own header cannot slide under the tool rail.
+
+                 240 was not enough. The panel is bottom-aligned, so expanding it grows the
+                 top edge upwards, and at 240 the header reached y=208 on a 874 point screen
+                 while the rail occupies roughly 54 to 292 on the same side. The More control
+                 ended up underneath the launch button: still reported hittable by
+                 accessibility, because nothing about the view hierarchy was wrong, and
+                 untappable in practice because the rail is in front. Tapping it opened a
+                 sheet instead of collapsing the panel, so the panel could be expanded and
+                 not put away, which is what prompted the question about whether More toggles.
+
+                 Sized from the window rather than from a second constant, so it stays right
+                 on a device whose screen is a different height. `interactiveOverlaysDoNotOverlap`
+                 in the UI tests is the gate; this number is just the fix.
+                 */
+                .frame(maxHeight: max(120, UIScreen.main.bounds.height * 0.5 - 240))
             }
 
             reliefNotice
+            /**
+             The expand control sits on the bottom edge, not in the header.
+
+             The panel is bottom-aligned, so expanding it grows the top edge upwards into the
+             tool rail. In the header, this control moved from y=418 to y=208 on a 874 point
+             screen and came to rest underneath the rail's buttons: accessibility still
+             reported it present and hittable, because nothing about the hierarchy was wrong,
+             and a tap went to the rail instead. The panel could be expanded and then not put
+             away, which is what prompted someone to ask whether More toggles at all.
+
+             Capping the height was the first attempt and only shrank the overlap to twenty
+             points, which is worse than either extreme: it usually works. The bottom edge
+             does not move at all, so the control cannot collide with anything above it and
+             the finger does not have to chase it between taps.
+             */
+            HStack {
+                Spacer()
+                Button(expanded ? "Less" : "More") { expanded.toggle() }
+                    .font(.caption2)
+                    .accessibilityIdentifier("panel.more")
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
@@ -482,6 +647,21 @@ private struct ViewControls: View {
                     .buttonStyle(.bordered)
                     .controlSize(.mini)
                     .tint(.cyan)
+            }
+            /**
+             Only shown once something has been launched, because there is nothing to ride
+             otherwise, and a disabled control that never explains itself is worse than an
+             absent one.
+             */
+            if scene.trajectoryStartEpoch != nil {
+                Button(scene.riding ? "Stop riding" : "Ride it") {
+                    scene.setRiding(!scene.riding, at: clock.epoch)
+                }
+                .font(.system(size: 11))
+                .buttonStyle(.bordered)
+                .controlSize(.mini)
+                .tint(scene.riding ? .orange : .teal)
+                .accessibilityIdentifier("view.ride")
             }
             Spacer()
         }

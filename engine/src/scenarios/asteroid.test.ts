@@ -137,3 +137,52 @@ describe("where things end up", () => {
     }
   });
 });
+
+describe("the drawn path", () => {
+  /**
+   * How sharply does the recorded path turn between consecutive points?
+   *
+   * This is the invariant the eye actually judges, and it is the one that was broken. A path
+   * is drawn as straight segments between samples, so the angle between consecutive segments
+   * is exactly how polygonal it looks. Twelve points around an orbit is thirty degrees a
+   * segment and reads as a dodecagon; the overlapping dodecagons of a fifty-year run were
+   * reported from the phone as a path that did not look right.
+   *
+   * Sample counts are the wrong thing to assert. The shipped iOS value of 600 is a perfectly
+   * reasonable-looking number and is fine at two years; what makes it wrong at fifty is the
+   * geometry it produces, and only the geometry says so.
+   */
+  // The 200 year case needs its own timeout: measured at 5.6 s for 53,729 steps, which is the
+  // propagation being genuinely long rather than slow. It runs off the main thread in both
+  // clients, so this is a test-harness limit and not a user-facing one.
+  it.each([2, 10, 50, 200])("stays smooth over %i years", (years) => {
+    const outcome = runAsteroid({ ...DEFAULT_LAUNCH, originBody: "embary", durationYears: years });
+    const samples = outcome.result.samples;
+    expect(samples.length).toBeGreaterThan(100 * years);
+
+    let worstTurnDeg = 0;
+    for (let i = 1; i + 1 < samples.length; i++) {
+      const a = sub(samples[i].position, samples[i - 1].position);
+      const b = sub(samples[i + 1].position, samples[i].position);
+      const la = length(a);
+      const lb = length(b);
+      if (la === 0 || lb === 0) continue;
+      const cos = (a.x * b.x + a.y * b.y + a.z * b.z) / (la * lb);
+      worstTurnDeg = Math.max(
+        worstTurnDeg,
+        (Math.acos(Math.max(-1, Math.min(1, cos))) * 180) / Math.PI,
+      );
+    }
+    // Measured at 3.1 degrees for every span up to 50 years and 4.2 at 200, where the sample
+    // cap starts to bite. Ten is well clear of both and far below the thirty that was shipped.
+    expect(worstTurnDeg).toBeLessThan(10);
+  }, 30_000);
+
+  it("records the end of the run, not a sample interval short of it", () => {
+    const years = 50;
+    const outcome = runAsteroid({ ...DEFAULT_LAUNCH, originBody: "embary", durationYears: years });
+    const samples = outcome.result.samples;
+    const requested = years * 365.25 * 86_400;
+    expect(samples[samples.length - 1].t).toBeCloseTo(requested, 3);
+  });
+});

@@ -1,0 +1,178 @@
+{
+  "domain": "sample-cadence",
+  "absoluteTolerance": 0.000001,
+  "description": "Recording interval for a propagated path, from the orbit rather than the span.",
+  "tolerance": 1e-12,
+  "cases": [
+    {
+      "id": "interval-0.39au-2y",
+      "input": {
+        "position": {
+          "x": 58343169573,
+          "y": 0,
+          "z": 0
+        },
+        "velocity": {
+          "x": 0,
+          "y": 47693.677150763506,
+          "z": 0
+        },
+        "durationSeconds": 63115200
+      },
+      "expected": 42700.8553724788
+    },
+    {
+      "id": "interval-0.39au-50y",
+      "input": {
+        "position": {
+          "x": 58343169573,
+          "y": 0,
+          "z": 0
+        },
+        "velocity": {
+          "x": 0,
+          "y": 47693.677150763506,
+          "z": 0
+        },
+        "durationSeconds": 1577880000
+      },
+      "expected": 42700.8553724788
+    },
+    {
+      "id": "interval-0.39au-200y",
+      "input": {
+        "position": {
+          "x": 58343169573,
+          "y": 0,
+          "z": 0
+        },
+        "velocity": {
+          "x": 0,
+          "y": 47693.677150763506,
+          "z": 0
+        },
+        "durationSeconds": 6311520000
+      },
+      "expected": 157788
+    },
+    {
+      "id": "interval-1au-2y",
+      "input": {
+        "position": {
+          "x": 149597870700,
+          "y": 0,
+          "z": 0
+        },
+        "velocity": {
+          "x": 0,
+          "y": 29784.69183427775,
+          "z": 0
+        },
+        "durationSeconds": 63115200
+      },
+      "expected": 175323.311197258
+    },
+    {
+      "id": "interval-1au-50y",
+      "input": {
+        "position": {
+          "x": 149597870700,
+          "y": 0,
+          "z": 0
+        },
+        "velocity": {
+          "x": 0,
+          "y": 29784.69183427775,
+          "z": 0
+        },
+        "durationSeconds": 1577880000
+      },
+      "expected": 175323.311197258
+    },
+    {
+      "id": "interval-1au-200y",
+      "input": {
+        "position": {
+          "x": 149597870700,
+          "y": 0,
+          "z": 0
+        },
+        "velocity": {
+          "x": 0,
+          "y": 29784.69183427775,
+          "z": 0
+        },
+        "durationSeconds": 6311520000
+      },
+      "expected": 175323.311197258
+    },
+    {
+      "id": "interval-5.2au-2y",
+      "input": {
+        "position": {
+          "x": 777908927640,
+          "y": 0,
+          "z": 0
+        },
+        "velocity": {
+          "x": 0,
+          "y": 13061.451412920946,
+          "z": 0
+        },
+        "durationSeconds": 63115200
+      },
+      "expected": 2078953.04109087
+    },
+    {
+      "id": "interval-5.2au-50y",
+      "input": {
+        "position": {
+          "x": 777908927640,
+          "y": 0,
+          "z": 0
+        },
+        "velocity": {
+          "x": 0,
+          "y": 13061.451412920946,
+          "z": 0
+        },
+        "durationSeconds": 1577880000
+      },
+      "expected": 2078953.04109087
+    },
+    {
+      "id": "interval-5.2au-200y",
+      "input": {
+        "position": {
+          "x": 777908927640,
+          "y": 0,
+          "z": 0
+        },
+        "velocity": {
+          "x": 0,
+          "y": 13061.451412920946,
+          "z": 0
+        },
+        "durationSeconds": 6311520000
+      },
+      "expected": 2078953.04109087
+    },
+    {
+      "id": "interval-escape-10y",
+      "input": {
+        "position": {
+          "x": 149597870700,
+          "y": 0,
+          "z": 0
+        },
+        "velocity": {
+          "x": 0,
+          "y": 59569.3836685555,
+          "z": 0
+        },
+        "durationSeconds": 315576000
+      },
+      "expected": 157788
+    }
+  ]
+}

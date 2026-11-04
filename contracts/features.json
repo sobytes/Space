@@ -74,7 +74,8 @@
       "web": {
         "status": "shipped",
         "paths": [
-          "website/src/view/react/Hud.tsx"
+          "website/src/view/react/Hud.tsx",
+          "website/src/view/react/PickLayer.tsx"
         ]
       },
       "ios": {
@@ -178,7 +179,9 @@
       "web": {
         "status": "shipped",
         "paths": [
-          "website/src/view/react/OrbitPaths.tsx"
+          "website/src/view/react/OrbitPaths.tsx",
+          "website/src/view/react/HeliocentricRoot.tsx",
+          "website/src/view/react/CameraRig.tsx"
         ]
       },
       "ios": {
@@ -416,7 +419,9 @@
       "web": {
         "status": "shipped",
         "paths": [
-          "engine/src/scenarios/asteroid.ts"
+          "engine/src/scenarios/asteroid.ts",
+          "website/src/view/react/AsteroidPanel.tsx",
+          "website/src/view/react/AsteroidTrajectory.tsx"
         ]
       },
       "ios": {
@@ -497,7 +502,8 @@
       "web": {
         "status": "shipped",
         "paths": [
-          "website/src/ai/tools.ts"
+          "website/src/ai/tools.ts",
+          "website/src/view/react/AskPanel.tsx"
         ]
       },
       "ios": {
@@ -609,6 +615,144 @@
         "status": "shipped",
         "paths": [
           "mobile/ios/App/Sources/ContentView.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
+    },
+    {
+      "id": "habitability",
+      "title": "Habitability assessment: what it would take to live on this body",
+      "why": "The question people actually ask about a planet, answered from the same contracts that position it. Every figure comes from engine/src/habitability.ts, so the two clients cannot quote different masses, temperatures or mirror areas for the same body.",
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/react/HabitabilityPanel.tsx",
+          "engine/src/habitability.ts"
+        ]
+      },
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/HabitabilityView.swift",
+          "mobile/ios/SolarKit/Sources/SolarKit/Habitability.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
+    },
+    {
+      "id": "ride-along",
+      "title": "Ride a launched object: fly with it and watch from on board",
+      "why": "Launching used to leave the camera wherever it was, so the departure happened off screen. Both clients now focus the body the object leaves from and can put the floating origin on the object itself, which turns the existing camera into an onboard one. The interpolation that places it between integrator samples is engine/src/propagate.ts trajectoryStateAt, gated by the trajectory-interpolation conformance domain so the two riders agree.",
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/core/viewport.ts",
+          "website/src/view/react/RideBinding.tsx"
+        ]
+      },
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/SolarScene.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
+    },
+    {
+      "id": "body-markers",
+      "title": "Markers for bodies too small to resolve",
+      "why": "From anywhere useful in the solar system most bodies are well under a pixel across, and drawing them larger would be a lie about scale. A soft dot in the body's own colour fades in exactly as the real sphere stops being resolvable, so scale stays honest and nothing becomes invisible. The web has done this from the start; iOS had nothing, so Phobos rendered at 0.46 pixels and a viewer reported that moons were missing. The feature was never listed here, which is why the parity gate had nothing to compare.",
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/react/BodyMarkers.tsx"
+        ]
+      },
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/SolarScene.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
+    },
+    {
+      "id": "labels",
+      "title": "Body labels, including pointers to bodies that are off screen",
+      "why": "A marker says something is here; only a label says what. The case it exists for is the off-screen one: focused on Earth at six radii the Moon is sixty radii away and not in frame at all, so there is nothing on screen to look harder at. A label clamped to the edge nearest it, with a bearing, turns 'it is missing' into 'it is that way'. Placement is engine/src/labels.ts, gated by the labels conformance domain so both clients clamp and thin identically.",
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/react/LabelLayer.tsx",
+          "engine/src/labels.ts"
+        ]
+      },
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/LabelLayer.swift",
+          "mobile/ios/SolarKit/Sources/SolarKit/Labels.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
+    },
+    {
+      "id": "surface-photographs",
+      "title": "Stand on the surface: real photographs taken on other worlds",
+      "why": "Asked for as a way to look around a world with real pictures rather than anything generated. That constraint is the design: NASA's library is full of artist's impressions and computed perspective views rendered from radar, and a search for 'Venus surface' returns a Magellan elevation model drawn as a landscape that looks exactly like a photograph and is not one. Every image is a curated asset id, and ./build.sh imagery re-resolves each one and rejects anything whose own description calls it a concept, an illustration or a perspective view. The gaps are the other half: five worlds have ever been photographed from their own surface, and each body with none says why.",
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "website/src/view/react/SurfacePanel.tsx",
+          "engine/src/surface-views.ts",
+          "engine/src/data/surface-imagery.ts"
+        ]
+      },
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/App/Sources/SurfaceView.swift",
+          "mobile/ios/SolarKit/Sources/SolarKit/SurfaceViews.swift"
         ]
       },
       "android": {

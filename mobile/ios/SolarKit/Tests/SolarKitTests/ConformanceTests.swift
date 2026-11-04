@@ -47,6 +47,8 @@ final class ConformanceTests: XCTestCase {
         let id: String
         let input: [String: JSON]?
         let expected: JSON
+        /// Optional per-case override, for a case whose domain tolerance is meaningless for it.
+        let absoluteTolerance: Double?
     }
 
     /// Just enough JSON to read a case. `Decodable` with `Any` is not a thing in Swift.
@@ -254,11 +256,239 @@ final class ConformanceTests: XCTestCase {
             }
             return value(try maximumPayload(vehicle(id: text(input, "vehicle"))!, target: target).payloadKg)
 
+        /**
+         Integrated trajectories, re-run rather than compared against a stored path.
+
+         The case carries only the initial condition and the duration, so passing means this
+         integrator arrived where the TypeScript one did, not that a number was copied across.
+         The two-body cases close an exact orbit, so the expected endpoint is also the start.
+         */
+        case "propagate":
+            let limits = PropagationLimits(
+                tolerance: number(input, "tolerance"),
+                minStepSeconds: 1,
+                maxStepSeconds: c.id.hasPrefix("mercury") ? 3_600 : 86_400 * 5,
+                maxSteps: 2_000_000
+            )
+
+            if c.id.hasPrefix("two-body") {
+                let r = number(input, "radiusAu") * Constants.auInMetres
+                let result = propagate(PropagateOptions(
+                    model: twoBodyModel(),
+                    initial: StateVector(
+                        position: Vec3(r, 0, 0),
+                        velocity: Vec3(0, (Constants.gmSun / r).squareRoot(), 0)
+                    ),
+                    durationSeconds: number(input, "durationSeconds"),
+                    limits: limits
+                ))
+                let final = result.samples[result.samples.count - 1]
+                return .object(["position": vec(final.position), "velocity": vec(final.velocity)])
+            }
+
+            if c.id.hasPrefix("mercury") {
+                let a = Mercury.semiMajorAxisM
+                let e = Mercury.eccentricity
+                let period = 2 * Double.pi * (pow(a, 3) / Constants.gmSun).squareRoot()
+                let result = propagate(PropagateOptions(
+                    model: ForceModel(
+                        centralGm: Constants.gmSun,
+                        perturbers: [],
+                        relativistic: c.id.hasSuffix("relativistic")
+                    ),
+                    initial: StateVector(
+                        position: Vec3(a * (1 - e), 0, 0),
+                        velocity: Vec3(0, ((Constants.gmSun * (1 + e)) / (a * (1 - e))).squareRoot(), 0)
+                    ),
+                    durationSeconds: number(input, "orbits") * period,
+                    limits: limits
+                ))
+                let final = result.samples[result.samples.count - 1]
+                return .object([
+                    "position": vec(final.position),
+                    "velocity": vec(final.velocity),
+                    "pericentreLongitude": .number(osculatingElements(
+                        gm: Constants.gmSun, position: final.position, velocity: final.velocity
+                    ).longitudeOfPericentreRad),
+                ])
+            }
+
+            let years = number(input, "durationYears")
+            let launch = AsteroidLaunch(durationYears: years)
+            let initialState = initialStateFor(launch)
+            let result = propagate(PropagateOptions(
+                model: asteroidForceModel(startEpoch: launch.startEpoch),
+                initial: initialState,
+                durationSeconds: years * Constants.secondsPerJulianYear,
+                limits: limits
+            ))
+            let final = result.samples[result.samples.count - 1]
+            return .object([
+                "initial": .object([
+                    "position": vec(initialState.position), "velocity": vec(initialState.velocity),
+                ]),
+                "final": .object(["position": vec(final.position), "velocity": vec(final.velocity)]),
+            ])
+
+        /// Where a body's name is drawn, and where an off-screen pointer aims.
+        case "labels":
+            guard case let .array(rawInputs)? = input?["inputs"] else { return .null }
+            let labelInputs: [LabelInput] = rawInputs.compactMap { entry in
+                guard case let .object(f) = entry,
+                      case let .string(id)? = f["id"],
+                      let body = BodyId(rawValue: id),
+                      case let .string(relevance)? = f["relevance"],
+                      let kind = LabelRelevance(rawValue: relevance)
+                else { return nil }
+                func num(_ key: String) -> Double {
+                    if case let .number(v)? = f[key] { return v }
+                    return 0
+                }
+                var behind = false
+                if case let .bool(v)? = f["behindCamera"] { behind = v }
+                return LabelInput(
+                    id: body, ndcX: num("ndcX"), ndcY: num("ndcY"), radiusPx: num("radiusPx"),
+                    distance: num("distance"), behindCamera: behind, relevance: kind
+                )
+            }
+            return .array(
+                placeLabels(labelInputs, options: LabelOptions(
+                    viewportWidthPx: number(input, "viewportWidthPx"),
+                    viewportHeightPx: number(input, "viewportHeightPx")
+                )).map { placement in
+                    .object([
+                        "id": .string(placement.id.rawValue),
+                        "x": .number(placement.x),
+                        "y": .number(placement.y),
+                        "clamped": .bool(placement.clamped),
+                        "bearingRadians": placement.bearingRadians.map { JSON.number($0) } ?? .null,
+                    ])
+                }
+            )
+
+        /// Recording interval for a propagated path, from the orbit rather than the span.
+        case "sample-cadence":
+            return value(sampleIntervalFor(
+                gm: Constants.gmSun,
+                initial: StateVector(
+                    position: vector(input, "position"), velocity: vector(input, "velocity")
+                ),
+                durationSeconds: number(input, "durationSeconds")
+            ))
+
+        /// Cubic Hermite placement of an object between integrator samples.
+        case "trajectory-interpolation":
+            guard case let .array(raw)? = input?["samples"] else { return .null }
+            let samples: [TrajectorySample] = raw.compactMap { entry in
+                guard case let .object(fields) = entry,
+                      case let .number(t) = fields["t"] ?? .null
+                else { return nil }
+                return TrajectorySample(
+                    t: t,
+                    position: vector(fields, "position"),
+                    velocity: vector(fields, "velocity")
+                )
+            }
+            guard let state = trajectoryStateAt(samples, seconds: number(input, "seconds")) else {
+                return .null
+            }
+            return .object(["position": vec(state.position), "velocity": vec(state.velocity)])
+
+        /**
+         Mutual gravity over years, with the conserved quantities alongside the state.
+
+         The drifts are cases rather than loose assertions. A port whose integrator is subtly
+         worse then shows up as a different number instead of as a pass with more slack, which
+         is the failure mode every tolerance-based energy check has.
+         */
+        case "nbody-evolution":
+            let system = solarSystemAt(JdTdb(number(input, "jdTdb")))
+            let beforeEnergy = totalEnergy(system)
+            let beforeAngular = totalAngularMomentum(system)
+            _ = advance(
+                system,
+                durationSeconds: number(input, "years") * Constants.secondsPerJulianYear,
+                limits: NBodyLimits(
+                    tolerance: number(input, "tolerance"),
+                    minStepSeconds: 60,
+                    maxStepSeconds: Constants.secondsPerDay
+                )
+            )
+            let afterAngular = totalAngularMomentum(system)
+            let beforeMagnitude = beforeAngular.length
+            let drift = (afterAngular - beforeAngular).length / beforeMagnitude
+            return .object([
+                "state": .array(system.state.map { JSON.number($0) }),
+                "energyDrift": .number(abs((totalEnergy(system) - beforeEnergy) / beforeEnergy)),
+                "angularDrift": .number(drift),
+            ])
+
+        /// Tile selection, which decides what a viewer actually sees on a surface.
+        case "tiles":
+            if c.id.hasPrefix("metres-per-pixel") {
+                return value(metresPerPixel(
+                    altitudeM: number(input, "altitudeM"),
+                    verticalFovRadians: number(input, "verticalFovRadians"),
+                    viewportHeightPx: number(input, "viewportHeightPx")
+                ))
+            }
+            if c.id.hasPrefix("level-for") {
+                return .number(Double(levelFor(
+                    Self.conformanceTileManifest,
+                    altitudeM: number(input, "altitudeM"),
+                    verticalFovRadians: number(input, "verticalFovRadians"),
+                    viewportHeightPx: number(input, "viewportHeightPx")
+                ).level))
+            }
+            if c.id.hasPrefix("visible-cap") {
+                return value(visibleCapAngle(
+                    radiusM: number(input, "radiusM"), altitudeM: number(input, "altitudeM")
+                ))
+            }
+            let levelIndex = Int(number(input, "level"))
+            let extent = tileExtent(
+                level: Self.conformanceTileManifest.levels[levelIndex],
+                tile: TileId(level: levelIndex, x: Int(number(input, "x")), y: Int(number(input, "y")))
+            )
+            return .object([
+                "phiStart": .number(extent.phiStart),
+                "phiLength": .number(extent.phiLength),
+                "thetaStart": .number(extent.thetaStart),
+                "thetaLength": .number(extent.thetaLength),
+            ])
+
         default:
             XCTFail("no runner for domain \"\(domain)\"")
             return .null
         }
     }
+
+    /**
+     The tile pyramid the `tiles` cases were generated against.
+
+     Spelled out rather than fetched, because the cases have to be reproducible with no network
+     and no asset pipeline, and because a manifest that drifted would silently change what the
+     cases mean rather than fail. Mirrors the one in `scripts/generate-conformance.mjs`.
+     */
+    private static let conformanceTileManifest = TerrainManifest(
+        body: "moon",
+        tileSize: 512,
+        levels: (0 ... 3).map { level in
+            PyramidLevel(
+                level: level,
+                tilesX: 2 * (1 << level),
+                tilesY: 1 * (1 << level),
+                levelWidth: 1024 * (1 << level),
+                levelHeight: 512 * (1 << level),
+                metresPerTexel: 10_660.552_883_490_052 / Double(1 << level)
+            )
+        },
+        globalNormalMap: "normal-global.jpg",
+        globalWidth: 8192,
+        referenceRadiusM: 1_737_400,
+        elevationRangeM: [-9106, 10_747],
+        source: "LRO LOLA"
+    )
 
     // MARK: - Comparing
 
@@ -340,7 +570,9 @@ final class ConformanceTests: XCTestCase {
                 check(
                     produced, testCase.expected,
                     tolerance: domain.tolerance,
-                    absolute: domain.absoluteTolerance,
+                    // A case may widen its own absolute term where the domain's is
+                    // meaningless for it: a near-zero component of a huge vector.
+                    absolute: testCase.absoluteTolerance ?? domain.absoluteTolerance,
                     where: "\(name)/\(testCase.id)"
                 )
                 ran += 1

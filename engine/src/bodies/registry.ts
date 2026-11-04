@@ -505,7 +505,13 @@ export const BODY_CONTRACTS: Readonly<Record<BodyId, BodyContract>> = {
     meanTemperatureK: 250,
     confirmedMoons: 0,
     atmosphere: null,
-    appearance: { albedoTextureId: "moon", tint: "#b8b2a8", emissive: false },
+    appearance: {
+      albedoTextureId: "moon",
+      tint: "#b8b2a8",
+      emissive: false,
+      // The only body with a shipped LOLA tile pyramid. Gated by terrain-coverage.test.ts.
+      hasTerrain: true,
+    },
     education: {
       oneLine: "Tidally locked, so its rotation period exactly equals its orbital period.",
       whyItMatters:

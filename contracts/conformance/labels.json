@@ -1,0 +1,249 @@
+{
+  "domain": "labels",
+  "absoluteTolerance": 1e-9,
+  "description": "Where a body's name is drawn, and where an off-screen pointer aims.",
+  "tolerance": 1e-12,
+  "cases": [
+    {
+      "id": "on-screen-large",
+      "input": {
+        "inputs": [
+          {
+            "ndcX": 0,
+            "ndcY": 0,
+            "radiusPx": 300,
+            "distance": 1000000000,
+            "behindCamera": false,
+            "relevance": "focus",
+            "id": "mars"
+          }
+        ],
+        "viewportWidthPx": 402,
+        "viewportHeightPx": 874
+      },
+      "expected": [
+        {
+          "id": "mars",
+          "x": 229,
+          "y": 409,
+          "clamped": false,
+          "bearingRadians": null
+        }
+      ]
+    },
+    {
+      "id": "off-right",
+      "input": {
+        "inputs": [
+          {
+            "ndcX": 4,
+            "ndcY": 0,
+            "radiusPx": 4,
+            "distance": 1000000000,
+            "behindCamera": false,
+            "relevance": "satellite-of-focus",
+            "id": "moon"
+          }
+        ],
+        "viewportWidthPx": 402,
+        "viewportHeightPx": 874
+      },
+      "expected": [
+        {
+          "id": "moon",
+          "x": 358,
+          "y": 437,
+          "clamped": true,
+          "bearingRadians": 0
+        }
+      ]
+    },
+    {
+      "id": "off-diagonal",
+      "input": {
+        "inputs": [
+          {
+            "ndcX": 6,
+            "ndcY": 3,
+            "radiusPx": 4,
+            "distance": 1000000000,
+            "behindCamera": false,
+            "relevance": "satellite-of-focus",
+            "id": "io"
+          }
+        ],
+        "viewportWidthPx": 402,
+        "viewportHeightPx": 874
+      },
+      "expected": [
+        {
+          "id": "io",
+          "x": 358,
+          "y": 266.330845771144,
+          "clamped": true,
+          "bearingRadians": -0.827090318620135
+        }
+      ]
+    },
+    {
+      "id": "behind-camera",
+      "input": {
+        "inputs": [
+          {
+            "ndcX": 0.5,
+            "ndcY": 0,
+            "radiusPx": 4,
+            "distance": 1000000000,
+            "behindCamera": true,
+            "relevance": "satellite-of-focus",
+            "id": "moon"
+          }
+        ],
+        "viewportWidthPx": 402,
+        "viewportHeightPx": 874
+      },
+      "expected": [
+        {
+          "id": "moon",
+          "x": 44,
+          "y": 437,
+          "clamped": true,
+          "bearingRadians": 3.14159265358979
+        }
+      ]
+    },
+    {
+      "id": "thinning",
+      "input": {
+        "inputs": [
+          {
+            "ndcX": 0,
+            "ndcY": 0,
+            "radiusPx": 4,
+            "distance": 1000000000,
+            "behindCamera": false,
+            "relevance": "other",
+            "id": "io"
+          },
+          {
+            "ndcX": 0,
+            "ndcY": 0,
+            "radiusPx": 4,
+            "distance": 2000000000,
+            "behindCamera": false,
+            "relevance": "other",
+            "id": "europa"
+          },
+          {
+            "ndcX": 0,
+            "ndcY": 0,
+            "radiusPx": 4,
+            "distance": 3000000000,
+            "behindCamera": false,
+            "relevance": "other",
+            "id": "ganymede"
+          }
+        ],
+        "viewportWidthPx": 402,
+        "viewportHeightPx": 874
+      },
+      "expected": [
+        {
+          "id": "io",
+          "x": 210.8,
+          "y": 427.2,
+          "clamped": false,
+          "bearingRadians": null
+        }
+      ]
+    },
+    {
+      "id": "planet-beats-its-moon",
+      "input": {
+        "inputs": [
+          {
+            "ndcX": 0,
+            "ndcY": 0,
+            "radiusPx": 4,
+            "distance": 1000000000,
+            "behindCamera": false,
+            "relevance": "other",
+            "id": "callisto"
+          },
+          {
+            "ndcX": 0,
+            "ndcY": 0,
+            "radiusPx": 4,
+            "distance": 2000000000,
+            "behindCamera": false,
+            "relevance": "other",
+            "id": "jupiter"
+          }
+        ],
+        "viewportWidthPx": 402,
+        "viewportHeightPx": 874
+      },
+      "expected": [
+        {
+          "id": "jupiter",
+          "x": 210.8,
+          "y": 427.2,
+          "clamped": false,
+          "bearingRadians": null
+        }
+      ]
+    },
+    {
+      "id": "mixed-relevance",
+      "input": {
+        "inputs": [
+          {
+            "ndcX": 0,
+            "ndcY": 0,
+            "radiusPx": 4,
+            "distance": 1000000000,
+            "behindCamera": false,
+            "relevance": "focus",
+            "id": "embary"
+          },
+          {
+            "ndcX": 3,
+            "ndcY": 0,
+            "radiusPx": 4,
+            "distance": 2000000000,
+            "behindCamera": false,
+            "relevance": "satellite-of-focus",
+            "id": "moon"
+          },
+          {
+            "ndcX": 9,
+            "ndcY": 0,
+            "radiusPx": 4,
+            "distance": 3000000000,
+            "behindCamera": false,
+            "relevance": "other",
+            "id": "neptune"
+          }
+        ],
+        "viewportWidthPx": 402,
+        "viewportHeightPx": 874
+      },
+      "expected": [
+        {
+          "id": "embary",
+          "x": 210.8,
+          "y": 427.2,
+          "clamped": false,
+          "bearingRadians": null
+        },
+        {
+          "id": "moon",
+          "x": 358,
+          "y": 437,
+          "clamped": true,
+          "bearingRadians": 0
+        }
+      ]
+    }
+  ]
+}

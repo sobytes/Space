@@ -115,6 +115,19 @@ export interface Appearance {
   readonly nightTextureId?: string;
   readonly cloudTextureId?: string;
   readonly normalTextureId?: string;
+  /**
+   * Whether a tile pyramid of real elevation data is shipped for this body.
+   *
+   * Declared rather than discovered. The web client fetched `/terrain/<id>/manifest.json`
+   * for every body in the registry and got a 404 for all but one, so a single page load
+   * produced 31 failed requests. The cost is small; the harm is that a console full of
+   * expected 404s is a console where a real one is invisible.
+   *
+   * `terrain-coverage.test.ts` checks this against what is actually in `public/terrain`, in
+   * both directions, so a contract claiming data that is not there and data on disk that no
+   * contract claims are both failures.
+   */
+  readonly hasTerrain?: true;
   readonly ringSystem?: RingSystem;
   /** Fallback colour used before the texture loads, and for the orbit line. */
   readonly tint: string;

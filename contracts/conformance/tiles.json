@@ -1,0 +1,202 @@
+{
+  "domain": "tiles",
+  "absoluteTolerance": 0,
+  "description": "Level choice, visible cap and tile extents for a surface pyramid.",
+  "tolerance": 1e-12,
+  "cases": [
+    {
+      "id": "metres-per-pixel-10000",
+      "input": {
+        "altitudeM": 10000,
+        "verticalFovRadians": 0.9599310885968813,
+        "viewportHeightPx": 900
+      },
+      "expected": 11.5681566789277
+    },
+    {
+      "id": "level-for-10000",
+      "input": {
+        "altitudeM": 10000,
+        "verticalFovRadians": 0.9599310885968813,
+        "viewportHeightPx": 900
+      },
+      "expected": 3
+    },
+    {
+      "id": "visible-cap-10000",
+      "input": {
+        "radiusM": 1737400,
+        "altitudeM": 10000
+      },
+      "expected": 0.107035086505974
+    },
+    {
+      "id": "metres-per-pixel-100000",
+      "input": {
+        "altitudeM": 100000,
+        "verticalFovRadians": 0.9599310885968813,
+        "viewportHeightPx": 900
+      },
+      "expected": 115.681566789277
+    },
+    {
+      "id": "level-for-100000",
+      "input": {
+        "altitudeM": 100000,
+        "verticalFovRadians": 0.9599310885968813,
+        "viewportHeightPx": 900
+      },
+      "expected": 3
+    },
+    {
+      "id": "visible-cap-100000",
+      "input": {
+        "radiusM": 1737400,
+        "altitudeM": 100000
+      },
+      "expected": 0.331438375773438
+    },
+    {
+      "id": "metres-per-pixel-1000000",
+      "input": {
+        "altitudeM": 1000000,
+        "verticalFovRadians": 0.9599310885968813,
+        "viewportHeightPx": 900
+      },
+      "expected": 1156.81566789277
+    },
+    {
+      "id": "level-for-1000000",
+      "input": {
+        "altitudeM": 1000000,
+        "verticalFovRadians": 0.9599310885968813,
+        "viewportHeightPx": 900
+      },
+      "expected": 3
+    },
+    {
+      "id": "visible-cap-1000000",
+      "input": {
+        "radiusM": 1737400,
+        "altitudeM": 1000000
+      },
+      "expected": 0.883189220731183
+    },
+    {
+      "id": "metres-per-pixel-10000000",
+      "input": {
+        "altitudeM": 10000000,
+        "verticalFovRadians": 0.9599310885968813,
+        "viewportHeightPx": 900
+      },
+      "expected": 11568.1566789277
+    },
+    {
+      "id": "level-for-10000000",
+      "input": {
+        "altitudeM": 10000000,
+        "verticalFovRadians": 0.9599310885968813,
+        "viewportHeightPx": 900
+      },
+      "expected": 0
+    },
+    {
+      "id": "visible-cap-10000000",
+      "input": {
+        "radiusM": 1737400,
+        "altitudeM": 10000000
+      },
+      "expected": 1.42222782040717
+    },
+    {
+      "id": "metres-per-pixel-100000000",
+      "input": {
+        "altitudeM": 100000000,
+        "verticalFovRadians": 0.9599310885968813,
+        "viewportHeightPx": 900
+      },
+      "expected": 115681.566789277
+    },
+    {
+      "id": "level-for-100000000",
+      "input": {
+        "altitudeM": 100000000,
+        "verticalFovRadians": 0.9599310885968813,
+        "viewportHeightPx": 900
+      },
+      "expected": 0
+    },
+    {
+      "id": "visible-cap-100000000",
+      "input": {
+        "radiusM": 1737400,
+        "altitudeM": 100000000
+      },
+      "expected": 1.55371819762499
+    },
+    {
+      "id": "tile-extent-level-0",
+      "input": {
+        "level": 0,
+        "tilesX": 2,
+        "tilesY": 1,
+        "x": 1,
+        "y": 0
+      },
+      "expected": {
+        "phiStart": 3.14159265358979,
+        "phiLength": 3.14159265358979,
+        "thetaStart": 0,
+        "thetaLength": 3.14159265358979
+      }
+    },
+    {
+      "id": "tile-extent-level-1",
+      "input": {
+        "level": 1,
+        "tilesX": 4,
+        "tilesY": 2,
+        "x": 1,
+        "y": 0
+      },
+      "expected": {
+        "phiStart": 1.5707963267949,
+        "phiLength": 1.5707963267949,
+        "thetaStart": 0,
+        "thetaLength": 1.5707963267949
+      }
+    },
+    {
+      "id": "tile-extent-level-2",
+      "input": {
+        "level": 2,
+        "tilesX": 8,
+        "tilesY": 4,
+        "x": 1,
+        "y": 0
+      },
+      "expected": {
+        "phiStart": 0.785398163397448,
+        "phiLength": 0.785398163397448,
+        "thetaStart": 0,
+        "thetaLength": 0.785398163397448
+      }
+    },
+    {
+      "id": "tile-extent-level-3",
+      "input": {
+        "level": 3,
+        "tilesX": 16,
+        "tilesY": 8,
+        "x": 1,
+        "y": 0
+      },
+      "expected": {
+        "phiStart": 0.392699081698724,
+        "phiLength": 0.392699081698724,
+        "thetaStart": 0,
+        "thetaLength": 0.392699081698724
+      }
+    }
+  ]
+}

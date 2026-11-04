@@ -126,6 +126,53 @@ enum TilePatch {
      rectangle over the surface, which looks like a blown-out exposure rather than a mapping
      error.
      */
+    /**
+     A flat annulus for a ring system, with the texture mapped radially.
+
+     `SCNTube` is the obvious shape and the wrong one. It has inner and outer walls as well as
+     the two annular faces, so a ring a thousandth of a radius thick still renders its inner
+     wall, which shows as a hard black band hugging the planet. Its UVs also wrap the texture
+     around the tube rather than across it, while a ring texture is a radial strip: one pixel
+     column per distance from the planet.
+
+     So: one flat ring of triangles, `u` running from the inner edge to the outer, which is
+     what the imagery expects.
+     */
+    static func annulus(innerRadius: Double, outerRadius: Double, segments: Int = 180) -> SCNGeometry {
+        var positions: [SCNVector3] = []
+        var normals: [SCNVector3] = []
+        var uvs: [CGPoint] = []
+
+        for i in 0 ... segments {
+            let angle = 2 * Double.pi * Double(i) / Double(segments)
+            let c = Float(cos(angle))
+            let s = Float(sin(angle))
+            for (edge, radius) in [(0.0, innerRadius), (1.0, outerRadius)] {
+                positions.append(SCNVector3(c * Float(radius), 0, s * Float(radius)))
+                normals.append(SCNVector3(0, 1, 0))
+                uvs.append(CGPoint(x: edge, y: 0.5))
+            }
+        }
+
+        var indices: [Int32] = []
+        for i in 0 ..< segments {
+            let a = Int32(i * 2)
+            let b = Int32(i * 2 + 1)
+            let c = Int32((i + 1) * 2)
+            let d = Int32((i + 1) * 2 + 1)
+            indices.append(contentsOf: [a, c, b, b, c, d])
+        }
+
+        return SCNGeometry(
+            sources: [
+                SCNGeometrySource(vertices: positions),
+                SCNGeometrySource(normals: normals),
+                SCNGeometrySource(textureCoordinates: uvs),
+            ],
+            elements: [SCNGeometryElement(indices: indices, primitiveType: .triangles)]
+        )
+    }
+
     static func geometry(extent: TileExtent, segments: Int = 24) -> SCNGeometry {
         var positions: [SCNVector3] = []
         var normals: [SCNVector3] = []

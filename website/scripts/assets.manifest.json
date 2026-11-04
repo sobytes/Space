@@ -12,6 +12,10 @@
     {
       "source": "planetpixelemporium.com",
       "reason": "ambiguous on redistribution, and currently offline"
+    },
+    {
+      "source": "nssdc.gsfc.nasa.gov Venera surface photographs",
+      "reason": "The only photographs ever taken from the surface of Venus, by the Soviet Venera 9, 10, 13 and 14 landers. NASA's NSSDCA hosts the scans and heads that section \u201cthe following images were provided to NSSDCA by what is now the Russian Space Agency and are not necessarily in the public domain\u201d. The archive holding them will not call them public domain, so this project does not host them either. The surface panel links to them instead, because linking is not copying."
     }
   ],
   "licences": {

@@ -37,6 +37,43 @@ import { leadingOrderPericentreRate, secularPericentreRate } from "@solar/engine
 import { impactEnergy } from "@solar/engine/scenarios/asteroid";
 import { ascentBudget, earthRotationBonus, maximumPayload, siteById } from "@solar/engine/launch/ascent";
 import { ATLAS_V_401 } from "@solar/engine/launch/vehicles";
+import {
+  propagate, sampleIntervalFor, trajectoryStateAt, twoBodyModel, type TrajectorySample,
+} from "@solar/engine/propagate";
+import { totalAngularMomentum, advance } from "@solar/engine/nbody";
+import {
+  DEFAULT_LAUNCH, asteroidForceModel, initialStateFor,
+} from "@solar/engine/scenarios/asteroid";
+import { SECONDS_PER_JULIAN_YEAR } from "@solar/engine/units";
+import type { Vec3 } from "@solar/engine/vec";
+import { placeLabels, type LabelInput } from "@solar/engine/labels";
+import { levelFor, metresPerPixel, tileExtent, visibleCapAngle } from "./view/core/tiles";
+
+/**
+ * The tile pyramid the `tiles` cases were generated against.
+ *
+ * Spelled out here rather than fetched, because the cases have to be reproducible with no
+ * network and no asset pipeline, and because a manifest that drifted would silently change
+ * what the cases mean rather than fail. It mirrors `scripts/generate-conformance.mjs`; the
+ * numbers are the LRO LOLA pyramid's.
+ */
+const CONFORMANCE_TILE_MANIFEST = {
+  body: "moon",
+  tileSize: 512,
+  levels: [0, 1, 2, 3].map((level) => ({
+    level,
+    tilesX: 2 * 2 ** level,
+    tilesY: 1 * 2 ** level,
+    levelWidth: 1024 * 2 ** level,
+    levelHeight: 512 * 2 ** level,
+    metresPerTexel: 10_660.552_883_490_052 / 2 ** level,
+  })),
+  globalNormalMap: "normal-global.jpg",
+  globalWidth: 8192,
+  referenceRadiusM: 1_737_400,
+  elevationRangeM: [-9106, 10_747] as [number, number],
+  source: "LRO LOLA",
+};
 
 const SUITE = fileURLToPath(new URL("../../contracts/conformance/", import.meta.url));
 
@@ -44,6 +81,8 @@ interface Case {
   readonly id: string;
   readonly input?: Record<string, unknown>;
   readonly expected: unknown;
+  /** Optional per-case override, for a case whose domain tolerance is meaningless for it. */
+  readonly absoluteTolerance?: number;
 }
 interface Domain {
   readonly domain: string;
@@ -190,6 +229,156 @@ function compute(domain: string, testCase: Case): unknown {
       return maximumPayload(ATLAS_V_401, target).payloadKg;
     }
 
+    /**
+     * Integrated trajectories, re-run rather than compared against a stored path.
+     *
+     * The case carries only the initial condition and the duration, so passing means the
+     * integrator arrived at the same endpoint, not that someone copied a number across. The
+     * two-body cases close an exact orbit, so their expected endpoint is also the starting
+     * one, and any error in the stepper shows up as a gap that nothing else can explain.
+     */
+    case "propagate": {
+      const limits = {
+        tolerance: input.tolerance,
+        minStepSeconds: 1,
+        maxStepSeconds: testCase.id.startsWith("mercury") ? 3_600 : 86_400 * 5,
+        maxSteps: 2_000_000,
+      };
+
+      if (testCase.id.startsWith("two-body")) {
+        const r = input.radiusAu * AU_IN_METRES;
+        const result = propagate({
+          model: twoBodyModel(),
+          initial: { position: { x: r, y: 0, z: 0 }, velocity: { x: 0, y: Math.sqrt(GM_SUN / r), z: 0 } },
+          durationSeconds: input.durationSeconds,
+          limits,
+        });
+        const final = result.samples[result.samples.length - 1];
+        return { position: final.position, velocity: final.velocity };
+      }
+
+      if (testCase.id.startsWith("mercury")) {
+        const a = MERCURY.semiMajorAxisMetres;
+        const e = MERCURY.eccentricity;
+        const period = 2 * Math.PI * Math.sqrt(a ** 3 / GM_SUN);
+        const result = propagate({
+          model: { centralGm: GM_SUN, perturbers: [], relativistic: input.relativistic },
+          initial: {
+            position: { x: a * (1 - e), y: 0, z: 0 },
+            velocity: { x: 0, y: Math.sqrt((GM_SUN * (1 + e)) / (a * (1 - e))), z: 0 },
+          },
+          durationSeconds: input.orbits * period,
+          limits,
+        });
+        const final = result.samples[result.samples.length - 1];
+        return {
+          position: final.position,
+          velocity: final.velocity,
+          pericentreLongitude: osculatingElements(GM_SUN, final.position, final.velocity)
+            .longitudeOfPericentreRad,
+        };
+      }
+
+      const launch = { ...DEFAULT_LAUNCH, durationYears: input.durationYears };
+      const initial = initialStateFor(launch);
+      const result = propagate({
+        model: asteroidForceModel(launch.startEpoch),
+        initial,
+        durationSeconds: input.durationYears * SECONDS_PER_JULIAN_YEAR,
+        limits,
+      });
+      const final = result.samples[result.samples.length - 1];
+      return {
+        initial: { position: initial.position, velocity: initial.velocity },
+        final: { position: final.position, velocity: final.velocity },
+      };
+    }
+
+    /** Where a body's name is drawn, and where an off-screen pointer aims. */
+    case "labels":
+      return placeLabels(input.inputs as LabelInput[], {
+        viewportWidthPx: input.viewportWidthPx as number,
+        viewportHeightPx: input.viewportHeightPx as number,
+      }).map((placement) => ({
+        id: placement.id,
+        x: placement.x,
+        y: placement.y,
+        clamped: placement.clamped,
+        bearingRadians: placement.bearingRadians,
+      }));
+
+    /** Recording interval for a propagated path, from the orbit rather than the span. */
+    case "sample-cadence":
+      return sampleIntervalFor(
+        GM_SUN,
+        { position: input.position as Vec3, velocity: input.velocity as Vec3 },
+        input.durationSeconds as number,
+      );
+
+    /** Cubic Hermite placement of an object between integrator samples. */
+    case "trajectory-interpolation": {
+      const state = trajectoryStateAt(
+        input.samples as TrajectorySample[],
+        input.seconds as number,
+      )!;
+      return { position: state.position, velocity: state.velocity };
+    }
+
+    /**
+     * Mutual gravity over years, with the conserved quantities alongside the state.
+     *
+     * The drifts are cases rather than loose assertions on purpose. A port whose integrator is
+     * subtly worse then shows up as a different number instead of as a pass with more slack,
+     * which is the failure mode a tolerance-based energy check always has.
+     */
+    case "nbody-evolution": {
+      const system = solarSystemAt(jdTdb(input.jdTdb));
+      const beforeEnergy = totalEnergy(system);
+      const beforeAngular = totalAngularMomentum(system);
+      advance(system, input.years * SECONDS_PER_JULIAN_YEAR, {
+        tolerance: input.tolerance,
+        minStepSeconds: 60,
+        maxStepSeconds: SECONDS_PER_DAY,
+      });
+      const afterAngular = totalAngularMomentum(system);
+      return {
+        state: Array.from(system.state),
+        energyDrift: Math.abs((totalEnergy(system) - beforeEnergy) / beforeEnergy),
+        angularDrift:
+          Math.hypot(
+            afterAngular.x - beforeAngular.x,
+            afterAngular.y - beforeAngular.y,
+            afterAngular.z - beforeAngular.z,
+          ) / Math.hypot(beforeAngular.x, beforeAngular.y, beforeAngular.z),
+      };
+    }
+
+    /** Tile selection, which decides what a viewer actually sees on a surface. */
+    case "tiles": {
+      if (testCase.id.startsWith("metres-per-pixel")) {
+        return metresPerPixel(input.altitudeM, input.verticalFovRadians, input.viewportHeightPx);
+      }
+      if (testCase.id.startsWith("level-for")) {
+        return levelFor(
+          CONFORMANCE_TILE_MANIFEST,
+          input.altitudeM,
+          input.verticalFovRadians,
+          input.viewportHeightPx,
+        ).level;
+      }
+      if (testCase.id.startsWith("visible-cap")) {
+        return visibleCapAngle(input.radiusM, input.altitudeM);
+      }
+      const level = CONFORMANCE_TILE_MANIFEST.levels[input.level];
+      const extent = tileExtent(level, { level: input.level, x: input.x, y: input.y });
+      return {
+        phiStart: extent.phiStart,
+        phiLength: extent.phiLength,
+        thetaStart: extent.thetaStart,
+        thetaLength: extent.thetaLength,
+      };
+    }
+
     default:
       throw new Error(`no runner for domain "${domain}"`);
   }
@@ -265,7 +454,9 @@ describe.each(JSON.parse(readFileSync(join(SUITE, "index.json"), "utf8")).domain
         check(
           compute(name, testCase),
           testCase.expected,
-          { relative: domain.tolerance, absolute: domain.absoluteTolerance },
+          // A case may widen its own absolute term where the domain's is meaningless for
+          // it, which is how a near-zero component of a huge vector is handled.
+          { relative: domain.tolerance, absolute: testCase.absoluteTolerance ?? domain.absoluteTolerance },
           `${name}/${testCase.id}`,
         );
       }

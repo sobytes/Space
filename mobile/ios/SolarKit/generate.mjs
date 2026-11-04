@@ -455,3 +455,203 @@ const leapTarget = fileURLToPath(
 );
 writeFileSync(leapTarget, leap);
 console.log(`wrote ${steps.length} leap-second steps to ${leapTarget}`);
+
+/**
+ * Habitability assessments, emitted whole.
+ *
+ * Unlike every other table here this is mostly prose, and the reason to generate it is the
+ * same reason the Standish tables are generated. Several thousand words of sourced
+ * explanation, transcribed by hand, is several thousand chances to drop a clause or mangle a
+ * citation, and wrong prose compiles perfectly and fails no test. Generating it makes the two
+ * clients read the same sentences by construction.
+ *
+ * The arithmetic is NOT generated. `Habitability.swift` ports every function by hand and
+ * `HabitabilityTests` recomputes the headline figures against this table, so a divergence
+ * between the Swift physics and the TypeScript physics still fails a build. Generating the
+ * numbers alone would have made that check circular.
+ */
+const { assessHabitability } = await import("../../../engine/src/habitability.ts");
+const { BODY_IDS } = await import("../../../engine/src/bodies/registry.ts");
+
+/**
+ * Swift double literal, exponent-aware.
+ *
+ * The shared `num` above appends ".0" whenever `Number.isInteger` is true, which is correct
+ * for element tables and wrong here: 2.2475163289704048e+21 is an integer by that test, so it
+ * came out as "2.2475163289704048e+21.0" and Swift rejected it. Atmospheric masses and spin
+ * energies live entirely in that range. Infinity is also a legitimate value here, for an
+ * atmosphere that is never stripped.
+ */
+const double = (v) => {
+  if (!Number.isFinite(v)) return v > 0 ? "Double.infinity" : "-Double.infinity";
+  const text = String(v);
+  return /[.e]/i.test(text) ? text : `${text}.0`;
+};
+
+const swiftString = (v) =>
+  `"${String(v).replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n")}"`;
+
+const optionalDouble = (v) => (v === null || v === undefined ? "nil" : double(v));
+
+function quantity(q) {
+  const note = q.note === undefined ? "" : `, note: ${swiftString(q.note)}`;
+  // Infinity is a legitimate result here (an atmosphere that is never stripped) and Swift
+  // has no literal for it that survives this path, so it is spelled as the property.
+  const value = double(q.value);
+  return `Quantity(label: ${swiftString(q.label)}, value: ${value}, unit: ${swiftString(q.unit)}${note})`;
+}
+
+function assessmentSwift(a) {
+  const s = a.state;
+  const barriers = a.barriers
+    .map(
+      (b) => `            Barrier(
+                id: ${swiftString(b.id)},
+                title: ${swiftString(b.title)},
+                severity: .${b.severity},
+                statement: ${swiftString(b.statement)},
+                quantities: [
+${b.quantities.map((q) => `                    ${quantity(q)}`).join(",\n")}
+                ]
+            )`,
+    )
+    .join(",\n");
+
+  const maturityCase = {
+    demonstrated: "demonstrated",
+    "engineering-extrapolation": "engineeringExtrapolation",
+    speculative: "speculative",
+  };
+  const strategyCase = {
+    star: "star",
+    home: "home",
+    "greenhouse-terraform": "greenhouseTerraform",
+    "shade-and-condense": "shadeAndCondense",
+    aerostat: "aerostat",
+    "pressurised-habitat": "pressurisedHabitat",
+    "ice-shell-subsurface": "iceShellSubsurface",
+    "cryo-paraterraform": "cryoParaterraform",
+  };
+
+  const ladder = a.ladder
+    .map(
+      (step) => `            TerraformStep(
+                order: ${step.order},
+                title: ${swiftString(step.title)},
+                mechanism: ${swiftString(step.mechanism)},
+                quantities: [
+${step.quantities.map((q) => `                    ${quantity(q)}`).join(",\n")}
+                ],
+                timescale: ${swiftString(step.timescale)},
+                maturity: .${maturityCase[step.maturity]},
+                source: ${swiftString(step.source)}
+            )`,
+    )
+    .join(",\n");
+
+  return `    .${a.body}: HabitabilityAssessment(
+        body: .${a.body},
+        displayName: ${swiftString(a.displayName)},
+        strategy: .${strategyCase[a.strategy]},
+        headline: ${swiftString(a.headline)},
+        state: HabitabilityState(
+            heliocentricDistanceAu: ${double(s.heliocentricDistanceAu)},
+            solarConstantWPerM2: ${double(s.solarConstantWPerM2)},
+            solarConstantRelativeToEarth: ${double(s.solarConstantRelativeToEarth)},
+            bondAlbedo: ${double(s.bondAlbedo)},
+            equilibriumTemperatureK: ${double(s.equilibriumTemperatureK)},
+            measuredSurfaceTemperatureK: ${double(s.measuredSurfaceTemperatureK)},
+            greenhouseRiseK: ${double(s.greenhouseRiseK)},
+            greenhouseSummary: ${swiftString(s.greenhouseSummary)},
+            surfaceGravityMS2: ${double(s.surfaceGravityMS2)},
+            gravityRelativeToEarth: ${double(s.gravityRelativeToEarth)},
+            escapeVelocityMS: ${double(s.escapeVelocityMS)},
+            surfacePressurePa: ${double(s.surfacePressurePa)},
+            surfaceDoseSvPerYear: ${optionalDouble(s.surfaceDoseSvPerYear)},
+            doseRelativeToEarth: ${optionalDouble(s.doseRelativeToEarth)},
+            solarDayDays: ${double(s.solarDayDays)},
+            hasIntrinsicMagneticField: ${s.hasIntrinsicMagneticField},
+            hasSolidSurface: ${s.hasSolidSurface},
+            insideHabitableZone: ${s.insideHabitableZone}
+        ),
+        barriers: [
+${barriers}
+        ],
+        ladder: [
+${ladder}
+        ],
+        caveats: [
+${a.caveats.map((c) => `            ${swiftString(c)}`).join(",\n")}
+        ]
+    )`;
+}
+
+const assessments = BODY_IDS.map((id) => assessmentSwift(assessHabitability(id)));
+const habitability = `// Generated by mobile/ios/SolarKit/generate.mjs. Do not edit.
+//
+// The prose and the assembled assessments come from engine/src/habitability.ts so the two
+// clients cannot quote a different mirror area, a different cooling time or a different
+// citation for the same body. The arithmetic behind these figures is ported by hand in
+// Habitability.swift and checked against this table by HabitabilityTests, so the port is
+// still gated rather than merely transcribed.
+
+public let habitabilityAssessments: [BodyId: HabitabilityAssessment] = [
+${assessments.join(",\n")}
+]
+`;
+writeFileSync(
+  fileURLToPath(new URL("./Sources/SolarKit/Generated/HabitabilityContent.swift", import.meta.url)),
+  habitability,
+);
+console.log(`wrote ${assessments.length} habitability assessments`);
+
+/**
+ * Surface photographs, emitted whole.
+ *
+ * Sourced text and curated asset ids, so the same argument as the habitability content
+ * applies: transcribing it by hand would be transcription errors that compile perfectly.
+ */
+const { surfaceViewFor } = await import("../../../engine/src/surface-views.ts");
+
+const surfaceEntries = BODY_IDS.map((id) => {
+  const view = surfaceViewFor(id);
+  const images = view.images
+    .map(
+      (image) => `            SurfaceImage(
+                nasaId: ${swiftString(image.nasaId)},
+                title: ${swiftString(image.title)},
+                mission: ${swiftString(image.mission)},
+                instrument: ${swiftString(image.instrument)},
+                captured: ${swiftString(image.captured)},
+                whatYouAreSeeing: ${swiftString(image.whatYouAreSeeing)},
+                credit: ${swiftString(image.credit)},
+                url: ${swiftString(image.url)}
+            )`,
+    )
+    .join(",\n");
+  return `    .${id}: SurfaceView(
+        body: .${id},
+        displayName: ${swiftString(view.displayName)},
+        images: [
+${images}
+        ],
+        statement: ${swiftString(view.statement)},
+        caveat: ${view.caveat === undefined ? "nil" : swiftString(view.caveat)},
+        seeAlsoLabel: ${view.seeAlso ? swiftString(view.seeAlso.label) : "nil"},
+        seeAlsoUrl: ${view.seeAlso ? swiftString(view.seeAlso.url) : "nil"}
+    )`;
+});
+
+writeFileSync(
+  fileURLToPath(new URL("./Sources/SolarKit/Generated/SurfaceContent.swift", import.meta.url)),
+  `// Generated by mobile/ios/SolarKit/generate.mjs. Do not edit.
+//
+// Curated NASA asset ids and their provenance, from engine/src/surface-views.ts, so the two
+// clients cannot show a different photograph or a different credit for the same world.
+
+public let surfaceViews: [BodyId: SurfaceView] = [
+${surfaceEntries.join(",\n")}
+]
+`,
+);
+console.log(`wrote ${surfaceEntries.length} surface views`);

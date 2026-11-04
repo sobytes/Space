@@ -9,7 +9,7 @@ it afterwards. Never just change the code.
 
 | Contract | Governs |
 |---|---|
-| [conformance](conformance/SKILL.md) | The 487-case suite every client must reproduce |
+| [conformance](conformance/SKILL.md) | The 521-case suite every client must reproduce |
 | [physics-and-mathematics](physics-and-mathematics/SKILL.md) | **The master contract.** Gravitation, mass, orbits, perturbation, relativity, conservation, integration, uncertainty, with the source for each |
 | [feature-parity](feature-parity/SKILL.md) | What the product does, and which clients do it. Backed by `features.json` and a gate |
 | [units-and-frames](units-and-frames/SKILL.md) | SI inside, branded at the boundary, float64, J2000 ecliptic |
@@ -20,6 +20,7 @@ it afterwards. Never just change the code.
 | [floating-origin](floating-origin/SKILL.md) | Rendering ten orders of magnitude without jitter or clipping |
 | [numbers-come-from-the-engine](numbers-come-from-the-engine/SKILL.md) | No client and no model states a figure the engine did not compute |
 | [gravity-modes](gravity-modes/SKILL.md) | Analytic rails versus full mutual gravity, and what each must admit |
+| [habitability](habitability/SKILL.md) | What a client may claim about making a body habitable, and where each figure comes from |
 
 The first two are the ones to read first. `physics-and-mathematics` is the
 model every client implements and the others specialise it;
@@ -64,7 +65,7 @@ Contracts are prose, but three of them have teeth:
 
 | Check | Where | Catches |
 |---|---|---|
-| Conformance | `website/src/conformance.test.ts` and SolarKit's `ConformanceTests` | A port disagreeing with the engine on any of 487 cases |
+| Conformance | `website/src/conformance.test.ts` and SolarKit's `ConformanceTests` | A port disagreeing with the engine on any of 521 cases |
 | Cross-language drift | `website/src/swift-port.test.ts` | A port diverging on the Horizons residuals |
 | Feature parity | `website/src/feature-parity.test.ts` | A client missing a feature, or a stale path |
 | Engine purity | `website/src/view/core/invariants.test.ts`, `engine/tsconfig.json` | The engine gaining a dependency on a renderer |

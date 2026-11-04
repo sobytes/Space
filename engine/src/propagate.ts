@@ -67,6 +67,15 @@ export interface PropagationLimits {
   readonly maxSteps: number;
 }
 
+/**
+ * A hard ceiling on recorded samples, independent of the requested cadence.
+ *
+ * `sampleIntervalFor` already bounds what this module asks for, but `propagate` is public and
+ * will honour any interval it is handed. Now that the sampler can emit many points per step
+ * rather than one, an interval of a second across a century would try to allocate billions.
+ */
+const MAX_SAMPLES = 200_000;
+
 export const DEFAULT_LIMITS: PropagationLimits = {
   tolerance: 1e-11,
   minStepSeconds: 1,
@@ -241,6 +250,11 @@ export function propagate(options: PropagateOptions): PropagationResult {
       continue;
     }
 
+    // Kept so the sampler can interpolate across the step it just took.
+    const tBefore = t;
+    const positionBefore = position;
+    const velocityBefore = velocity;
+
     position = { x: y5[0], y: y5[1], z: y5[2] };
     velocity = { x: y5[3], y: y5[4], z: y5[5] };
     t += h;
@@ -261,8 +275,34 @@ export function propagate(options: PropagateOptions): PropagationResult {
     }
     if (fate.kind === "impact") break;
 
-    if (t >= nextSampleAt) {
-      samples.push({ t, position, velocity });
+    /**
+     * Every sample the step passed over, not just the last one.
+     *
+     * This was `if (t >= nextSampleAt)`, which records at most one sample per integration
+     * step and advances the schedule by a single interval however far the step reached. So a
+     * requested cadence finer than the step size was silently coarsened to the step size, and
+     * a cadence slightly finer lost samples: a request for 1000 across 3.7 years returned 987,
+     * at times that were not the ones asked for.
+     *
+     * Measured, the asteroid integrator runs at a 1.36 day mean step under its 1e-10
+     * tolerance, well inside the 30 day ceiling, so this was not what produced the polygonal
+     * paths; a fixed sample count was. It is still the wrong behaviour, and fixing it is what
+     * lets `sampleIntervalFor` promise a resolution rather than request one.
+     *
+     * Interpolating inside the step costs no extra force evaluations and no accuracy worth
+     * the name: the blend is third order in a step already controlled to 1e-10. Shrinking the
+     * integrator step to the drawing cadence would have been the other way to get here, and
+     * it would have let the drawing dictate the physics.
+     */
+    const stepStart: TrajectorySample = {
+      t: tBefore,
+      position: positionBefore,
+      velocity: velocityBefore,
+    };
+    const stepEnd: TrajectorySample = { t, position, velocity };
+    while (nextSampleAt <= t && samples.length < MAX_SAMPLES) {
+      const at = hermiteBetween(stepStart, stepEnd, nextSampleAt);
+      samples.push({ t: nextSampleAt, position: at.position, velocity: at.velocity });
       nextSampleAt += sampleInterval;
     }
 
@@ -276,6 +316,21 @@ export function propagate(options: PropagateOptions): PropagationResult {
       limits.maxStepSeconds,
       h * Math.min(5, 0.9 * (limits.tolerance / Math.max(error, 1e-18)) ** 0.2),
     );
+  }
+
+  /**
+   * Always record where it actually ended up.
+   *
+   * The loop only pushed a sample when the clock crossed a sample boundary, so the last
+   * recorded state was up to one sample interval short of the requested duration: on a
+   * fifty-year run at a thousand samples, eighteen days of motion missing from the answer. The
+   * final step is already clamped to land exactly on `durationSeconds`, so the exact endpoint
+   * was computed every time and then thrown away. Callers read `samples[samples.length - 1]`
+   * as the final state, and now it is one.
+   */
+  const lastSample = samples[samples.length - 1];
+  if (fate.kind !== "impact" && t > lastSample.t) {
+    samples.push({ t, position, velocity });
   }
 
   if (fate.kind === "propagating" && steps >= limits.maxSteps) {
@@ -296,6 +351,131 @@ export function propagate(options: PropagateOptions): PropagationResult {
 }
 
 /** A two-body model with no perturbers, used as the exactly-solvable reference. */
+/**
+ * How often to record a sample, chosen from the orbit rather than from the span.
+ *
+ * A fixed number of samples across the whole run sounds reasonable and degrades badly: the
+ * resolution per orbit is the total divided by the number of orbits, so a path that is smooth
+ * over two years becomes a polygon over fifty. Measured on the shipped values, a one-au orbit
+ * got 1000 points per orbit at two years and 40 at fifty on the web, and 300 then 12 on iOS.
+ * Twelve points per orbit draws a dodecagon, and fifty overlapping dodecagons is the
+ * crosshatched band that was reported as "it might be correct, just wanted to check". It was
+ * not correct: the orbit is smooth and the drawing was not.
+ *
+ * The two clients also disagreed, 2000 against 600, so the same launch drew a different shape
+ * depending on which one you ran it in. That is the part a conformance suite should have
+ * caught and could not, because nothing had ever stated what the cadence was supposed to be.
+ *
+ * Tying the cadence to the orbital period fixes the resolution per orbit instead, so the path
+ * looks the same at any span. The period comes from the initial state by vis-viva, which costs
+ * nothing and needs no extra input. An unbound orbit has no period, so those fall back to a
+ * fixed count, which is the right behaviour: a hyperbolic path is one swing and does not
+ * accumulate turns.
+ *
+ * `maxSamples` is a memory bound, not a quality target. A tight orbit propagated for centuries
+ * would otherwise ask for hundreds of thousands of points; it degrades to a coarser path
+ * rather than refusing, and the degradation is proportional rather than sudden.
+ */
+export function sampleIntervalFor(
+  gm: number,
+  initial: { readonly position: Vec3; readonly velocity: Vec3 },
+  durationSeconds: number,
+  options: { pointsPerOrbit?: number; maxSamples?: number } = {},
+): number {
+  const pointsPerOrbit = options.pointsPerOrbit ?? 180;
+  const maxSamples = options.maxSamples ?? 40_000;
+  const floor = durationSeconds / maxSamples;
+
+  const r = length(initial.position);
+  const v = length(initial.velocity);
+  const energy = (v * v) / 2 - gm / r;
+  if (!(energy < 0) || r <= 0) return Math.max(floor, durationSeconds / 2_000);
+
+  const semiMajorAxis = -gm / (2 * energy);
+  const period = 2 * Math.PI * Math.sqrt(semiMajorAxis ** 3 / gm);
+  return Math.max(floor, period / pointsPerOrbit);
+}
+
 export function twoBodyModel(centralGm = GM_SUN): ForceModel {
   return { centralGm, perturbers: [], relativistic: false };
+}
+
+/**
+ * Where a propagated object is at an arbitrary moment, interpolated between samples.
+ *
+ * Cubic Hermite rather than linear, because the integrator hands back velocity alongside
+ * position and discarding it shows an object that visibly corners at every sample. During a
+ * close approach, which is exactly where someone is watching, the samples are far apart
+ * relative to how fast the direction is changing and a linear path cuts the corner by
+ * thousands of kilometres.
+ *
+ * Shared rather than reimplemented per client. Both the browser and the phone need to place a
+ * rider on a trajectory at the current clock, and two hand-rolled interpolations would be two
+ * chances to put the object somewhere the drawn path does not go.
+ */
+export function trajectoryStateAt(
+  samples: readonly TrajectorySample[],
+  seconds: number,
+): { position: Vec3; velocity: Vec3 } | null {
+  if (samples.length === 0) return null;
+  const first = samples[0];
+  const last = samples[samples.length - 1];
+  if (samples.length === 1 || seconds <= first.t) {
+    return { position: first.position, velocity: first.velocity };
+  }
+  if (seconds >= last.t) return { position: last.position, velocity: last.velocity };
+
+  // Binary search: a two-century run holds thousands of samples and this is called per frame.
+  let low = 0;
+  let high = samples.length - 1;
+  while (high - low > 1) {
+    const mid = (low + high) >> 1;
+    if (samples[mid].t <= seconds) low = mid;
+    else high = mid;
+  }
+
+  return hermiteBetween(samples[low], samples[high], seconds);
+}
+
+/**
+ * Cubic Hermite between two states, used both to look a trajectory up and to record it.
+ *
+ * Shared on purpose. The sampler needs it because an adaptive integrator takes steps far
+ * longer than the cadence a drawn path needs, and the lookup needs it for the same reason one
+ * step later. Two implementations of the same blend would be two chances for the path on
+ * screen to disagree with the object riding it.
+ */
+export function hermiteBetween(
+  a: TrajectorySample,
+  b: TrajectorySample,
+  seconds: number,
+): { position: Vec3; velocity: Vec3 } {
+  const h = b.t - a.t;
+  if (h <= 0) return { position: a.position, velocity: a.velocity };
+
+  const u = (seconds - a.t) / h;
+  const u2 = u * u;
+  const u3 = u2 * u;
+  const h00 = 2 * u3 - 3 * u2 + 1;
+  const h10 = u3 - 2 * u2 + u;
+  const h01 = -2 * u3 + 3 * u2;
+  const h11 = u3 - u2;
+  // Derivative of the same polynomial, so the velocity reported is the one the drawn path
+  // actually has rather than a separately interpolated quantity that disagrees with it.
+  const d00 = (6 * u2 - 6 * u) / h;
+  const d10 = 3 * u2 - 4 * u + 1;
+  const d01 = (-6 * u2 + 6 * u) / h;
+  const d11 = 3 * u2 - 2 * u;
+
+  const blend = (
+    pa: number, va: number, pb: number, vb: number,
+  ): [number, number] => [
+    h00 * pa + h10 * h * va + h01 * pb + h11 * h * vb,
+    d00 * pa + d10 * va + d01 * pb + d11 * vb,
+  ];
+
+  const [x, vx] = blend(a.position.x, a.velocity.x, b.position.x, b.velocity.x);
+  const [y, vy] = blend(a.position.y, a.velocity.y, b.position.y, b.velocity.y);
+  const [z, vz] = blend(a.position.z, a.velocity.z, b.position.z, b.velocity.z);
+  return { position: { x, y, z }, velocity: { x: vx, y: vy, z: vz } };
 }

@@ -162,6 +162,11 @@ public struct PropagateOptions: Sendable {
     }
 }
 
+/// A hard ceiling on recorded samples, independent of the requested cadence. `propagate` is
+/// public and will honour any interval it is handed, and the sampler can now emit many points
+/// per step rather than one.
+private let maxRecordedSamples = 200_000
+
 public func propagate(_ options: PropagateOptions) -> PropagationResult {
     let limits = options.limits
     let model = options.model
@@ -230,6 +235,11 @@ public func propagate(_ options: PropagateOptions) -> PropagationResult {
             continue
         }
 
+        // Kept so the sampler can interpolate across the step it just took.
+        let tBefore = t
+        let positionBefore = position
+        let velocityBefore = velocity
+
         position = Vec3(y5[0], y5[1], y5[2])
         velocity = Vec3(y5[3], y5[4], y5[5])
         t += h
@@ -250,8 +260,24 @@ public func propagate(_ options: PropagateOptions) -> PropagationResult {
         }
         if hit { break }
 
-        if t >= nextSampleAt {
-            samples.append(TrajectorySample(t: t, position: position, velocity: velocity))
+        /**
+         Every sample the step passed over, not just the last one.
+
+         This was `if t >= nextSampleAt`, which records at most one sample per integration step
+         and advances the schedule by a single interval however far the step reached, so a
+         requested cadence finer than the step size was silently coarsened. Interpolating
+         inside the step costs no extra force evaluations: the blend is third order in a step
+         already controlled to 1e-10.
+         */
+        let stepStart = TrajectorySample(
+            t: tBefore, position: positionBefore, velocity: velocityBefore
+        )
+        let stepEnd = TrajectorySample(t: t, position: position, velocity: velocity)
+        while nextSampleAt <= t && samples.count < maxRecordedSamples {
+            let at = hermiteBetween(stepStart, stepEnd, seconds: nextSampleAt)
+            samples.append(
+                TrajectorySample(t: nextSampleAt, position: at.position, velocity: at.velocity)
+            )
             nextSampleAt += sampleInterval
         }
 
@@ -276,7 +302,16 @@ public func propagate(_ options: PropagateOptions) -> PropagationResult {
             body: id, atSeconds: best.t, distanceM: best.distance, relativeSpeedMS: best.speed
         )
     }
-    samples.append(TrajectorySample(t: t, position: position, velocity: velocity))
+    /**
+     Record where it actually ended up, unless it ended up inside something.
+
+     This appended unconditionally, including after an impact, which placed a sample inside
+     the body that was struck. The engine did not append at all, so the two clients disagreed
+     about what the last sample of a trajectory even meant.
+     */
+    if case .impact = fate {} else if let last = samples.last, t > last.t {
+        samples.append(TrajectorySample(t: t, position: position, velocity: velocity))
+    }
 
     return PropagationResult(
         samples: samples, closeApproaches: closeApproaches,
@@ -285,6 +320,39 @@ public func propagate(_ options: PropagateOptions) -> PropagationResult {
 }
 
 /// A two-body model with no perturbers, the exactly-solvable reference.
+/**
+ How often to record a sample, chosen from the orbit rather than from the span.
+
+ A fixed number of samples across the whole run degrades badly: the resolution per orbit is
+ the total divided by the number of orbits, so a path that is smooth over two years becomes a
+ polygon over fifty. This client shipped 600 samples total, which is 300 points per orbit at
+ two years and twelve at fifty. Twelve points draws a dodecagon, and fifty overlapping
+ dodecagons is the crosshatched band that was reported from the phone.
+
+ Tying the cadence to the orbital period fixes the resolution per orbit instead. The period
+ comes from the initial state by vis-viva. An unbound orbit has no period and falls back to a
+ fixed count, which is right: a hyperbolic path is one swing and accumulates no turns.
+
+ `maxSamples` is a memory bound, not a quality target.
+ */
+public func sampleIntervalFor(
+    gm: Double,
+    initial: StateVector,
+    durationSeconds: Double,
+    pointsPerOrbit: Double = 180,
+    maxSamples: Double = 40_000
+) -> Double {
+    let floor = durationSeconds / maxSamples
+    let r = initial.position.length
+    let v = initial.velocity.length
+    let energy = (v * v) / 2 - gm / r
+    guard energy < 0, r > 0 else { return Swift.max(floor, durationSeconds / 2_000) }
+
+    let semiMajorAxis = -gm / (2 * energy)
+    let period = 2 * Double.pi * (pow(semiMajorAxis, 3) / gm).squareRoot()
+    return Swift.max(floor, period / pointsPerOrbit)
+}
+
 public func twoBodyModel(centralGm: Double = Constants.gmSun) -> ForceModel {
     ForceModel(centralGm: centralGm, perturbers: [], relativistic: false)
 }
@@ -317,4 +385,69 @@ public func perturbersFrom(startEpoch: JdTdb, include: [BodyId] = bodyIds) -> [P
             }
         )
     }
+}
+
+/**
+ Where a propagated object is at an arbitrary moment, interpolated between samples.
+
+ Cubic Hermite rather than linear, because the integrator hands back velocity alongside
+ position and discarding it shows an object that visibly corners at every sample. During a
+ close approach, which is exactly where someone is watching, the samples are far apart
+ relative to how fast the direction is changing and a linear path cuts the corner by thousands
+ of kilometres.
+
+ Ported from `engine/src/propagate.ts` and gated by the conformance suite, so the rider on a
+ phone is in the same place as the rider in a browser.
+ */
+public func trajectoryStateAt(_ samples: [TrajectorySample], seconds: Double) -> StateVector? {
+    guard let first = samples.first, let last = samples.last else { return nil }
+    if samples.count == 1 || seconds <= first.t {
+        return StateVector(position: first.position, velocity: first.velocity)
+    }
+    if seconds >= last.t {
+        return StateVector(position: last.position, velocity: last.velocity)
+    }
+
+    // Binary search: a two-century run holds thousands of samples and this runs per frame.
+    var low = 0
+    var high = samples.count - 1
+    while high - low > 1 {
+        let mid = (low + high) / 2
+        if samples[mid].t <= seconds { low = mid } else { high = mid }
+    }
+
+    return hermiteBetween(samples[low], samples[high], seconds: seconds)
+}
+
+/**
+ Cubic Hermite between two states, used both to look a trajectory up and to record it.
+
+ Shared on purpose. The sampler needs it because the integrator's steps are not the cadence a
+ drawn path wants, and the lookup needs it for the same reason one step later. Two
+ implementations of the same blend would be two chances for the path on screen to disagree
+ with the object riding it.
+ */
+public func hermiteBetween(
+    _ a: TrajectorySample, _ b: TrajectorySample, seconds: Double
+) -> StateVector {
+    let h = b.t - a.t
+    guard h > 0 else { return StateVector(position: a.position, velocity: a.velocity) }
+
+    let u = (seconds - a.t) / h
+    let u2 = u * u
+    let u3 = u2 * u
+    let h00 = 2 * u3 - 3 * u2 + 1
+    let h10 = u3 - 2 * u2 + u
+    let h01 = -2 * u3 + 3 * u2
+    let h11 = u3 - u2
+    // Derivative of the same polynomial, so the velocity reported is the one the drawn path
+    // actually has rather than a separately interpolated quantity that disagrees with it.
+    let d00 = (6 * u2 - 6 * u) / h
+    let d10 = 3 * u2 - 4 * u + 1
+    let d01 = (-6 * u2 + 6 * u) / h
+    let d11 = 3 * u2 - 2 * u
+
+    let position = a.position * h00 + a.velocity * (h10 * h) + b.position * h01 + b.velocity * (h11 * h)
+    let velocity = a.position * d00 + a.velocity * d10 + b.position * d01 + b.velocity * d11
+    return StateVector(position: position, velocity: velocity)
 }

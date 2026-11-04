@@ -72,3 +72,38 @@ mobile/ios/*.xcworkspace
 *.xcuserstate
 xcuserdata/
 mobile/ios/App/Resources/Textures/
+
+# ---------------------------------------------------------------------------
+# Monorepo paths.
+#
+# Everything above this line was written when the Next app lived at the repository
+# root, and the leading slashes make those rules root-relative. The app moved to
+# website/ and the rules silently stopped matching: 199 files of build output, 78 MB
+# of licensed textures, 24 MB of terrain tiles and 93 MB of screenshots were all being
+# tracked. Nothing warns about this, because an ignore rule that matches nothing is
+# indistinguishable from one that has nothing to match.
+#
+# A leading slash is not the only thing that anchors a pattern: a slash anywhere but the
+# end does too, so `public/textures/` is still root-relative and still matches nothing.
+# Only `**/` matches at any depth. That caught two of the four rules below on the first
+# attempt at this fix, which is the same mistake one layer down.
+# ---------------------------------------------------------------------------
+
+# Next build output and its caches. Source maps here embed absolute paths from the
+# machine that built them, so this also keeps a developer's home directory private.
+.next/
+
+# Downloaded planetary textures. The manifest and fetch script are the artifact, not
+# the bytes: `npm run assets 1` restores them. They are third-party and licensed
+# individually, so a public clone should fetch them under those licences rather than
+# receive a redistributed copy.
+**/public/textures/
+
+# Generated terrain pyramids. Rebuild with `npm run terrain`.
+**/public/terrain/
+
+# Visual verification output and probe screenshots.
+artifacts/
+
+# Native texture copies, generated from website/public/textures.
+**/App/Resources/Textures/

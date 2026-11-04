@@ -77,3 +77,21 @@ targets:
         # after a successful compile, which reads as a build problem rather than a signing
         # one. The simulator builds fine with signing left enabled.
         CODE_SIGN_IDENTITY: "Apple Development"
+
+  # Interaction gates. Separate from SolarKit's `swift test`, which runs headless against the
+  # physics and cannot launch a UI, and from `scripts/focus-probe.mjs`, which reads pixels and
+  # cannot tap anything. Two reported bugs lived in exactly that gap: controls that drew
+  # correctly and ignored every touch.
+  SolarUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: App/UITests
+    dependencies:
+      - target: Solar
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.sobytes.solar.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: "6.0"
+        TEST_TARGET_NAME: Solar

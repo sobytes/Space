@@ -14,14 +14,16 @@
  */
 
 import { BODY_CONTRACTS, BODY_IDS, type BodyId } from "../bodies/registry";
-import { heliocentricPositionOf } from "../bodies/position";
+import { heliocentricPositionOf, heliocentricStateOf } from "../bodies/position";
 import { J2000_JD, jdTdb, type JdTdb } from "../time";
 import { AU_IN_METRES, GM_SUN } from "../units";
-import { add, cross, length, normalize, scale, sub, type Vec3 } from "../vec";
+import { impactConsequences, type ImpactConsequences } from "./impact";
+import { add, cross, dot, length, normalize, scale, sub, type Vec3 } from "../vec";
 import {
   DEFAULT_LIMITS,
   eccentricityOf,
   propagate,
+  sampleIntervalFor,
   type Fate,
   type ForceModel,
   type Perturber,
@@ -90,25 +92,82 @@ export function asteroidForceModel(startEpoch: JdTdb): ForceModel {
 }
 
 /** Turns the launch controls into a heliocentric state vector. */
-export function initialStateFor(launch: AsteroidLaunch): { position: Vec3; velocity: Vec3 } {
-  const origin = heliocentricPositionOf(launch.originBody, launch.startEpoch);
+/**
+ * The frame the release controls are expressed in.
+ *
+ * Along-track, outward and normal, built from the origin body's own motion, which is what
+ * makes a heading of zero mean "keep pace with the planet". Exported because inverting it is
+ * how a solved intercept is turned back into slider positions, and writing that inverse
+ * against a guessed basis is how aiming silently failed: the asteroid was given a perfectly
+ * correct speed in an entirely wrong direction and sat next to Mars for two years.
+ */
+export interface ReleaseFrame {
+  readonly origin: Vec3;
+  readonly carrierVelocity: Vec3;
+  readonly alongTrack: Vec3;
+  readonly outward: Vec3;
+  readonly normal: Vec3;
+}
 
-  // The origin body's own motion, from a short central difference of its position. Using the
-  // body's real velocity rather than zero is what makes "drop it near Mars" behave like Mars.
+export function releaseFrame(originBody: BodyId, startEpoch: JdTdb): ReleaseFrame {
+  const origin = heliocentricPositionOf(originBody, startEpoch);
+
+  // The body's own motion, from a short central difference of its position. Using the real
+  // velocity rather than zero is what makes "drop it near Mars" behave like Mars.
   const dt = 60;
-  const ahead = heliocentricPositionOf(
-    launch.originBody,
-    jdTdb(launch.startEpoch + dt / SECONDS_PER_DAY),
-  );
-  const behind = heliocentricPositionOf(
-    launch.originBody,
-    jdTdb(launch.startEpoch - dt / SECONDS_PER_DAY),
-  );
+  const ahead = heliocentricPositionOf(originBody, jdTdb(startEpoch + dt / SECONDS_PER_DAY));
+  const behind = heliocentricPositionOf(originBody, jdTdb(startEpoch - dt / SECONDS_PER_DAY));
   const carrierVelocity = scale(sub(ahead, behind), 1 / (2 * dt));
 
+  /**
+   * Orthonormalised, which it was not before.
+   *
+   * `outward` is the direction away from the Sun and `alongTrack` is the direction of motion,
+   * and those are only perpendicular for a circular orbit. Mars's eccentricity of 0.093 tilts
+   * them about five degrees apart, so the three "axes" the heading and climb controls were
+   * measured against were not axes at all. The forward direction still came out a unit
+   * vector, because it was normalised afterwards, which is why nothing looked wrong: the
+   * controls simply did not mean quite what they said, and the map could not be inverted.
+   * Solving an intercept and feeding the angles back reproduced the velocity to within 230
+   * m/s, and the asteroid left at the right speed in the wrong direction.
+   *
+   * Gram-Schmidt against the direction of motion fixes both. Along-track is kept exactly,
+   * because keeping pace with the planet is the one case that has to stay true.
+   */
   const alongTrack = normalize(carrierVelocity);
-  const outward = normalize(origin);
-  const normal = normalize(cross(outward, alongTrack));
+  const radial = normalize(origin);
+  const alongComponent = dot(radial, alongTrack);
+  const outward = normalize(sub(radial, scale(alongTrack, alongComponent)));
+  return { origin, carrierVelocity, alongTrack, outward, normal: normalize(cross(outward, alongTrack)) };
+}
+
+/**
+ * Turn a required heliocentric velocity into the speed, heading and climb the controls take.
+ *
+ * The exact inverse of the direction built in `initialStateFor`, using the same frame object
+ * so the two cannot drift apart. `asteroid.test.ts` round-trips it.
+ */
+export function releaseAnglesFor(
+  frame: ReleaseFrame,
+  requiredVelocity: Vec3,
+): { speedMS: number; headingDeg: number; inclinationDeg: number } {
+  const relative = sub(requiredVelocity, frame.carrierVelocity);
+  const speedMS = length(relative);
+  if (speedMS === 0) return { speedMS: 0, headingDeg: 0, inclinationDeg: 0 };
+
+  const unit = scale(relative, 1 / speedMS);
+  const climb = Math.asin(Math.max(-1, Math.min(1, dot(unit, frame.normal))));
+  const heading = Math.atan2(dot(unit, frame.outward), dot(unit, frame.alongTrack));
+  return {
+    speedMS,
+    headingDeg: ((heading * 180) / Math.PI + 360) % 360,
+    inclinationDeg: (climb * 180) / Math.PI,
+  };
+}
+
+export function initialStateFor(launch: AsteroidLaunch): { position: Vec3; velocity: Vec3 } {
+  const { origin, carrierVelocity, alongTrack, outward, normal } =
+    releaseFrame(launch.originBody, launch.startEpoch);
 
   const heading = (launch.headingDeg * Math.PI) / 180;
   const climb = (launch.inclinationDeg * Math.PI) / 180;
@@ -125,8 +184,12 @@ export function initialStateFor(launch: AsteroidLaunch): { position: Vec3; veloc
 
   const releaseRadius = BODY_CONTRACTS[launch.originBody].equatorialRadiusM + launch.altitudeM;
 
+  // Released on the sunward-outward side, using the true radial rather than the
+  // orthonormalised one: where the object starts is a position, not a direction in the
+  // control frame, and it should be genuinely radial.
+  const radial = normalize(origin);
   return {
-    position: add(origin, scale(outward, releaseRadius)),
+    position: add(origin, scale(radial, releaseRadius)),
     velocity: add(carrierVelocity, scale(direction, launch.speedMS)),
   };
 }
@@ -175,6 +238,15 @@ export interface AsteroidOutcome {
   readonly result: PropagationResult;
   readonly summary: string;
   readonly impact: ImpactEstimate | null;
+  /**
+   * What the impact actually does where it lands: airburst or crater, how wide, how far the
+   * blast reaches.
+   *
+   * The energy alone was the whole answer before, and energy is the least interesting part.
+   * The same rock is a crater on the Moon and an airburst on Earth, and megatons cannot tell
+   * you which.
+   */
+  readonly consequences: ImpactConsequences | null;
   readonly finalEccentricity: number;
   readonly finalSemiMajorAxisAu: number | null;
 }
@@ -206,7 +278,7 @@ export function runAsteroid(launch: AsteroidLaunch): AsteroidOutcome {
     initial,
     durationSeconds,
     limits: { ...DEFAULT_LIMITS, tolerance: 1e-10, maxSteps: 400_000 },
-    sampleIntervalSeconds: durationSeconds / 2_000,
+    sampleIntervalSeconds: sampleIntervalFor(GM_SUN, initial, durationSeconds),
     closeApproachThresholdM: 0.2 * AU_IN_METRES,
   });
 
@@ -216,13 +288,40 @@ export function runAsteroid(launch: AsteroidLaunch): AsteroidOutcome {
   const energy = length(final.velocity) ** 2 / 2 - GM_SUN / r;
   const semiMajorAxis = energy < 0 ? -GM_SUN / (2 * energy) : null;
 
+  /**
+   * Impact speed is relative to the body that was hit, not to the Sun.
+   *
+   * This used the heliocentric speed, which for anything striking Earth is wrong by up to a
+   * factor of two in either direction: Earth is itself travelling at 30 km/s, so a rock
+   * overtaking it from behind arrives gently and one meeting it head-on arrives at 60. Energy
+   * goes as the square of that, so the error reached a factor of four in the headline number.
+   */
+  const struck =
+    result.fate.kind === "impact"
+      ? (() => {
+          const at = jdTdb(launch.startEpoch + result.fate.atSeconds / SECONDS_PER_DAY);
+          const body = heliocentricStateOf(result.fate.body as BodyId, at);
+          return length(sub(final.velocity, body.velocity));
+        })()
+      : null;
+
   return {
     result,
     summary: describeFate(result.fate, launch),
     impact:
-      result.fate.kind === "impact"
-        ? impactEnergy(launch.diameterM, launch.densityKgM3, length(final.velocity))
-        : null,
+      struck === null ? null : impactEnergy(launch.diameterM, launch.densityKgM3, struck),
+    consequences:
+      struck === null || result.fate.kind !== "impact"
+        ? null
+        : impactConsequences({
+            target: result.fate.body as BodyId,
+            diameterM: launch.diameterM,
+            densityKgM3: launch.densityKgM3,
+            speedMS: struck,
+            // The most probable angle for a randomly arriving body, and the one Collins et
+            // al. use when nothing better is known.
+            angleDeg: 45,
+          }),
     finalEccentricity: eccentricity,
     finalSemiMajorAxisAu: semiMajorAxis === null ? null : semiMajorAxis / AU_IN_METRES,
   };

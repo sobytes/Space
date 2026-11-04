@@ -13,6 +13,9 @@ import { RATE_PRESETS } from "../core/clock";
 import type { ViewportSnapshot } from "../core/viewport";
 import { useViewport, useViewportValue } from "./ViewportContext";
 import { ALL_MOONS, PLANETARY_SET } from "@solar/engine/nbody-tracker";
+import { HabitabilityPanel } from "./HabitabilityPanel";
+import { LabelLayer } from "./LabelLayer";
+import { SurfacePanel } from "./SurfacePanel";
 
 /** Hoisted so `useSyncExternalStore` is not handed a new selector identity every render. */
 const selectEpoch = (s: ViewportSnapshot) => s.epoch;
@@ -21,6 +24,8 @@ const selectRunning = (s: ViewportSnapshot) => s.running;
 const selectFocus = (s: ViewportSnapshot) => s.focus;
 const selectAltitude = (s: ViewportSnapshot) => s.distanceToFocus;
 const selectGravity = (s: ViewportSnapshot) => s.gravity;
+const selectRiding = (s: ViewportSnapshot) => s.riding;
+const selectHasTrajectory = (s: ViewportSnapshot) => s.hasTrajectory;
 
 function formatEpoch(epoch: JdTdb): string {
   const ms = epochMsFromJdUtc(utcFromTdb(epoch));
@@ -572,13 +577,61 @@ function SystemViewButton() {
   );
 }
 
+/**
+ * Ride the launched object, or stop riding it.
+ *
+ * Only shown once something has been launched, because there is nothing to ride otherwise and
+ * a disabled control that never explains itself is worse than an absent one. Riding moves the
+ * floating origin onto the object, so the ordinary camera controls keep working and the view
+ * is simply from the rock rather than from a planet.
+ */
+function RideButton() {
+  const viewport = useViewport();
+  const riding = useViewportValue(selectRiding);
+  const hasTrajectory = useViewportValue(selectHasTrajectory);
+
+  if (!hasTrajectory) return null;
+
+  return (
+    <button
+      type="button"
+      title={
+        riding
+          ? "Put the camera back on the focused body."
+          : "Put the camera on the launched object and fly with it. Speed up the clock to watch it go."
+      }
+      onClick={() => viewport.setRiding(!riding)}
+      className={`rounded-lg border px-2.5 py-1.5 text-xs backdrop-blur-md transition ${
+        riding
+          ? "border-orange-400/40 bg-orange-400/15 text-orange-200"
+          : "border-teal-400/30 bg-teal-400/10 text-teal-200 hover:bg-teal-400/20"
+      }`}
+    >
+      {riding ? "Stop riding" : "Ride it"}
+    </button>
+  );
+}
+
 export function Hud() {
   const epoch = useViewportValue(selectEpoch);
+  const focus = useViewportValue(selectFocus);
   const [hidden, setHidden] = useHiddenOverlay();
+  const [habitability, setHabitability] = useState(false);
+  /**
+   * Labels on by default.
+   *
+   * Asked for because the Moon could not be found while focused on Earth, which is the
+   * off-screen case: there is nothing on screen to look harder at. Defaulting them off would
+   * leave that unsolved for anyone who does not go hunting for a toggle, and the people most
+   * likely to need a name for something are the least likely to know the control exists.
+   */
+  const [labels, setLabels] = useState(true);
+  const [surface, setSurface] = useState(false);
 
   if (hidden) {
     return (
       <div className="pointer-events-none absolute inset-0 p-4">
+        <LabelLayer visible={labels} />
         <button
           type="button"
           aria-label="Show the information overlay"
@@ -594,12 +647,47 @@ export function Hud() {
 
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-4">
+      <LabelLayer visible={labels} />
       <div className="flex items-start justify-between gap-3">
         <BodyList />
         <div className="flex items-start gap-2">
           <BodyPanel epoch={epoch} />
           <div className="pointer-events-auto flex shrink-0 flex-col gap-1.5">
             <SystemViewButton />
+            <button
+              type="button"
+              title={labels ? "Hide the body names" : "Show the body names, including for bodies off screen"}
+              onClick={() => setLabels((on) => !on)}
+              className={`rounded-lg border px-2.5 py-1.5 text-xs backdrop-blur-md transition ${
+                labels
+                  ? "border-amber-400/40 bg-amber-400/15 text-amber-200"
+                  : "border-white/10 bg-black/70 text-zinc-400 hover:bg-white/10 hover:text-zinc-100"
+              }`}
+            >
+              Labels
+            </button>
+            <RideButton />
+            {/*
+              Offered on the Sun too, where it answers a different and fair question: the Sun
+              has no habitability ladder, and saying why in the same place is better than a
+              control that silently disappears when the focus changes.
+            */}
+            <button
+              type="button"
+              onClick={() => setSurface(true)}
+              title="Real photographs taken on the surface, where any exist"
+              className="rounded-lg border border-sky-400/30 bg-sky-400/10 px-2.5 py-1.5 text-xs text-sky-200 backdrop-blur-md transition hover:bg-sky-400/20"
+            >
+              Stand here
+            </button>
+            <button
+              type="button"
+              onClick={() => setHabitability(true)}
+              title="What would it take to live here?"
+              className="rounded-lg border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1.5 text-xs text-emerald-200 backdrop-blur-md transition hover:bg-emerald-400/20"
+            >
+              Make it habitable
+            </button>
             <button
               type="button"
               aria-label="Hide the information overlay"
@@ -616,6 +704,10 @@ export function Hud() {
         <GravityBar />
         <TimeBar />
       </div>
+      {habitability ? (
+        <HabitabilityPanel focus={focus} onClose={() => setHabitability(false)} />
+      ) : null}
+      {surface ? <SurfacePanel focus={focus} onClose={() => setSurface(false)} /> : null}
     </div>
   );
 }

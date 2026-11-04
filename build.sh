@@ -6,12 +6,16 @@
 #   ./build.sh check           every gate: engine, website, Swift port, cross-language drift
 #   ./build.sh website         build the Next.js site
 #   ./build.sh website dev     run it on port 3000
+#   ./build.sh website probe   geometry checks against a running dev server
 #   ./build.sh ios             build the iPhone app for the simulator
 #   ./build.sh ios run         build, install and launch it on a simulator
 #   ./build.sh ios device      build signed for a paired iPhone, and list what is paired
 #   ./build.sh ios test        SolarKit's gates against the JPL fixtures
+#   ./build.sh ios uitest      interaction gates: launch the app and touch the controls
 #   ./build.sh generate        regenerate the Swift tables from the TypeScript engine
 #   ./build.sh conformance     regenerate the cross-platform conformance suite
+#   ./build.sh citations       re-resolve every cited DOI and check it says what we say
+#   ./build.sh imagery         re-check every surface photograph is real and still served
 #
 # `set -o pipefail` with explicit status capture, because a piped command's exit code is the
 # pipeline's, not the command's, and reading the wrong one is how a red build gets reported
@@ -47,7 +51,7 @@ require() {
 }
 
 usage() {
-  sed -n '3,16p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+  sed -n '3,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
   printf '\nplatforms\n'
   printf '  website   Next.js, the reference client. Imports @solar/engine directly.\n'
   printf '  ios       iPhone, SwiftUI + SceneKit over SolarKit. A hand-port; see contracts/.\n'
@@ -90,6 +94,20 @@ case "${1:-}" in
     generate_swift
     ;;
 
+  imagery)
+    # Online, like `citations`, and for the same reason. Checks that every surface photograph
+    # is still served and is still a photograph rather than an artist's impression.
+    require node "install Node, then run npm install"
+    node scripts/verify-imagery.mjs
+    ;;
+
+  citations)
+    # Online, so deliberately not part of `check`. A gate that fails when the network is
+    # down teaches people to ignore gates. The offline half is in website/src/citations.test.ts.
+    require node "install Node, then run npm install"
+    node scripts/verify-citations.mjs
+    ;;
+
   conformance)
     require node "install Node, then run npm install"
     # The cases are committed, so regenerating is a deliberate act: it says the engine's
@@ -105,6 +123,10 @@ case "${1:-}" in
         ;;
       build) npm run build ;;
       test) npx vitest run ;;
+      # Geometry, against a running dev server. The browser counterpart to
+      # mobile/ios/scripts/focus-probe.mjs, and it exists because the web had no equivalent:
+      # the camera rendered the whole system rolled ninety degrees and every gate stayed green.
+      probe) node website/scripts/web-probe.mjs ;;
       *) printf 'unknown: website %s\n' "$2"; exit 1 ;;
     esac
     ;;
@@ -124,6 +146,22 @@ case "${1:-}" in
         ;;
       test)
         swift test -c release --package-path mobile/ios/SolarKit
+        ;;
+      uitest)
+        # Interaction gates, in the simulator. Separate from `test` because that one is the
+        # physics and runs headless in half a second, while this one launches the app and
+        # touches it. Neither can see what the other sees: a control can render perfectly,
+        # pass every arithmetic gate, and ignore every tap. Two shipped bugs did exactly that.
+        udid=$(xcrun simctl list devices available \
+          | grep -m1 "$SIMULATOR (" | sed -E 's/.*\(([0-9A-F-]{36})\).*/\1/')
+        if [ -z "$udid" ]; then
+          printf 'no %s simulator. Set SOLAR_SIMULATOR to one of:\n' "$SIMULATOR"
+          xcrun simctl list devices available | grep iPhone
+          exit 1
+        fi
+        xcodebuild test -project mobile/ios/Solar.xcodeproj -scheme Solar \
+          -destination "platform=iOS Simulator,id=$udid" -only-testing:SolarUITests \
+          | grep -E 'error:|Test Case|Test Suite .All tests.' || true
         ;;
       device)
         # Signed as SOBYTES LTD, team pinned in project.yml. -allowProvisioningUpdates lets

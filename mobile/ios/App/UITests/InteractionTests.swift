@@ -1,0 +1,190 @@
+import XCTest
+
+/**
+ Can a person actually operate the controls?
+
+ The existing iOS gates answer two questions: does the arithmetic match the engine
+ (`swift test`), and does the right thing end up on screen (`scripts/focus-probe.mjs`). Neither
+ can see a control that renders perfectly and ignores every tap, and two of those have now been
+ reported from the phone rather than caught here: planets that would not focus on a tap, and
+ the asteroid origin picker whose menu opened and then discarded the selection.
+
+ Both had the same shape. The view is rebuilt faster than a touch completes, so the control is
+ drawn correctly every frame and no gesture ever finishes on the instance that started it. A
+ screenshot of that is indistinguishable from a screenshot of a working control, which is why
+ it needs a test that touches things.
+ */
+@MainActor
+final class InteractionTests: XCTestCase {
+    private var app: XCUIApplication!
+
+    override func setUp() {
+        continueAfterFailure = false
+        app = XCUIApplication()
+        // The scene animates continuously, so waiting for quiescence never returns.
+        app.launchArguments = ["-uiTest"]
+        app.launch()
+    }
+
+    /**
+     The asteroid origin picker keeps a selection.
+
+     Reported from the phone as "you cant click these": the menu opened, listed every body, and
+     tapping one changed nothing. The cause was that the sheet was handed `clock.epoch`, which
+     advances sixty times a second, so the entire form was rebuilt between the touch landing
+     and the menu resolving it.
+
+     The assertion is on the picker's own value rather than on the menu closing, because the
+     menu closed in the broken build too. Only the retained selection distinguishes them.
+     */
+    func testAsteroidOriginPickerKeepsSelection() {
+        app.buttons["tool.asteroid"].tap()
+
+        /**
+         A long wait, and the wait is itself part of the evidence.
+
+         A SwiftUI picker row carries no accessibility `value`; its state is in the label,
+         which reads "From, Mars". Querying for it took ten seconds in the broken build,
+         because the app never reaches idle while the form is being rebuilt at sixty hertz,
+         and every accessibility snapshot raced the rebuild. In a fixed build the same query
+         resolves in well under a second.
+         */
+        let picker = app.buttons["asteroid.origin"]
+        XCTAssertTrue(picker.waitForExistence(timeout: 20), "the asteroid sheet did not open")
+        XCTAssertEqual(picker.label, "From, Mars", "expected the default origin")
+
+        picker.tap()
+        // By identifier, not label: the body rail behind the sheet also has an "Earth" button
+        // and a label query matches both.
+        let earth = app.buttons["origin.embary"]
+        XCTAssertTrue(earth.waitForExistence(timeout: 10), "the origin menu did not open")
+        earth.tap()
+
+        XCTAssertTrue(
+            settles(timeout: 10) { picker.label == "From, Earth" },
+            "picked Earth and the control still reads \(picker.label)"
+        )
+    }
+
+    /**
+     Tapping a planet in the top picker focuses it.
+
+     The other reported interaction failure, and the same cause. Focus is observable from the
+     outside through the body panel's title, so the test does not need to reach into the scene.
+     */
+    func testBodyPickerFocusesOnTap() {
+        let venus = app.buttons["Venus"]
+        XCTAssertTrue(venus.waitForExistence(timeout: 5), "the body picker never appeared")
+        venus.tap()
+
+        let title = app.staticTexts["panel.title"]
+        XCTAssertTrue(
+            settles(timeout: 5) { title.exists && title.label == "Venus" },
+            "tapped Venus and the panel still reads \(title.label)"
+        )
+    }
+
+    /**
+     The body panel's More control expands and collapses again.
+
+     Asked from the phone as whether More toggles. It does, and the useful thing is a test
+     saying so rather than a reading of the source: the control is one tap in a panel that is
+     height-capped and scrolls, so "it expanded and I could not get back" and "it did not
+     expand" look identical from the outside, and neither is what the code appears to do.
+     */
+    func testBodyPanelMoreTogglesBothWays() {
+        let more = app.buttons["panel.more"]
+        XCTAssertTrue(more.waitForExistence(timeout: 10), "the body panel never appeared")
+        XCTAssertEqual(more.label, "More", "the panel should start collapsed")
+
+        more.tap()
+        XCTAssertTrue(
+            settles(timeout: 5) { more.label == "Less" },
+            "tapped More and the control still reads \(more.label)"
+        )
+        /**
+         The extra detail is what More is for, so its absence is the real failure.
+
+         "Axial tilt" rather than "From Earth", which is the row this first reached for and
+         which Earth deliberately does not have: a body does not report its distance from
+         itself. Axial tilt is on every body's expanded panel.
+         */
+        XCTAssertTrue(
+            app.staticTexts["Axial tilt"].waitForExistence(timeout: 3),
+            "expanded, and the extra rows did not appear"
+        )
+
+        more.tap()
+        XCTAssertTrue(
+            settles(timeout: 5) { more.label == "More" },
+            "tapped Less and the control still reads \(more.label)"
+        )
+    }
+
+    /**
+     No overlay control may sit underneath another one.
+
+     This is the general form of a bug that has now happened twice in the same place. The body
+     panel is bottom-aligned, so expanding it grows upwards into the tool rail, and a control
+     that ends up behind the rail is still a perfectly valid view: accessibility reports it as
+     present and hittable, the layout engine is content, and the only thing wrong is that
+     touches go somewhere else. A screenshot cannot see it and a unit test cannot reach it.
+
+     Comparing frames can. Every pair of interactive elements in the overlay must be disjoint,
+     which is a property of the design rather than of any one control, so it keeps holding as
+     controls are added.
+     */
+    func testInteractiveOverlaysDoNotOverlap() {
+        let more = app.buttons["panel.more"]
+        XCTAssertTrue(more.waitForExistence(timeout: 10), "the body panel never appeared")
+        // Expanded is the state that caused this, so check it rather than the resting layout.
+        more.tap()
+        XCTAssertTrue(settles(timeout: 5) { more.label == "Less" }, "the panel did not expand")
+
+        /**
+         Filtered by frame, not by `isHittable`.
+
+         `isHittable` throws on an element scrolled out of its container rather than returning
+         false: the horizontal body picker holds every body in the registry, and asking about
+         Uranus while it is off the right-hand edge fails the test for the wrong reason. A
+         frame inside the window is the question actually being asked anyway.
+         */
+        let window = app.windows.firstMatch.frame
+        let buttons = app.buttons.allElementsBoundByIndex.filter { button in
+            guard button.exists else { return false }
+            let frame = button.frame
+            return frame.width > 1 && frame.height > 1 && window.intersects(frame)
+        }
+        XCTAssertGreaterThan(buttons.count, 5, "found almost no controls; the query is wrong")
+
+        var collisions: [String] = []
+        for i in buttons.indices {
+            for j in (i + 1) ..< buttons.count {
+                let a = buttons[i]
+                let b = buttons[j]
+                let overlap = a.frame.intersection(b.frame)
+                guard !overlap.isNull, overlap.width > 2, overlap.height > 2 else { continue }
+                collisions.append(
+                    "\(describe(a)) over \(describe(b)) by \(Int(overlap.width))x\(Int(overlap.height))"
+                )
+            }
+        }
+        XCTAssertEqual(collisions, [], "controls are stacked on top of each other")
+    }
+
+    private func describe(_ element: XCUIElement) -> String {
+        let id = element.identifier
+        return id.isEmpty ? "\"\(element.label)\"" : id
+    }
+
+    /// Polls rather than using `expectation(for:evaluatedWith:)`, which Swift 6 rejects for
+    /// sending a non-Sendable test case across actors.
+    private func settles(timeout: TimeInterval, until: () -> Bool) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if until() { return true }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        }
+        return until()
+    }
+}

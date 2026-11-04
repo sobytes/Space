@@ -1,0 +1,148 @@
+{
+  "domain": "propagate",
+  "absoluteTolerance": 0.001,
+  "description": "Integrated trajectories: two-body, relativistic, and with real perturbers.",
+  "tolerance": 1e-7,
+  "cases": [
+    {
+      "id": "two-body-one-period-0.39au",
+      "input": {
+        "radiusAu": 0.39,
+        "durationSeconds": 7686153.967046182,
+        "tolerance": 1e-12
+      },
+      "absoluteTolerance": 58.343169573000004,
+      "expected": {
+        "position": {
+          "x": 58343169573.1479,
+          "y": -0.591999292373657,
+          "z": 0
+        },
+        "velocity": {
+          "x": 4.83985218124872e-7,
+          "y": 47693.6771507029,
+          "z": 0
+        }
+      }
+    },
+    {
+      "id": "two-body-one-period-1au",
+      "input": {
+        "radiusAu": 1,
+        "durationSeconds": 31558196.01550645,
+        "tolerance": 1e-12
+      },
+      "absoluteTolerance": 149.59787070000002,
+      "expected": {
+        "position": {
+          "x": 149597870700.379,
+          "y": -1.51374125480652,
+          "z": 0
+        },
+        "velocity": {
+          "x": 3.01401883007202e-7,
+          "y": 29784.6918342398,
+          "z": 0
+        }
+      }
+    },
+    {
+      "id": "two-body-one-period-5.2au",
+      "input": {
+        "radiusAu": 5.2,
+        "durationSeconds": 374211547.39635664,
+        "tolerance": 1e-12
+      },
+      "absoluteTolerance": 777.90892764,
+      "expected": {
+        "position": {
+          "x": 777908927640.057,
+          "y": -0.25037956237793,
+          "z": 0
+        },
+        "velocity": {
+          "x": 4.20656931510166e-9,
+          "y": 13061.4514129205,
+          "z": 0
+        }
+      }
+    },
+    {
+      "id": "mercury-20-orbits-newtonian",
+      "input": {
+        "relativistic": false,
+        "orbits": 20,
+        "tolerance": 1e-13
+      },
+      "absoluteTolerance": 57.9089,
+      "expected": {
+        "position": {
+          "x": 46001092892.9991,
+          "y": -0.366183668375015,
+          "z": 0
+        },
+        "velocity": {
+          "x": 3.90013013884527e-7,
+          "y": 58976.4687341538,
+          "z": 0
+        },
+        "pericentreLongitude": -6.09785946806082e-14
+      }
+    },
+    {
+      "id": "mercury-20-orbits-relativistic",
+      "input": {
+        "relativistic": true,
+        "orbits": 20,
+        "tolerance": 1e-13
+      },
+      "absoluteTolerance": 57.9089,
+      "expected": {
+        "position": {
+          "x": 46001092813.7834,
+          "y": -3068118.7280325,
+          "z": 0
+        },
+        "velocity": {
+          "x": 3.16167159328245,
+          "y": 58976.4686248414,
+          "z": 0
+        },
+        "pericentreLongitude": 0.0000100373844293966
+      }
+    },
+    {
+      "id": "asteroid-default-two-years",
+      "input": {
+        "durationYears": 2,
+        "tolerance": 1e-9
+      },
+      "expected": {
+        "initial": {
+          "position": {
+            "x": 213042562858.355,
+            "y": -2051436536.48033,
+            "z": -5279273209.95079
+          },
+          "velocity": {
+            "x": 899.166980476,
+            "y": 20304.5012922628,
+            "z": 403.24975499374
+          }
+        },
+        "final": {
+          "position": {
+            "x": 147778903953.824,
+            "y": -117455077555.138,
+            "z": -6091617162.58384
+          },
+          "velocity": {
+            "x": 19656.8510603342,
+            "y": 13662.9131015359,
+            "z": -196.880583480701
+          }
+        }
+      }
+    }
+  ]
+}
