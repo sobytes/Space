@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useTexture } from "@react-three/drei";
 import {
   AdditiveBlending,
   BackSide,
   Color,
   DoubleSide,
   Group,
+  SRGBColorSpace,
   TextureLoader,
   Vector3,
   type Texture,
@@ -28,16 +28,52 @@ function textureUrl(id: string): string {
 }
 
 /**
- * drei's loader sets the colour space from the file rather than leaving it at the default,
- * which matters: a planet texture sampled as linear reads washed out and slightly wrong, and
- * it is the kind of error that looks like a lighting problem for an hour.
+ * A body's texture, or null if it is not there.
  *
- * A body with no cloud or ring map still has to call the hook, so an absent id loads the Sun
- * and the result is discarded. Hooks cannot be conditional, and the texture is cached anyway.
+ * This used drei's `useTexture`, which suspends and then throws when a file is missing.
+ * With no error boundary above it, one absent image took down the entire React tree: the
+ * deployed site rendered, hit a 404 on `/textures/sun.jpg`, and the tab died with Chrome's
+ * "This page couldn't load". A simulator that cannot start because one planet has no
+ * photograph is the wrong trade, and the fallback was already written and simply never
+ * reachable: the material below draws an untextured body at its measured geometric albedo
+ * in its measured colour, which is an honest rendering rather than a broken one.
+ *
+ * So this loads the same way `useGlobalNormalMap` does and returns null on failure, which
+ * makes a missing texture a degraded picture instead of a blank page. Textures are not in
+ * the repository by design, so the deployed app has to survive without them.
+ *
+ * Colour space is set by hand because drei used to do it: a planet texture sampled as linear
+ * reads washed out and slightly wrong, and it looks like a lighting bug for an hour.
  */
 function useOptionalTexture(id: string | undefined): Texture | null {
-  const loaded = useTexture(id ? textureUrl(id) : "/textures/sun.jpg");
-  return id ? (loaded as Texture) : null;
+  // The id travels with the texture so a body that switches map never shows the previous
+  // one during the load. Earth alone does this, flipping between day and night.
+  const [loaded, setLoaded] = useState<{ id: string; texture: Texture } | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    new TextureLoader().load(
+      textureUrl(id),
+      (texture) => {
+        if (cancelled) {
+          texture.dispose();
+          return;
+        }
+        texture.colorSpace = SRGBColorSpace;
+        setLoaded({ id, texture });
+      },
+      undefined,
+      // Swallowed deliberately. A missing texture is a known state with a designed
+      // appearance, not an error anyone can act on, and three already logs the 404.
+      () => {},
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  return loaded && loaded.id === id ? loaded.texture : null;
 }
 
 
