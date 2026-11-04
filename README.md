@@ -36,8 +36,14 @@ The simulation needs no configuration. Only the AI panel wants an API key: copy
 `.env.local.example` to `.env.local` and fill it in, or leave it and that one panel will say
 so politely.
 
-Planetary textures are not in this repository. `npm run assets 1` fetches the first tier
-under the licences recorded in the manifest.
+The planet imagery is already here, as the WebP files under `website/public/textures`: 2048
+across for every body, 4096 for whichever one the camera is focused on, 12 MB in total. You
+do not need to fetch anything to see real planets.
+
+What is not here is the originals those were made from, 78 MB of 8192 x 4096 JPEGs. To change
+a texture, or to regenerate the set, `npm run assets` downloads them into `website/assets/originals`
+under the licences recorded in the manifest and `npm run textures` resizes them back into
+`public/textures` and rewrites the credits page.
 
 ## How it is kept honest
 
@@ -105,5 +111,7 @@ eclipse-grade ephemeris and does not pretend to be.
 
 ## Licence
 
-MIT, for the code. See [LICENSE](LICENSE) — the assets are not covered by it and are not
-stored here.
+MIT, for the code. See [LICENSE](LICENSE). The imagery is not covered by it: every texture
+served is third-party, is licensed separately, and has been resized from its original.
+[website/public/ATTRIBUTION.md](website/public/ATTRIBUTION.md) names each one, its licence and
+where it came from, and is generated from the files on disk so it cannot go stale.
