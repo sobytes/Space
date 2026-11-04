@@ -1,0 +1,14 @@
+{
+  // The production build's view of the project: application code only.
+  //
+  // `tsconfig.json` includes the tests, which is right for an editor and for
+  // `npm run typecheck`, and wrong for `next build`. Type-checking a test file means
+  // resolving `vitest`, so a production install would have to carry the test runner, and
+  // on Vercel it does not: the deploy failed on exactly this, one error after the one that
+  // was actually reported.
+  //
+  // Pointed at by next.config.ts. Nothing stops being checked, it just moves to the command
+  // whose job it is.
+  "extends": "./tsconfig.json",
+  "exclude": ["node_modules", "**/*.test.ts", "**/*.test.tsx", "scripts/**"]
+}

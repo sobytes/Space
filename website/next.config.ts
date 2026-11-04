@@ -9,6 +9,17 @@ const nextConfig: NextConfig = {
    * gates, the route handler and the browser all run the identical files.
    */
   transpilePackages: ["@solar/engine"],
+  typescript: {
+    /**
+     * The build checks application code; `npm run typecheck` checks everything.
+     *
+     * `tsconfig.json` sweeps in the eleven test files under src, and type-checking those
+     * needs `vitest` resolvable. That makes a production install depend on the test runner,
+     * and on Vercel it is not there: the deploy failed on a missing type package, and this
+     * would have been the very next error after fixing it.
+     */
+    tsconfigPath: "tsconfig.build.json",
+  },
   turbopack: {
     rules: {
       "*.css": {
