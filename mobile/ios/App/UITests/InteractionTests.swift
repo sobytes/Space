@@ -53,6 +53,55 @@ final class InteractionTests: XCTestCase {
     }
 
     /**
+     The time-rate slider takes effect, and the clock keeps running underneath it.
+
+     Reported from the phone: "when i increase the time with the slider at the bottom it gets
+     stuck for a bit and looks like its crashed before it updates."
+
+     What this asserts is correctness, not speed. The first version of this test timed the
+     whole interaction and failed at 2.03 seconds, which looked like the bug and was not: a
+     probe measured the same 1.97 seconds with the clock paused, so it was XCUITest's own
+     synthesized drag, and the app settled in 32 milliseconds either way. The stall is not
+     reproducible on a simulator fast enough to rebuild the whole overlay sixty times a second
+     without visibly suffering.
+
+     The cost that actually caused it is measured where it can be seen, by
+     `mobile/ios/scripts/focus-probe.mjs` reading `overlayRendersPerSecond`. This test covers
+     the other half: that the control works at all, and that the rate reaching the clock does
+     not stop the clock.
+     */
+    func testTimeRateSliderTakesEffect() {
+        let slider = app.sliders["time.rate"]
+        XCTAssertTrue(slider.waitForExistence(timeout: 20), "the time bar never appeared")
+
+        let label = app.staticTexts["time.rateLabel"]
+        XCTAssertEqual(label.label, "real time", "expected the clock to open at real time")
+
+        slider.adjust(toNormalizedSliderPosition: 1.0)
+        XCTAssertTrue(
+            settles(timeout: 5) { label.label.hasPrefix("10 years/s") },
+            "dragged the rate to maximum and the label still reads \(label.label)"
+        )
+
+        /**
+         The date must still be moving.
+
+         The overlay now reads a throttled epoch rather than the live one, and the failure mode
+         of getting that wrong is a clock that renders once and then never again: the scene
+         keeps moving and the date sits still. That looks fine in a screenshot.
+         */
+        let date = app.staticTexts.matching(
+            NSPredicate(format: "label ENDSWITH %@", "UTC")
+        ).firstMatch
+        XCTAssertTrue(date.waitForExistence(timeout: 5), "no date on screen")
+        let first = date.label
+        XCTAssertTrue(
+            settles(timeout: 5) { date.label != first },
+            "the rate is 10 years a second and the date is stuck at \(first)"
+        )
+    }
+
+    /**
      Tapping a planet in the top picker focuses it.
 
      The other reported interaction failure, and the same cause. Focus is observable from the

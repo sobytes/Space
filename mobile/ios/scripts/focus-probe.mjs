@@ -208,7 +208,8 @@ for (const { id: body, label, minimumLit, note, moons, extraArgs, orbitError } o
     const container = sh("xcrun", ["simctl", "get_app_container", udid, BUNDLE, "data"]);
     rmSync(join(container, "Documents", "scene-debug.json"), { force: true });
   } catch { /* not installed yet */ }
-  const needsScene = body === "sun" || body === "saturn" || moons !== undefined
+  const needsScene = body === "sun" || body === "saturn" || body === "embary"
+    || moons !== undefined
     || orbitError !== undefined;
   const args = body === "sun"
     ? ["-focus", "embary", "-focusAfter", "sun", "-startHidden", "-dumpScene"]
@@ -282,6 +283,37 @@ for (const { id: body, label, minimumLit, note, moons, extraArgs, orbitError } o
       );
     }
     if (results.some((m) => !m.ok)) {
+      failures += 1;
+      ok = false;
+    }
+  }
+
+  if (body === "embary") {
+    /**
+     * Is the overlay rebuilding itself at frame rate?
+     *
+     * A SwiftUI body that runs sixty times a second recreates every control beneath it, and a
+     * control recreated under a finger does not reliably receive the gesture that started on
+     * the previous instance. Three reports from the phone have been this: a picker that
+     * discarded every tap, unreachable sheet controls, and a rate slider that "gets stuck for
+     * a bit and looks like its crashed".
+     *
+     * Measured rather than reasoned about, because the cause is a single property read in a
+     * view body and nothing about the code looks wrong. The overlay's root went from 60
+     * evaluations a second to 0 when the clock's epoch stopped being observed; the label
+     * layer still runs every frame, by design, and is a different view.
+     *
+     * The threshold is 20 rather than something tight: the overlay legitimately redraws on
+     * the clock's 10 Hz publish, and the failure this catches is 60.
+     */
+    const scene = sceneDebug(udid);
+    const renders = scene?.overlayRendersPerSecond ?? Infinity;
+    const calm = renders <= 20;
+    console.log(
+      `${"".padEnd(9)} overlay rebuilds: ${renders}/s  `
+        + `${calm ? "ok" : "OVERLAY REBUILDS AT FRAME RATE"}`,
+    );
+    if (!calm) {
       failures += 1;
       ok = false;
     }

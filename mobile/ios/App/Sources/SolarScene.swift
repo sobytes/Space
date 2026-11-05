@@ -34,14 +34,26 @@ import SolarKit
  `ViewControls` is handed a `BodyId` and two class references. A control whose visibility
  depends on scene state none of those three carry was correctly skipped by SwiftUI and simply
  never appeared. Driving it from the sixty-hertz tick instead would have worked by accident
- and broken the moment the tick was optimised. The properties written every frame, positions
- and the origin, are not read by any view, so this costs nothing.
+ and broken the moment the tick was optimised. Of the properties written every frame, only
+ `frameCounter` is read by a view, and only by the label layer, which wants every frame.
  */
 @MainActor
 @Observable
 final class SolarScene {
     let scene = SCNScene()
     let cameraNode = SCNNode()
+
+    /**
+     Bumped on every scene update, and the only per-frame property any view is meant to read.
+
+     Labels have to track the bodies exactly or they visibly lag during a drag, so they are the
+     one part of the overlay that does want every frame. Subscribing them to this rather than
+     to the clock's epoch is what keeps that cost inside the label layer: the epoch is observed
+     by nothing, so the body picker, the panel and the time bar no longer rebuild sixty times a
+     second alongside it. The website draws its labels on an animation frame for the same
+     reason, while its HUD reads a throttled snapshot.
+     */
+    private(set) var frameCounter: UInt64 = 0
 
     private(set) var focus: BodyId = .embary
     private var nodes: [BodyId: SCNNode] = [:]
@@ -800,6 +812,7 @@ final class SolarScene {
      then follow a planet that is itself moving under mutual gravity.
      */
     func update(to epoch: JdTdb, gravity: Gravity? = nil) {
+        frameCounter &+= 1
         for id in bodyIds {
             positions[id] = gravity?.heliocentricPosition(of: id)
                 ?? heliocentricPositionOf(id, at: epoch)

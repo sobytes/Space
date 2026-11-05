@@ -15,10 +15,19 @@ import SolarKit
  */
 struct LabelLayer: View {
     let scene: SolarScene
-    /// Redrawn when the clock moves, which is what makes the labels track the bodies.
-    let epoch: JdTdb
 
     var body: some View {
+        /**
+         Read on purpose, and the whole subscription.
+
+         This used to take the epoch as a parameter, which meant whoever built this view read
+         the clock in their own body and was themselves rebuilt sixty times a second. That was
+         `ContentView`, so the entire overlay went with it and a drag on the rate slider took
+         two seconds to land. Reading the scene's own counter here subscribes this layer, and
+         only this layer, to every frame.
+         */
+        let _ = scene.frameCounter
+
         GeometryReader { geometry in
             let size = geometry.size
             let placements = placeLabels(

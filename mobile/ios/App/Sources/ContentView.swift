@@ -1,4 +1,43 @@
 import SwiftUI
+
+/**
+ How often the overlay's root body is re-evaluated, in evaluations per second.
+
+ Not a performance curiosity. A SwiftUI body that runs at the display's rate rebuilds every
+ control beneath it, and a control recreated under a finger does not reliably receive the
+ gesture that started on the previous instance. That has now been reported from the phone three
+ times, each time as something different: a picker that opened and discarded every tap, sheet
+ controls that were unreachable, and a time-rate slider that "gets stuck for a bit and looks
+ like its crashed". All three were this.
+
+ The cause is always the same shape, and it is easy to reintroduce by accident: read a property
+ that changes every frame, anywhere in a view body, and `@Observable` correctly invalidates that
+ whole view sixty times a second. Reading the clock's epoch to hand it to the label layer was
+ enough to rebuild the entire overlay.
+
+ So it is measured rather than commented on. `focus-probe.mjs` reads this out of the scene dump
+ and fails if the overlay is rebuilding at anything like frame rate.
+ */
+@MainActor
+enum OverlayRenders {
+    private(set) static var perSecond: Int = 0
+    private static var count = 0
+    private static var windowStart = Date()
+
+    static func recordBodyEvaluation() {
+        count += 1
+    }
+
+    /// Called from the tick. Averages over a whole second rather than reporting an instant,
+    /// so one slow frame cannot read as a regression and one fast one cannot hide it.
+    static func sample(now: Date = Date()) {
+        let elapsed = now.timeIntervalSince(windowStart)
+        guard elapsed >= 1 else { return }
+        perSecond = Int((Double(count) / elapsed).rounded())
+        count = 0
+        windowStart = now
+    }
+}
 import SceneKit
 import SolarKit
 
@@ -59,6 +98,8 @@ struct ContentView: View {
     private let tick = Timer.publish(every: 1.0 / 60.0, on: .main, in: .common).autoconnect()
 
     var body: some View {
+        // Counted, not just commented on. See `OverlayRenders`.
+        let _ = OverlayRenders.recordBodyEvaluation()
         ZStack(alignment: .bottom) {
             /**
              No `.allowsCameraControl`.
@@ -112,7 +153,7 @@ struct ContentView: View {
              Nothing is lost, because a sheet covers the scene and the labels with it.
              */
             if showLabels && !anySheetPresented {
-                LabelLayer(scene: scene, epoch: clock.epoch)
+                LabelLayer(scene: scene)
                     .ignoresSafeArea()
             }
 
@@ -258,7 +299,8 @@ struct ContentView: View {
                  not have. The probe reads this out of the app container.
                  */
                 let url = URL.documentsDirectory.appendingPathComponent("scene-debug.json")
-                let report = scene.debug()
+                var report = scene.debug()
+                report["overlayRendersPerSecond"] = OverlayRenders.perSecond
                 /**
                  Report a failed dump instead of swallowing it.
 
@@ -283,6 +325,7 @@ struct ContentView: View {
                     NSLog("SCENEDEBUG failed: %@", String(describing: error))
                 }
             }
+            OverlayRenders.sample()
             clock.advance(realSeconds: delta)
             gravity.seek(to: clock.epoch)
             scene.update(to: clock.epoch, gravity: gravity)
@@ -345,11 +388,11 @@ private struct BodyPanel: View {
         }
     }
 
-    private var fromSun: Double { heliocentricPositionOf(id, at: clock.epoch).length }
+    private var fromSun: Double { heliocentricPositionOf(id, at: clock.displayEpoch).length }
 
     private var fromEarth: Double {
-        (heliocentricPositionOf(id, at: clock.epoch)
-            - heliocentricPositionOf(.embary, at: clock.epoch)).length
+        (heliocentricPositionOf(id, at: clock.displayEpoch)
+            - heliocentricPositionOf(.embary, at: clock.displayEpoch)).length
     }
 
     var body: some View {
@@ -384,7 +427,7 @@ private struct BodyPanel: View {
                                     "\(distance(fromEarth))  (\(lightTime(fromEarth)) of light)")
                             }
                             row("Axial tilt", String(
-                                format: "%.2f\u{00b0}", obliquityToOrbitDeg(id, at: clock.epoch)
+                                format: "%.2f\u{00b0}", obliquityToOrbitDeg(id, at: clock.displayEpoch)
                             ))
                             row("Mean temperature",
                                 "\(Int(contract.meanTemperatureK)) K  "
@@ -703,9 +746,11 @@ private struct TimeBar: View {
                     in: 0 ... Double(Clock.presets.count - 1),
                     step: 1
                 )
+                .accessibilityIdentifier("time.rate")
                 Text(clock.direction < 0 ? "\(clock.rate.label), reversed" : clock.rate.label)
                     .font(.caption2.monospacedDigit())
                     .frame(width: 112, alignment: .trailing)
+                    .accessibilityIdentifier("time.rateLabel")
             }
         }
         .padding(12)
