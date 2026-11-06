@@ -41,6 +41,7 @@ import { totalAngularMomentum, advance } from "@solar/engine/nbody";
 import { SECONDS_PER_JULIAN_YEAR } from "@solar/engine/units";
 import type { Vec3 } from "@solar/engine/vec";
 import { markIntervalFor, orbitTimeMarks } from "@solar/engine/orbit-time";
+import { timeHeadline, timeSense } from "@solar/engine/time-sense";
 import { placeLabels, type LabelInput } from "@solar/engine/labels";
 import { levelFor, metresPerPixel, tileExtent, visibleCapAngle } from "./view/core/tiles";
 
@@ -245,6 +246,22 @@ function compute(domain: string, testCase: Case): unknown {
       }
 
       throw new Error(`unhandled propagate case ${testCase.id}`);
+    }
+
+    /** How long a day, a month and a year are here, and the sentence that explains them. */
+    case "time-sense": {
+      const t = timeSense(input.body as BodyId);
+      return {
+        siderealSpinDays: t.siderealSpinDays,
+        solarDayDays: t.solarDayDays,
+        yearDays: t.yearDays,
+        solarDaysPerYear: t.solarDaysPerYear,
+        spinsPerYear: t.spinsPerYear,
+        tidallyLocked: t.tidallyLocked,
+        monthDays: t.monthDays,
+        synodicMonthDays: t.synodicMonthDays,
+        headline: timeHeadline(input.body as BodyId),
+      };
     }
 
     /** What a mark on an orbit is worth, and where the marks go. */

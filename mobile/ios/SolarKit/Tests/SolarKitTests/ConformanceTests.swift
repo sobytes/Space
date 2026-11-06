@@ -281,6 +281,22 @@ final class ConformanceTests: XCTestCase {
             XCTFail("no runner for propagate case \"\(c.id)\"")
             return .null
 
+        /// How long a day, a month and a year are here, and the sentence that explains them.
+        case "time-sense":
+            let body = BodyId(rawValue: text(input, "body"))!
+            let t = timeSense(body)
+            return .object([
+                "siderealSpinDays": .number(t.siderealSpinDays),
+                "solarDayDays": .number(t.solarDayDays),
+                "yearDays": .number(t.yearDays),
+                "solarDaysPerYear": .number(t.solarDaysPerYear),
+                "spinsPerYear": .number(t.spinsPerYear),
+                "tidallyLocked": .bool(t.tidallyLocked),
+                "monthDays": t.monthDays.map { JSON.number($0) } ?? .null,
+                "synodicMonthDays": t.synodicMonthDays.map { JSON.number($0) } ?? .null,
+                "headline": .string(timeHeadline(body)),
+            ])
+
         /// What a mark on an orbit is worth, and where the marks go.
         case "orbit-time":
             if c.id.hasPrefix("interval") {

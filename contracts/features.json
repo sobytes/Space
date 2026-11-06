@@ -256,6 +256,34 @@
       }
     },
     {
+      "id": "time-sense",
+      "title": "How long a day, a month and a year are here, and how they compare to ours",
+      "why": "Asked for after the orbit marks answered the wrong question: the point was for a child to see how a spin and an orbit relate. All of it is derived from one measured constant and one formula, 1/day = 1/spin - 1/year, which alone explains Earth's 24h day against its 23h56m spin, Venus's year being under two Venus days, Mercury's day lasting two Mercury years, and the Moon's day being the 29.5 day month. The headline sentence is gated as an exact string: it is the part a child reads, and two clients telling them different things is worse than neither speaking.",
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "engine/src/time-sense.ts",
+          "website/src/view/react/Hud.tsx"
+        ]
+      },
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/SolarKit/Sources/SolarKit/TimeSense.swift",
+          "mobile/ios/App/Sources/ContentView.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
+    },
+    {
       "id": "textures",
       "title": "Real NASA and USGS surface imagery",
       "why": "A flat tint is a placeholder. The imagery is data too.",

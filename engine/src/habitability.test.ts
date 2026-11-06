@@ -6,7 +6,6 @@ import {
   columnDensityGPerCm2,
   jeansParameter,
   solarConstantAt,
-  solarDayDays,
   spinChangeEnergy,
   surfaceGravity,
   formatQuantity,
@@ -16,6 +15,7 @@ import {
   EARTH_AIR_MOLAR_MASS,
   GRAVITATIONAL_CONSTANT,
 } from "./habitability";
+import { solarDayDays } from "./time-sense";
 import { AU_IN_METRES } from "./units";
 import { BODY_IDS, contractFor } from "./bodies/registry";
 import { ENVIRONMENT } from "./data/habitability-environment";

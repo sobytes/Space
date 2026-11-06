@@ -39,6 +39,7 @@ const propagate = await import(`${ROOT}engine/src/propagate.ts`);
 const tiles = await import(`${ROOT}website/src/view/core/tiles.ts`);
 const labels = await import(`${ROOT}engine/src/labels.ts`);
 const orbitTime = await import(`${ROOT}engine/src/orbit-time.ts`);
+const timeSense = await import(`${ROOT}engine/src/time-sense.ts`);
 
 /** Epochs chosen to exercise the element drift, the leap table and the model seam. */
 const EPOCHS = [
@@ -406,6 +407,38 @@ domains.propagate = {
 
     return out;
   })(),
+};
+
+/**
+ * How long a day, a month and a year are here.
+ *
+ * The numbers are derived from two measured constants and one formula, so an error in either
+ * client is a silent wrong answer rather than a crash. The headline is gated as an exact
+ * string because it is the part a child actually reads, and two clients telling them
+ * different things about the same planet is worse than either saying nothing.
+ */
+domains["time-sense"] = {
+  absoluteTolerance: 1e-9,
+  description: "Solar day, spin, year and the sentence that explains them.",
+  tolerance: 1e-12,
+  cases: registry.BODY_IDS.map((id) => {
+    const t = timeSense.timeSense(id);
+    return {
+      id,
+      input: { body: id },
+      expected: {
+        siderealSpinDays: round(t.siderealSpinDays),
+        solarDayDays: round(t.solarDayDays),
+        yearDays: round(t.yearDays),
+        solarDaysPerYear: round(t.solarDaysPerYear),
+        spinsPerYear: round(t.spinsPerYear),
+        tidallyLocked: t.tidallyLocked,
+        monthDays: t.monthDays === null ? null : round(t.monthDays),
+        synodicMonthDays: t.synodicMonthDays === null ? null : round(t.synodicMonthDays),
+        headline: timeSense.timeHeadline(id),
+      },
+    };
+  }),
 };
 
 /**

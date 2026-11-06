@@ -417,7 +417,25 @@ private struct BodyPanel: View {
                 row("Rotation", rotationText,
                     simulated: abs(contract.siderealRotationDays) * Constants.secondsPerDay,
                     label: "one turn")
+                row("A day here", dayText)
+                row("A year here", yearText)
+                if let monthText { row("A month here", monthText) }
             }
+
+            /**
+             The one paragraph a child would actually read, and the reason this exists.
+
+             Asked for after the orbit marks turned out to answer a different question: not
+             "where will it be in nine days" but how a spin, a month and a year relate to each
+             other and to ours. Every number in it is computed, none is written into the
+             sentence, and the wording is shared with the website and gated as an exact string.
+             */
+            Text(timeHeadline(id))
+                .font(.system(size: 11))
+                .foregroundStyle(.white.opacity(0.75))
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(8)
+                .background(Color.cyan.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
 
             if expanded {
                 ScrollView {
@@ -553,6 +571,30 @@ private struct BodyPanel: View {
             return "Position from JPL mean elements, good to roughly a degree, not an "
                 + "eclipse-grade theory. Rotation from the IAU WGCCRE report."
         }
+    }
+
+    private var time: TimeSense { timeSense(id) }
+
+    private var dayText: String {
+        let base = formatDuration(days: time.dayInEarthDays) + ", sunrise to sunrise"
+        return time.spinsBackwards ? base + ", Sun rises in the west" : base
+    }
+
+    private var yearText: String {
+        let days = time.solarDaysPerYear
+        // Two decimals right up to a thousand, because the fraction is the point: the Moon
+        // fits 12.37 of its days into a year, not 12, and Venus 1.92 rather than 2.
+        let count = days < 1000
+            ? String(format: "%.2f", days)
+            : Int(days.rounded()).formatted()
+        return formatDuration(days: time.yearDays) + " = \(count) of its own days"
+    }
+
+    private var monthText: String? {
+        guard let month = time.monthDays, let synodic = time.synodicMonthDays,
+              let parent = contract.parent else { return nil }
+        return String(format: "%.2f days round ", month) + bodyContracts[parent]!.displayName
+            + String(format: " \u{00b7} %.2f full phase to full phase", synodic)
     }
 
     private var rotationText: String {

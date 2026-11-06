@@ -11,6 +11,7 @@
     "nbody",
     "secular",
     "propagate",
+    "time-sense",
     "orbit-time",
     "labels",
     "sample-cadence",
@@ -18,5 +19,5 @@
     "nbody-evolution",
     "tiles"
   ],
-  "totalCases": 540
+  "totalCases": 572
 }

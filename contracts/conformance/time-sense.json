@@ -1,0 +1,552 @@
+{
+  "domain": "time-sense",
+  "absoluteTolerance": 1e-9,
+  "description": "Solar day, spin, year and the sentence that explains them.",
+  "tolerance": 1e-12,
+  "cases": [
+    {
+      "id": "sun",
+      "input": {
+        "body": "sun"
+      },
+      "expected": {
+        "siderealSpinDays": 25.38,
+        "solarDayDays": 27.2752670138582,
+        "yearDays": 365.25,
+        "solarDaysPerYear": 13.3912529550827,
+        "spinsPerYear": 14.3912529550827,
+        "tidallyLocked": false,
+        "monthDays": null,
+        "synodicMonthDays": null,
+        "headline": "The Sun turns once every 25.4 Earth days, but not as one piece: it is a ball of gas, so its equator laps its poles. Nothing here has a day, because there is no sunrise to count from."
+      }
+    },
+    {
+      "id": "mercury",
+      "input": {
+        "body": "mercury"
+      },
+      "expected": {
+        "siderealSpinDays": 58.6462,
+        "solarDayDays": 175.938774232474,
+        "yearDays": 87.9692564419463,
+        "solarDaysPerYear": 0.499999257274065,
+        "spinsPerYear": 1.49999925727407,
+        "tidallyLocked": false,
+        "monthDays": null,
+        "synodicMonthDays": null,
+        "headline": "A day here is longer than a year. One sunrise to the next takes 175.9 Earth days, while a full trip round the Sun takes only 88.0 Earth days, so it goes round the Sun 2.0 times between one sunrise and the next."
+      }
+    },
+    {
+      "id": "venus",
+      "input": {
+        "body": "venus"
+      },
+      "expected": {
+        "siderealSpinDays": -243.018,
+        "solarDayDays": -116.75036188755,
+        "yearDays": 224.700801165861,
+        "solarDaysPerYear": 1.92462616417657,
+        "spinsPerYear": 0.924626164176566,
+        "tidallyLocked": false,
+        "monthDays": null,
+        "synodicMonthDays": null,
+        "headline": "It spins backwards, so the Sun rises in the west. A day here lasts 116.8 Earth days and a year 224.7 Earth days, which means the whole year is only 1.9 of its own days long."
+      }
+    },
+    {
+      "id": "embary",
+      "input": {
+        "body": "embary"
+      },
+      "expected": {
+        "siderealSpinDays": 0.99727,
+        "solarDayDays": 1.00000032975905,
+        "yearDays": 365.256367130628,
+        "solarDaysPerYear": 365.256246684075,
+        "spinsPerYear": 366.256246684075,
+        "tidallyLocked": false,
+        "monthDays": null,
+        "synodicMonthDays": null,
+        "headline": "A day here is 24h 00m, but one full spin takes 23h 56m. The difference is that it also moves along its orbit while it turns, so it has to turn a little further to bring the Sun back round. Those slivers add up: a year holds 365.26 days but 366.26 spins, exactly one more."
+      }
+    },
+    {
+      "id": "mars",
+      "input": {
+        "body": "mars"
+      },
+      "expected": {
+        "siderealSpinDays": 1.025957,
+        "solarDayDays": 1.02749148789835,
+        "yearDays": 686.979731533272,
+        "solarDaysPerYear": 668.598951547942,
+        "spinsPerYear": 669.598951547942,
+        "tidallyLocked": false,
+        "monthDays": null,
+        "synodicMonthDays": null,
+        "headline": "A day here is 24h 40m, but one full spin takes 24h 37m. The difference is that it also moves along its orbit while it turns, so it has to turn a little further to bring the Sun back round. Those slivers add up: a year holds 668.60 days but 669.60 spins, exactly one more."
+      }
+    },
+    {
+      "id": "jupiter",
+      "input": {
+        "body": "jupiter"
+      },
+      "expected": {
+        "siderealSpinDays": 0.41354,
+        "solarDayDays": 0.413579473545838,
+        "yearDays": 4332.81712752323,
+        "solarDaysPerYear": 10476.383391022,
+        "spinsPerYear": 10477.383391022,
+        "tidallyLocked": false,
+        "monthDays": null,
+        "synodicMonthDays": null,
+        "headline": "It turns in 9h 56m, faster than any rocky planet, so even though a year here lasts 11.9 Earth years it holds about 10,476 of its own days."
+      }
+    },
+    {
+      "id": "saturn",
+      "input": {
+        "body": "saturn"
+      },
+      "expected": {
+        "siderealSpinDays": 0.44401,
+        "solarDayDays": 0.444028329782335,
+        "yearDays": 10755.8843361331,
+        "solarDaysPerYear": 24223.4191259952,
+        "spinsPerYear": 24224.4191259952,
+        "tidallyLocked": false,
+        "monthDays": null,
+        "synodicMonthDays": null,
+        "headline": "It turns in 10h 39m, faster than any rocky planet, so even though a year here lasts 29.4 Earth years it holds about 24,223 of its own days."
+      }
+    },
+    {
+      "id": "uranus",
+      "input": {
+        "body": "uranus"
+      },
+      "expected": {
+        "siderealSpinDays": -0.71833,
+        "solarDayDays": -0.718313185741169,
+        "yearDays": 30687.4014435983,
+        "solarDaysPerYear": 42721.4786708035,
+        "spinsPerYear": 42720.4786708035,
+        "tidallyLocked": false,
+        "monthDays": null,
+        "synodicMonthDays": null,
+        "headline": "It spins backwards, so the Sun rises in the west. A day here lasts 17h 14m and a year 84.0 Earth years, which means the whole year is only 42721.5 of its own days long."
+      }
+    },
+    {
+      "id": "neptune",
+      "input": {
+        "body": "neptune"
+      },
+      "expected": {
+        "siderealSpinDays": 0.67125,
+        "solarDayDays": 0.671257486029907,
+        "yearDays": 60189.6590162779,
+        "solarDaysPerYear": 89667.0208808609,
+        "spinsPerYear": 89668.0208808609,
+        "tidallyLocked": false,
+        "monthDays": null,
+        "synodicMonthDays": null,
+        "headline": "It turns in 16h 07m, faster than any rocky planet, so even though a year here lasts 164.8 Earth years it holds about 89,667 of its own days."
+      }
+    },
+    {
+      "id": "moon",
+      "input": {
+        "body": "moon"
+      },
+      "expected": {
+        "siderealSpinDays": 27.321582,
+        "solarDayDays": 29.5304958964909,
+        "yearDays": 365.256367130628,
+        "solarDaysPerYear": 12.3687854213796,
+        "spinsPerYear": 13.3687854213796,
+        "tidallyLocked": true,
+        "monthDays": 27.321582,
+        "synodicMonthDays": 29.5304958964909,
+        "headline": "Locked to Earth: it turns exactly once each time it goes round, so the same face is always pointed at Earth and the other side was never seen until a spacecraft went to look. One day here lasts 29.5 Earth days, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "phobos",
+      "input": {
+        "body": "phobos"
+      },
+      "expected": {
+        "siderealSpinDays": 0.3189101,
+        "solarDayDays": 0.319058213375203,
+        "yearDays": 686.979731533272,
+        "solarDaysPerYear": 2153.14855639026,
+        "spinsPerYear": 2154.14855639026,
+        "tidallyLocked": true,
+        "monthDays": 0.318910104370432,
+        "synodicMonthDays": 0.319058217749695,
+        "headline": "Locked to Mars: it turns exactly once each time it goes round, so the same face is always pointed at Mars and the other side was never seen until a spacecraft went to look. One day here lasts 7h 39m, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "deimos",
+      "input": {
+        "body": "deimos"
+      },
+      "expected": {
+        "siderealSpinDays": 1.26244079,
+        "solarDayDays": 1.26476500840571,
+        "yearDays": 686.979731533272,
+        "solarDaysPerYear": 543.167882545424,
+        "spinsPerYear": 544.167882545424,
+        "tidallyLocked": true,
+        "monthDays": 1.26244078854669,
+        "synodicMonthDays": 1.26476500694704,
+        "headline": "Locked to Mars: it turns exactly once each time it goes round, so the same face is always pointed at Mars and the other side was never seen until a spacecraft went to look. One day here lasts 30h 21m, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "io",
+      "input": {
+        "body": "io"
+      },
+      "expected": {
+        "siderealSpinDays": 1.7691378,
+        "solarDayDays": 1.76986045386179,
+        "yearDays": 4332.81712752323,
+        "solarDaysPerYear": 2448.11228934413,
+        "spinsPerYear": 2449.11228934413,
+        "tidallyLocked": true,
+        "monthDays": 1.76913779975412,
+        "synodicMonthDays": 1.76986045361571,
+        "headline": "Locked to Jupiter: it turns exactly once each time it goes round, so the same face is always pointed at Jupiter and the other side was never seen until a spacecraft went to look. One day here lasts 42h 29m, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "europa",
+      "input": {
+        "body": "europa"
+      },
+      "expected": {
+        "siderealSpinDays": 3.55118108,
+        "solarDayDays": 3.55409401887208,
+        "yearDays": 4332.81712752323,
+        "solarDaysPerYear": 1219.10593938038,
+        "spinsPerYear": 1220.10593938038,
+        "tidallyLocked": true,
+        "monthDays": 3.551181079177,
+        "synodicMonthDays": 3.55409401804773,
+        "headline": "Locked to Jupiter: it turns exactly once each time it goes round, so the same face is always pointed at Jupiter and the other side was never seen until a spacecraft went to look. One day here lasts 3.6 Earth days, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "ganymede",
+      "input": {
+        "body": "ganymede"
+      },
+      "expected": {
+        "siderealSpinDays": 7.15455312,
+        "solarDayDays": 7.16638659740755,
+        "yearDays": 4332.81712752323,
+        "solarDaysPerYear": 604.602761605218,
+        "spinsPerYear": 605.602761605218,
+        "tidallyLocked": true,
+        "monthDays": 7.15455311954703,
+        "synodicMonthDays": 7.16638659695309,
+        "headline": "Locked to Jupiter: it turns exactly once each time it goes round, so the same face is always pointed at Jupiter and the other side was never seen until a spacecraft went to look. One day here lasts 7.2 Earth days, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "callisto",
+      "input": {
+        "body": "callisto"
+      },
+      "expected": {
+        "siderealSpinDays": 16.68901797,
+        "solarDayDays": 16.7535487980323,
+        "yearDays": 4332.81712752323,
+        "solarDaysPerYear": 258.62085578144,
+        "spinsPerYear": 259.62085578144,
+        "tidallyLocked": true,
+        "monthDays": 16.6890179748373,
+        "synodicMonthDays": 16.7535488029071,
+        "headline": "Locked to Jupiter: it turns exactly once each time it goes round, so the same face is always pointed at Jupiter and the other side was never seen until a spacecraft went to look. One day here lasts 16.8 Earth days, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "amalthea",
+      "input": {
+        "body": "amalthea"
+      },
+      "expected": {
+        "siderealSpinDays": 0.49817925,
+        "solarDayDays": 0.498236536309732,
+        "yearDays": 4332.81712752323,
+        "solarDaysPerYear": 8696.30549299922,
+        "spinsPerYear": 8697.30549299922,
+        "tidallyLocked": true,
+        "monthDays": 0.498179254460797,
+        "synodicMonthDays": 0.498236540771555,
+        "headline": "Locked to Jupiter: it turns exactly once each time it goes round, so the same face is always pointed at Jupiter and the other side was never seen until a spacecraft went to look. One day here lasts 11h 57m, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "mimas",
+      "input": {
+        "body": "mimas"
+      },
+      "expected": {
+        "siderealSpinDays": 0.94242181,
+        "solarDayDays": 0.942504391465808,
+        "yearDays": 10755.8843361331,
+        "solarDaysPerYear": 11412.0256982626,
+        "spinsPerYear": 11413.0256982626,
+        "tidallyLocked": true,
+        "monthDays": 0.942421810174755,
+        "synodicMonthDays": 0.942504391640594,
+        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 22h 37m, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "enceladus",
+      "input": {
+        "body": "enceladus"
+      },
+      "expected": {
+        "siderealSpinDays": 1.37021808,
+        "solarDayDays": 1.37039265763002,
+        "yearDays": 10755.8843361331,
+        "solarDaysPerYear": 7848.76091990635,
+        "spinsPerYear": 7849.76091990635,
+        "tidallyLocked": true,
+        "monthDays": 1.37021808371228,
+        "synodicMonthDays": 1.37039266134325,
+        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 32h 53m, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "tethys",
+      "input": {
+        "body": "tethys"
+      },
+      "expected": {
+        "siderealSpinDays": 1.88780256,
+        "solarDayDays": 1.88813395293791,
+        "yearDays": 10755.8843361331,
+        "solarDaysPerYear": 5696.56846612875,
+        "spinsPerYear": 5697.56846612875,
+        "tidallyLocked": true,
+        "monthDays": 1.88780256077114,
+        "synodicMonthDays": 1.88813395370932,
+        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 45h 19m, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "dione",
+      "input": {
+        "body": "dione"
+      },
+      "expected": {
+        "siderealSpinDays": 2.73691555,
+        "solarDayDays": 2.73761215597357,
+        "yearDays": 10755.8843361331,
+        "solarDaysPerYear": 3928.92919936208,
+        "spinsPerYear": 3929.92919936208,
+        "tidallyLocked": true,
+        "monthDays": 2.73691555255273,
+        "synodicMonthDays": 2.7376121585276,
+        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 2.7 Earth days, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "rhea",
+      "input": {
+        "body": "rhea"
+      },
+      "expected": {
+        "siderealSpinDays": 4.51750262,
+        "solarDayDays": 4.51940078143731,
+        "yearDays": 10755.8843361331,
+        "solarDaysPerYear": 2379.93593759401,
+        "spinsPerYear": 2380.93593759401,
+        "tidallyLocked": true,
+        "monthDays": 4.51750262345808,
+        "synodicMonthDays": 4.5194007848983,
+        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 4.5 Earth days, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "titan",
+      "input": {
+        "body": "titan"
+      },
+      "expected": {
+        "siderealSpinDays": 15.94544758,
+        "solarDayDays": 15.9691215786293,
+        "yearDays": 10755.8843361331,
+        "solarDaysPerYear": 673.54264185246,
+        "spinsPerYear": 674.54264185246,
+        "tidallyLocked": true,
+        "monthDays": 15.9454475764886,
+        "synodicMonthDays": 15.9691215751075,
+        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 16.0 Earth days, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "iapetus",
+      "input": {
+        "body": "iapetus"
+      },
+      "expected": {
+        "siderealSpinDays": 79.33084957,
+        "solarDayDays": 79.9203079285816,
+        "yearDays": 10755.8843361331,
+        "solarDaysPerYear": 134.582618797525,
+        "spinsPerYear": 135.582618797525,
+        "tidallyLocked": true,
+        "monthDays": 79.3308495725786,
+        "synodicMonthDays": 79.9203079311986,
+        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 79.9 Earth days, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "phoebe",
+      "input": {
+        "body": "phoebe"
+      },
+      "expected": {
+        "siderealSpinDays": 0.38641577,
+        "solarDayDays": 0.386429652867015,
+        "yearDays": 10755.8843361331,
+        "solarDaysPerYear": 27834.0035665809,
+        "spinsPerYear": 27835.0035665809,
+        "tidallyLocked": false,
+        "monthDays": 548.885391984399,
+        "synodicMonthDays": 578.401920317791,
+        "headline": "It turns in 9h 16m, faster than any rocky planet, so even though a year here lasts 29.4 Earth years it holds about 27,834 of its own days."
+      }
+    },
+    {
+      "id": "ariel",
+      "input": {
+        "body": "ariel"
+      },
+      "expected": {
+        "siderealSpinDays": -2.52037887,
+        "solarDayDays": -2.52017188642783,
+        "yearDays": 30687.4014435983,
+        "solarDaysPerYear": 12176.709695423,
+        "spinsPerYear": 12175.709695423,
+        "tidallyLocked": true,
+        "monthDays": 2.52037887166924,
+        "synodicMonthDays": 2.5205858892439,
+        "headline": "Locked to Uranus: it turns exactly once each time it goes round, so the same face is always pointed at Uranus and the other side was never seen until a spacecraft went to look. One day here lasts 2.5 Earth days, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "umbriel",
+      "input": {
+        "body": "umbriel"
+      },
+      "expected": {
+        "siderealSpinDays": -4.14417625,
+        "solarDayDays": -4.14361667580964,
+        "yearDays": 30687.4014435983,
+        "solarDaysPerYear": 7405.94602361525,
+        "spinsPerYear": 7404.94602361525,
+        "tidallyLocked": true,
+        "monthDays": 4.14417624616125,
+        "synodicMonthDays": 4.14473597150624,
+        "headline": "Locked to Uranus: it turns exactly once each time it goes round, so the same face is always pointed at Uranus and the other side was never seen until a spacecraft went to look. One day here lasts 4.1 Earth days, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "titania",
+      "input": {
+        "body": "titania"
+      },
+      "expected": {
+        "siderealSpinDays": -8.70586546,
+        "solarDayDays": -8.70339634909142,
+        "yearDays": 30687.4014435983,
+        "solarDaysPerYear": 3525.91105962925,
+        "spinsPerYear": 3524.91105962925,
+        "tidallyLocked": true,
+        "monthDays": 8.70586545787208,
+        "synodicMonthDays": 8.70833597012634,
+        "headline": "Locked to Uranus: it turns exactly once each time it goes round, so the same face is always pointed at Uranus and the other side was never seen until a spacecraft went to look. One day here lasts 8.7 Earth days, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "oberon",
+      "input": {
+        "body": "oberon"
+      },
+      "expected": {
+        "siderealSpinDays": -13.46323198,
+        "solarDayDays": -13.4573279568638,
+        "yearDays": 30687.4014435983,
+        "solarDaysPerYear": 2280.34878409473,
+        "spinsPerYear": 2279.34878409473,
+        "tidallyLocked": true,
+        "monthDays": 13.4632319807767,
+        "synodicMonthDays": 13.4691411866347,
+        "headline": "Locked to Uranus: it turns exactly once each time it goes round, so the same face is always pointed at Uranus and the other side was never seen until a spacecraft went to look. One day here lasts 13.5 Earth days, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "miranda",
+      "input": {
+        "body": "miranda"
+      },
+      "expected": {
+        "siderealSpinDays": -1.41347923,
+        "solarDayDays": -1.41341412733837,
+        "yearDays": 30687.4014435983,
+        "solarDaysPerYear": 21711.5428875656,
+        "spinsPerYear": 21710.5428875656,
+        "tidallyLocked": true,
+        "monthDays": 1.41347923291104,
+        "synodicMonthDays": 1.41354434157054,
+        "headline": "Locked to Uranus: it turns exactly once each time it goes round, so the same face is always pointed at Uranus and the other side was never seen until a spacecraft went to look. One day here lasts 33h 55m, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "triton",
+      "input": {
+        "body": "triton"
+      },
+      "expected": {
+        "siderealSpinDays": -5.87685408,
+        "solarDayDays": -5.87628032625932,
+        "yearDays": 60189.6590162779,
+        "solarDaysPerYear": 10242.8161480501,
+        "spinsPerYear": 10241.8161480501,
+        "tidallyLocked": true,
+        "monthDays": 5.87685407828623,
+        "synodicMonthDays": 5.87742794407892,
+        "headline": "Locked to Neptune: it turns exactly once each time it goes round, so the same face is always pointed at Neptune and the other side was never seen until a spacecraft went to look. One day here lasts 5.9 Earth days, which is about half that in sunlight and then the same again in darkness."
+      }
+    },
+    {
+      "id": "proteus",
+      "input": {
+        "body": "proteus"
+      },
+      "expected": {
+        "siderealSpinDays": 1.12231548,
+        "solarDayDays": 1.12233640744077,
+        "yearDays": 60189.6590162779,
+        "solarDaysPerYear": 53628.8929212648,
+        "spinsPerYear": 53629.8929212648,
+        "tidallyLocked": true,
+        "monthDays": 1.12231548169225,
+        "synodicMonthDays": 1.12233640913308,
+        "headline": "Locked to Neptune: it turns exactly once each time it goes round, so the same face is always pointed at Neptune and the other side was never seen until a spacecraft went to look. One day here lasts 26h 56m, which is about half that in sunlight and then the same again in darkness."
+      }
+    }
+  ]
+}

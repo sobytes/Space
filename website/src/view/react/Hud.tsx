@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { markIntervalFor } from "@solar/engine/orbit-time";
+import { formatDuration, timeHeadline, timeSense } from "@solar/engine/time-sense";
 import { BODY_CONTRACTS, BODY_IDS, satelliteSystemRadiusM, type BodyId } from "@solar/engine/bodies/registry";
 import { obliquityToOrbitDeg, rotationPeriodDays } from "@solar/engine/rotation";
 import { ACCURACY } from "@solar/engine/data/ephemeris-accuracy";
@@ -180,6 +181,8 @@ function BodyPanel({ epoch }: { epoch: JdTdb }) {
   const altitudeM = useViewportValue(selectAltitude);
   const rate = useViewportValue(selectRate);
   const contract = BODY_CONTRACTS[focus];
+  // Pure in the body id, so it costs one memo rather than a recompute per published epoch.
+  const time = useMemo(() => timeSense(focus), [focus]);
 
   const derived = useMemo(() => {
     const self = heliocentricPositionOf(focus, epoch);
@@ -263,6 +266,38 @@ function BodyPanel({ epoch }: { epoch: JdTdb }) {
             rate={rate}
           />
         </dd>
+        <dt className="text-zinc-500">A day here</dt>
+        <dd className="text-zinc-200">
+          {formatDuration(time.dayInEarthDays)}
+          <span className="text-zinc-500">
+            {" "}sunrise to sunrise
+            {time.spinsBackwards ? ", Sun rises in the west" : ""}
+          </span>
+        </dd>
+        <dt className="text-zinc-500">A year here</dt>
+        <dd className="text-zinc-200">
+          {formatDuration(time.yearDays)}
+          <span className="text-zinc-500">
+            {/*
+              Two decimals right up to a thousand, because the fraction is the point: the
+              Moon fits 12.37 of its days into a year, not 12, and Venus 1.92 rather than 2.
+            */}
+            {" "}= {time.solarDaysPerYear < 1000
+              ? time.solarDaysPerYear.toFixed(2)
+              : Math.round(time.solarDaysPerYear).toLocaleString()} of its own days
+          </span>
+        </dd>
+        {time.synodicMonthDays !== null ? (
+          <>
+            <dt className="text-zinc-500">A month here</dt>
+            <dd className="text-zinc-200">
+              {time.monthDays!.toFixed(2)} days round {BODY_CONTRACTS[contract.parent!].displayName}
+              <span className="text-zinc-500">
+                {" "}&middot; {time.synodicMonthDays.toFixed(2)} full phase to full phase
+              </span>
+            </dd>
+          </>
+        ) : null}
         <dt className="text-zinc-500">Axial tilt</dt>
         <dd className="text-zinc-200">{derived.obliquity.toFixed(2)}&deg;</dd>
         <dt className="text-zinc-500">Mean temperature</dt>
@@ -287,6 +322,17 @@ function BodyPanel({ epoch }: { epoch: JdTdb }) {
           </>
         ) : null}
       </dl>
+
+      {/*
+        The one paragraph a child would actually read, and the reason this section exists.
+        Asked for after orbit marks turned out to answer a different question: not "where will
+        it be in nine days" but how a spin, a month and a year relate to each other. Every
+        number in it is computed, none is written into the sentence, and the wording is shared
+        with the phone and gated as an exact string.
+      */}
+      <p className="mt-3 rounded-lg bg-sky-400/5 p-2.5 text-[12px] leading-relaxed text-sky-100/80">
+        {timeHeadline(focus)}
+      </p>
 
       <p className="mt-4 text-[13px] leading-relaxed text-zinc-300">{contract.education.whyItMatters}</p>
 

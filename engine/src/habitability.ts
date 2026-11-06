@@ -32,6 +32,7 @@
  */
 
 import { AU_IN_METRES, SECONDS_PER_JULIAN_YEAR, SECONDS_PER_DAY } from "./units";
+import { heliocentricPeriodDays, solarDayDays } from "./time-sense";
 import { BODY_CONTRACTS, contractFor } from "./bodies/registry";
 import type { BodyContract, BodyId } from "./bodies/contract";
 import { PLANET_IDS, SHORT_SPAN, type PlanetId } from "./data/planets";
@@ -241,19 +242,6 @@ export function spinChangeEnergy(
 }
 
 /**
- * Solar day from the sidereal day and the orbital period, in days.
- *
- * 1/T_solar = 1/T_sidereal - 1/T_orbital, signed. The body turns once on its axis and has
- * also moved along its orbit, so the Sun comes back to the meridian at a different time. For
- * Venus the two nearly cancel against each other with opposite signs, giving a solar day of
- * 117 days against a sidereal day of 243.
- */
-export function solarDayDays(siderealDays: number, orbitalDays: number): number {
-  const inverse = 1 / siderealDays - 1 / orbitalDays;
-  return inverse === 0 ? Infinity : 1 / inverse;
-}
-
-/**
  * Lift of one gas floating in another at the same pressure and temperature, kg/m^3.
  *
  * Archimedes with the ideal gas law: at matched P and T, density goes as molar mass, so the
@@ -409,11 +397,15 @@ export function heliocentricDistanceM(id: BodyId): number {
   return SHORT_SPAN.elements[planet].atJ2000.semiMajorAxisAu * AU_IN_METRES;
 }
 
+/**
+ * Delegated rather than duplicated.
+ *
+ * This module and `time-sense` both need "how long does this body take to go round the Sun",
+ * and they had the same six lines twice until the duplicate `solarDayDays` collided on the
+ * barrel export and made it obvious. One definition, in the module whose subject it is.
+ */
 function orbitalPeriodDays(id: BodyId): number {
-  const planet = planetAncestor(id);
-  if (!planet) return 365.25;
-  const rate = SHORT_SPAN.elements[planet].ratePerCentury.meanLongitudeDeg;
-  return (360 / rate) * 36_525;
+  return heliocentricPeriodDays(id);
 }
 
 /**
