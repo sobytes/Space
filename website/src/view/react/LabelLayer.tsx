@@ -76,6 +76,17 @@ export function LabelLayer({ visible }: { visible: boolean }) {
       {placements.map((placement) => {
         const contract = BODY_CONTRACTS[placement.id];
         const isFocus = placement.id === focus;
+        /**
+         * Satellites of the focus, except in the system view, where every planet is one.
+         *
+         * The first version of this rule said "the focus and its satellites", which in the
+         * system view means the Sun and all eight planets, so nothing was thinned and the
+         * sprawl stayed exactly as reported. Focusing a planet is the case the full badge is
+         * for: two or three labels, and the Moon's month next to Earth's year.
+         */
+        const detailed =
+          !placement.clamped
+          && (isFocus || (focus !== "sun" && satellites.has(placement.id)));
         // The arrow goes on the side the body is on. Always placing it first put a pointer
         // on the left of a name whose body was off to the right.
         const trailing =
@@ -119,8 +130,18 @@ export function LabelLayer({ visible }: { visible: boolean }) {
               suppressing it there removed the one comparison most worth having. The clamp
               keeps labels 44 px inside the viewport, which is room enough for a second line.
             */}
+            {/*
+              The full two-figure badge only where the comparison is the point: the body in
+              focus and the moons going round it. Everything else gets one figure.
+
+              Both figures on every label made each one several times wider than its name, and
+              in the system view six of them sprawled across each other and across the planets
+              between them, which read as the times belonging to the wrong bodies. The moment
+              the comparison actually matters is Earth against its own Moon, and there are two
+              labels on screen then, not six.
+            */}
             <span className="text-[9px] font-normal leading-tight text-white/45">
-              {placement.clamped ? timeBadgeShort(placement.id) : timeBadge(placement.id)}
+              {detailed ? timeBadge(placement.id) : timeBadgeShort(placement.id)}
             </span>
           </div>
         );

@@ -90,7 +90,28 @@ struct LabelLayer: View {
              keeps labels 44 points inside the viewport, which is room enough for a second
              line.
              */
-            Text(placement.clamped ? timeBadgeShort(placement.id) : timeBadge(placement.id))
+            /**
+             The full two-figure badge only where the comparison is the point: the body in
+             focus and the moons going round it. Everything else gets one figure.
+
+             Both figures on every label made each one several times wider than its name, and
+             in the system view six of them sprawled across each other and across the planets
+             between them, which read as the times belonging to the wrong bodies. The moment
+             the comparison actually matters is Earth against its own Moon, and there are two
+             labels on screen then, not six.
+             */
+            /**
+             Satellites of the focus, except in the system view, where every planet is one.
+
+             The first version of this rule said "the focus and its satellites", which with the
+             Sun focused means all eight planets, so nothing was thinned and the sprawl stayed
+             exactly as reported. Focusing a planet is the case the full badge is for: two or
+             three labels, and the Moon's month next to Earth's year.
+             */
+            let detailed = !placement.clamped
+                && (isFocus
+                    || (scene.focus != .sun && childrenOf(scene.focus).contains(placement.id)))
+            Text(detailed ? timeBadge(placement.id) : timeBadgeShort(placement.id))
                 .font(.system(size: 9))
                 .foregroundStyle(.white.opacity(0.45))
         }

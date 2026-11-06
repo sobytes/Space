@@ -332,6 +332,7 @@ struct ContentView: View {
             scene.update(to: clock.epoch, gravity: gravity)
             let heightPx = Double(UIScreen.main.bounds.height)
             scene.setViewportHeight(heightPx)
+            scene.viewportWidthPxForDebug = Double(UIScreen.main.bounds.width)
             scene.refreshTiles(viewportHeightPx: heightPx)
         }
     }

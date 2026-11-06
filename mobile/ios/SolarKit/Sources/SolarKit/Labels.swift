@@ -70,7 +70,7 @@ public struct LabelOptions: Sendable {
         viewportWidthPx: Double,
         viewportHeightPx: Double,
         edgeInsetPx: Double = 44,
-        minimumSeparationPx: Double = 46,
+        minimumSeparationPx: Double = 64,
         maximumLabels: Int = 12
     ) {
         self.viewportWidthPx = viewportWidthPx

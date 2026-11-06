@@ -1023,6 +1023,9 @@ final class SolarScene {
 
     /// The HUD reports the live viewport, because the marker threshold is in pixels and a
     /// hardcoded height puts the fade at the wrong distance on every device but one.
+    /// Width that goes with `viewportHeightPx`, for the debug projection above.
+    var viewportWidthPxForDebug: Double = 402
+
     func setViewportHeight(_ px: Double) {
         guard px > 0 else { return }
         viewportHeightPx = px
@@ -1207,6 +1210,26 @@ final class SolarScene {
             "orbitNodes": orbitNodes.count,
             // Time marks, so a probe can tell "the marks are not drawn" from "the marks are
             // drawn and I cannot see them", which a screenshot cannot.
+            /**
+             Where each body actually projects, beside where its label went.
+
+             Added because a report of labels being in the wrong place could not be settled
+             from a photograph: the designed offset is a capped 28 points up and to the right,
+             and telling that apart from a real error by eye, on a picture of a screen, is not
+             possible. These are the two numbers that answer it.
+             */
+            "bodyScreen": Dictionary(uniqueKeysWithValues: labelInputs(
+                aspect: viewportWidthPxForDebug / max(viewportHeightPx, 1)
+            ).map { input -> (String, [String: Double]) in
+                (input.id.rawValue, [
+                    "x": ((input.ndcX + 1) / 2) * viewportWidthPxForDebug,
+                    "y": ((1 - input.ndcY) / 2) * viewportHeightPx,
+                    "ndcX": input.ndcX,
+                    "ndcY": input.ndcY,
+                    "radiusPx": input.radiusPx,
+                    "behind": input.behindCamera ? 1 : 0,
+                ])
+            }),
             "markNodes": markNodes.count,
             "markVertices": markNodes.values.reduce(0) { total, node in
                 total + (node.geometry?.sources.first { $0.semantic == .vertex }?.vectorCount ?? 0)
@@ -1234,8 +1257,14 @@ final class SolarScene {
             /// Label geometry, so a probe can check a pointer points at the body it names
             /// rather than squinting at an eight-pixel triangle in a screenshot.
             "labels": placeLabels(
-                labelInputs(aspect: 1206.0 / 2622.0),
-                options: LabelOptions(viewportWidthPx: 402, viewportHeightPx: 874)
+                // The real viewport, not one device's numbers. This was hardcoded to
+                // 402x874, so the dumped label positions described a phone that may not be
+                // the one running, which is worse than no diagnostic at all.
+                labelInputs(aspect: viewportWidthPxForDebug / max(viewportHeightPx, 1)),
+                options: LabelOptions(
+                    viewportWidthPx: viewportWidthPxForDebug,
+                    viewportHeightPx: viewportHeightPx
+                )
             ).map { placement -> [String: Any] in
                 var entry: [String: Any] = [
                     "id": placement.id.rawValue,

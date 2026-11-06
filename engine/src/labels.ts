@@ -64,7 +64,16 @@ export interface LabelOptions {
 
 const DEFAULTS = {
   edgeInsetPx: 44,
-  minimumSeparationPx: 46,
+  /**
+   * How close two label anchors may be before the less significant one is dropped.
+   *
+   * Raised from 46 when labels gained a second line carrying the body's day and year. Forty
+   * six was measured against a bare name: "Mars" is about fifty points wide, so anchors that
+   * far apart barely touched. A label is now two lines and several times wider, and at the old
+   * spacing they sprawled across each other and across neighbouring planets, which read as the
+   * times being attached to the wrong bodies. Reported as exactly that.
+   */
+  minimumSeparationPx: 64,
   maximumLabels: 12,
 };
 
