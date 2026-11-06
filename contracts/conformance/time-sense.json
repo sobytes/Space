@@ -18,7 +18,9 @@
         "tidallyLocked": false,
         "monthDays": null,
         "synodicMonthDays": null,
-        "headline": "The Sun turns once every 25.4 Earth days, but not as one piece: it is a ball of gas, so its equator laps its poles. Nothing here has a day, because there is no sunrise to count from."
+        "headline": "The Sun turns once every 25.4 Earth days, but not as one piece: it is a ball of gas, so its equator laps its poles. Nothing here has a day, because there is no sunrise to count from.",
+        "badge": "turns every 25.4 d",
+        "badgeShort": "turns every 25.4 d"
       }
     },
     {
@@ -35,7 +37,9 @@
         "tidallyLocked": false,
         "monthDays": null,
         "synodicMonthDays": null,
-        "headline": "A day here is longer than a year. One sunrise to the next takes 175.9 Earth days, while a full trip round the Sun takes only 88.0 Earth days, so it goes round the Sun 2.0 times between one sunrise and the next."
+        "headline": "A day here is longer than a year. One sunrise to the next takes 175.9 Earth days, while a full trip round the Sun takes only 88.0 Earth days, so it goes round the Sun 2.0 times between one sunrise and the next.",
+        "badge": "day 175.9 d · year 88.0 d",
+        "badgeShort": "year 88.0 d"
       }
     },
     {
@@ -52,7 +56,9 @@
         "tidallyLocked": false,
         "monthDays": null,
         "synodicMonthDays": null,
-        "headline": "It spins backwards, so the Sun rises in the west. A day here lasts 116.8 Earth days and a year 224.7 Earth days, which means the whole year is only 1.9 of its own days long."
+        "headline": "It spins backwards, so the Sun rises in the west. A day here lasts 116.8 Earth days and a year 224.7 Earth days, which means the whole year is only 1.9 of its own days long.",
+        "badge": "day 116.8 d · year 224.7 d",
+        "badgeShort": "year 224.7 d"
       }
     },
     {
@@ -69,7 +75,9 @@
         "tidallyLocked": false,
         "monthDays": null,
         "synodicMonthDays": null,
-        "headline": "A day here is 24h 00m, but one full spin takes 23h 56m. The difference is that it also moves along its orbit while it turns, so it has to turn a little further to bring the Sun back round. Those slivers add up: a year holds 365.26 days but 366.26 spins, exactly one more."
+        "headline": "A day here is 24h 00m, but one full spin takes 23h 56m. The difference is that it also moves along its orbit while it turns, so it has to turn a little further to bring the Sun back round. Those slivers add up: a year holds 365.26 days but 366.26 spins, exactly one more.",
+        "badge": "day 24h 00m · year 365.3 d",
+        "badgeShort": "year 365.3 d"
       }
     },
     {
@@ -86,7 +94,9 @@
         "tidallyLocked": false,
         "monthDays": null,
         "synodicMonthDays": null,
-        "headline": "A day here is 24h 40m, but one full spin takes 24h 37m. The difference is that it also moves along its orbit while it turns, so it has to turn a little further to bring the Sun back round. Those slivers add up: a year holds 668.60 days but 669.60 spins, exactly one more."
+        "headline": "A day here is 24h 40m, but one full spin takes 24h 37m. The difference is that it also moves along its orbit while it turns, so it has to turn a little further to bring the Sun back round. Those slivers add up: a year holds 668.60 days but 669.60 spins, exactly one more.",
+        "badge": "day 24h 40m · year 687.0 d",
+        "badgeShort": "year 687.0 d"
       }
     },
     {
@@ -103,7 +113,9 @@
         "tidallyLocked": false,
         "monthDays": null,
         "synodicMonthDays": null,
-        "headline": "It turns in 9h 56m, faster than any rocky planet, so even though a year here lasts 11.9 Earth years it holds about 10,476 of its own days."
+        "headline": "It turns in 9h 56m, faster than any rocky planet, so even though a year here lasts 11.9 Earth years it holds about 10,476 of its own days.",
+        "badge": "day 9h 56m · year 11.9 y",
+        "badgeShort": "year 11.9 y"
       }
     },
     {
@@ -120,7 +132,9 @@
         "tidallyLocked": false,
         "monthDays": null,
         "synodicMonthDays": null,
-        "headline": "It turns in 10h 39m, faster than any rocky planet, so even though a year here lasts 29.4 Earth years it holds about 24,223 of its own days."
+        "headline": "It turns in 10h 39m, faster than any rocky planet, so even though a year here lasts 29.4 Earth years it holds about 24,223 of its own days.",
+        "badge": "day 10h 39m · year 29.4 y",
+        "badgeShort": "year 29.4 y"
       }
     },
     {
@@ -137,7 +151,9 @@
         "tidallyLocked": false,
         "monthDays": null,
         "synodicMonthDays": null,
-        "headline": "It spins backwards, so the Sun rises in the west. A day here lasts 17h 14m and a year 84.0 Earth years, which means the whole year is only 42721.5 of its own days long."
+        "headline": "It spins backwards, so the Sun rises in the west. A day here lasts 17h 14m and a year 84.0 Earth years, which means the whole year is only 42721.5 of its own days long.",
+        "badge": "day 17h 14m · year 84.0 y",
+        "badgeShort": "year 84.0 y"
       }
     },
     {
@@ -154,7 +170,9 @@
         "tidallyLocked": false,
         "monthDays": null,
         "synodicMonthDays": null,
-        "headline": "It turns in 16h 07m, faster than any rocky planet, so even though a year here lasts 164.8 Earth years it holds about 89,667 of its own days."
+        "headline": "It turns in 16h 07m, faster than any rocky planet, so even though a year here lasts 164.8 Earth years it holds about 89,667 of its own days.",
+        "badge": "day 16h 07m · year 164.8 y",
+        "badgeShort": "year 164.8 y"
       }
     },
     {
@@ -171,7 +189,9 @@
         "tidallyLocked": true,
         "monthDays": 27.321582,
         "synodicMonthDays": 29.5304958964909,
-        "headline": "Locked to Earth: it turns exactly once each time it goes round, so the same face is always pointed at Earth and the other side was never seen until a spacecraft went to look. One day here lasts 29.5 Earth days, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Earth: it turns exactly once each time it goes round, so the same face is always pointed at Earth and the other side was never seen until a spacecraft went to look. One day here lasts 29.5 Earth days, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 29.5 d · month 27.3 d",
+        "badgeShort": "month 27.3 d"
       }
     },
     {
@@ -188,7 +208,9 @@
         "tidallyLocked": true,
         "monthDays": 0.318910104370432,
         "synodicMonthDays": 0.319058217749695,
-        "headline": "Locked to Mars: it turns exactly once each time it goes round, so the same face is always pointed at Mars and the other side was never seen until a spacecraft went to look. One day here lasts 7h 39m, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Mars: it turns exactly once each time it goes round, so the same face is always pointed at Mars and the other side was never seen until a spacecraft went to look. One day here lasts 7h 39m, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 7h 39m · month 7h 39m",
+        "badgeShort": "month 7h 39m"
       }
     },
     {
@@ -205,7 +227,9 @@
         "tidallyLocked": true,
         "monthDays": 1.26244078854669,
         "synodicMonthDays": 1.26476500694704,
-        "headline": "Locked to Mars: it turns exactly once each time it goes round, so the same face is always pointed at Mars and the other side was never seen until a spacecraft went to look. One day here lasts 30h 21m, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Mars: it turns exactly once each time it goes round, so the same face is always pointed at Mars and the other side was never seen until a spacecraft went to look. One day here lasts 30h 21m, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 30h 21m · month 30h 18m",
+        "badgeShort": "month 30h 18m"
       }
     },
     {
@@ -222,7 +246,9 @@
         "tidallyLocked": true,
         "monthDays": 1.76913779975412,
         "synodicMonthDays": 1.76986045361571,
-        "headline": "Locked to Jupiter: it turns exactly once each time it goes round, so the same face is always pointed at Jupiter and the other side was never seen until a spacecraft went to look. One day here lasts 42h 29m, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Jupiter: it turns exactly once each time it goes round, so the same face is always pointed at Jupiter and the other side was never seen until a spacecraft went to look. One day here lasts 42h 29m, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 42h 29m · month 42h 28m",
+        "badgeShort": "month 42h 28m"
       }
     },
     {
@@ -239,7 +265,9 @@
         "tidallyLocked": true,
         "monthDays": 3.551181079177,
         "synodicMonthDays": 3.55409401804773,
-        "headline": "Locked to Jupiter: it turns exactly once each time it goes round, so the same face is always pointed at Jupiter and the other side was never seen until a spacecraft went to look. One day here lasts 3.6 Earth days, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Jupiter: it turns exactly once each time it goes round, so the same face is always pointed at Jupiter and the other side was never seen until a spacecraft went to look. One day here lasts 3.6 Earth days, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 3.6 d · month 3.6 d",
+        "badgeShort": "month 3.6 d"
       }
     },
     {
@@ -256,7 +284,9 @@
         "tidallyLocked": true,
         "monthDays": 7.15455311954703,
         "synodicMonthDays": 7.16638659695309,
-        "headline": "Locked to Jupiter: it turns exactly once each time it goes round, so the same face is always pointed at Jupiter and the other side was never seen until a spacecraft went to look. One day here lasts 7.2 Earth days, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Jupiter: it turns exactly once each time it goes round, so the same face is always pointed at Jupiter and the other side was never seen until a spacecraft went to look. One day here lasts 7.2 Earth days, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 7.2 d · month 7.2 d",
+        "badgeShort": "month 7.2 d"
       }
     },
     {
@@ -273,7 +303,9 @@
         "tidallyLocked": true,
         "monthDays": 16.6890179748373,
         "synodicMonthDays": 16.7535488029071,
-        "headline": "Locked to Jupiter: it turns exactly once each time it goes round, so the same face is always pointed at Jupiter and the other side was never seen until a spacecraft went to look. One day here lasts 16.8 Earth days, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Jupiter: it turns exactly once each time it goes round, so the same face is always pointed at Jupiter and the other side was never seen until a spacecraft went to look. One day here lasts 16.8 Earth days, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 16.8 d · month 16.7 d",
+        "badgeShort": "month 16.7 d"
       }
     },
     {
@@ -290,7 +322,9 @@
         "tidallyLocked": true,
         "monthDays": 0.498179254460797,
         "synodicMonthDays": 0.498236540771555,
-        "headline": "Locked to Jupiter: it turns exactly once each time it goes round, so the same face is always pointed at Jupiter and the other side was never seen until a spacecraft went to look. One day here lasts 11h 57m, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Jupiter: it turns exactly once each time it goes round, so the same face is always pointed at Jupiter and the other side was never seen until a spacecraft went to look. One day here lasts 11h 57m, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 11h 57m · month 11h 57m",
+        "badgeShort": "month 11h 57m"
       }
     },
     {
@@ -307,7 +341,9 @@
         "tidallyLocked": true,
         "monthDays": 0.942421810174755,
         "synodicMonthDays": 0.942504391640594,
-        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 22h 37m, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 22h 37m, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 22h 37m · month 22h 37m",
+        "badgeShort": "month 22h 37m"
       }
     },
     {
@@ -324,7 +360,9 @@
         "tidallyLocked": true,
         "monthDays": 1.37021808371228,
         "synodicMonthDays": 1.37039266134325,
-        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 32h 53m, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 32h 53m, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 32h 53m · month 32h 53m",
+        "badgeShort": "month 32h 53m"
       }
     },
     {
@@ -341,7 +379,9 @@
         "tidallyLocked": true,
         "monthDays": 1.88780256077114,
         "synodicMonthDays": 1.88813395370932,
-        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 45h 19m, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 45h 19m, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 45h 19m · month 45h 18m",
+        "badgeShort": "month 45h 18m"
       }
     },
     {
@@ -358,7 +398,9 @@
         "tidallyLocked": true,
         "monthDays": 2.73691555255273,
         "synodicMonthDays": 2.7376121585276,
-        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 2.7 Earth days, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 2.7 Earth days, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 2.7 d · month 2.7 d",
+        "badgeShort": "month 2.7 d"
       }
     },
     {
@@ -375,7 +417,9 @@
         "tidallyLocked": true,
         "monthDays": 4.51750262345808,
         "synodicMonthDays": 4.5194007848983,
-        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 4.5 Earth days, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 4.5 Earth days, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 4.5 d · month 4.5 d",
+        "badgeShort": "month 4.5 d"
       }
     },
     {
@@ -392,7 +436,9 @@
         "tidallyLocked": true,
         "monthDays": 15.9454475764886,
         "synodicMonthDays": 15.9691215751075,
-        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 16.0 Earth days, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 16.0 Earth days, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 16.0 d · month 15.9 d",
+        "badgeShort": "month 15.9 d"
       }
     },
     {
@@ -409,7 +455,9 @@
         "tidallyLocked": true,
         "monthDays": 79.3308495725786,
         "synodicMonthDays": 79.9203079311986,
-        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 79.9 Earth days, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Saturn: it turns exactly once each time it goes round, so the same face is always pointed at Saturn and the other side was never seen until a spacecraft went to look. One day here lasts 79.9 Earth days, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 79.9 d · month 79.3 d",
+        "badgeShort": "month 79.3 d"
       }
     },
     {
@@ -426,7 +474,9 @@
         "tidallyLocked": false,
         "monthDays": 548.885391984399,
         "synodicMonthDays": 578.401920317791,
-        "headline": "It turns in 9h 16m, faster than any rocky planet, so even though a year here lasts 29.4 Earth years it holds about 27,834 of its own days."
+        "headline": "It turns in 9h 16m, faster than any rocky planet, so even though a year here lasts 29.4 Earth years it holds about 27,834 of its own days.",
+        "badge": "day 9h 16m · month 548.9 d",
+        "badgeShort": "month 548.9 d"
       }
     },
     {
@@ -443,7 +493,9 @@
         "tidallyLocked": true,
         "monthDays": 2.52037887166924,
         "synodicMonthDays": 2.5205858892439,
-        "headline": "Locked to Uranus: it turns exactly once each time it goes round, so the same face is always pointed at Uranus and the other side was never seen until a spacecraft went to look. One day here lasts 2.5 Earth days, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Uranus: it turns exactly once each time it goes round, so the same face is always pointed at Uranus and the other side was never seen until a spacecraft went to look. One day here lasts 2.5 Earth days, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 2.5 d · month 2.5 d",
+        "badgeShort": "month 2.5 d"
       }
     },
     {
@@ -460,7 +512,9 @@
         "tidallyLocked": true,
         "monthDays": 4.14417624616125,
         "synodicMonthDays": 4.14473597150624,
-        "headline": "Locked to Uranus: it turns exactly once each time it goes round, so the same face is always pointed at Uranus and the other side was never seen until a spacecraft went to look. One day here lasts 4.1 Earth days, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Uranus: it turns exactly once each time it goes round, so the same face is always pointed at Uranus and the other side was never seen until a spacecraft went to look. One day here lasts 4.1 Earth days, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 4.1 d · month 4.1 d",
+        "badgeShort": "month 4.1 d"
       }
     },
     {
@@ -477,7 +531,9 @@
         "tidallyLocked": true,
         "monthDays": 8.70586545787208,
         "synodicMonthDays": 8.70833597012634,
-        "headline": "Locked to Uranus: it turns exactly once each time it goes round, so the same face is always pointed at Uranus and the other side was never seen until a spacecraft went to look. One day here lasts 8.7 Earth days, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Uranus: it turns exactly once each time it goes round, so the same face is always pointed at Uranus and the other side was never seen until a spacecraft went to look. One day here lasts 8.7 Earth days, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 8.7 d · month 8.7 d",
+        "badgeShort": "month 8.7 d"
       }
     },
     {
@@ -494,7 +550,9 @@
         "tidallyLocked": true,
         "monthDays": 13.4632319807767,
         "synodicMonthDays": 13.4691411866347,
-        "headline": "Locked to Uranus: it turns exactly once each time it goes round, so the same face is always pointed at Uranus and the other side was never seen until a spacecraft went to look. One day here lasts 13.5 Earth days, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Uranus: it turns exactly once each time it goes round, so the same face is always pointed at Uranus and the other side was never seen until a spacecraft went to look. One day here lasts 13.5 Earth days, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 13.5 d · month 13.5 d",
+        "badgeShort": "month 13.5 d"
       }
     },
     {
@@ -511,7 +569,9 @@
         "tidallyLocked": true,
         "monthDays": 1.41347923291104,
         "synodicMonthDays": 1.41354434157054,
-        "headline": "Locked to Uranus: it turns exactly once each time it goes round, so the same face is always pointed at Uranus and the other side was never seen until a spacecraft went to look. One day here lasts 33h 55m, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Uranus: it turns exactly once each time it goes round, so the same face is always pointed at Uranus and the other side was never seen until a spacecraft went to look. One day here lasts 33h 55m, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 33h 55m · month 33h 55m",
+        "badgeShort": "month 33h 55m"
       }
     },
     {
@@ -528,7 +588,9 @@
         "tidallyLocked": true,
         "monthDays": 5.87685407828623,
         "synodicMonthDays": 5.87742794407892,
-        "headline": "Locked to Neptune: it turns exactly once each time it goes round, so the same face is always pointed at Neptune and the other side was never seen until a spacecraft went to look. One day here lasts 5.9 Earth days, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Neptune: it turns exactly once each time it goes round, so the same face is always pointed at Neptune and the other side was never seen until a spacecraft went to look. One day here lasts 5.9 Earth days, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 5.9 d · month 5.9 d",
+        "badgeShort": "month 5.9 d"
       }
     },
     {
@@ -545,7 +607,9 @@
         "tidallyLocked": true,
         "monthDays": 1.12231548169225,
         "synodicMonthDays": 1.12233640913308,
-        "headline": "Locked to Neptune: it turns exactly once each time it goes round, so the same face is always pointed at Neptune and the other side was never seen until a spacecraft went to look. One day here lasts 26h 56m, which is about half that in sunlight and then the same again in darkness."
+        "headline": "Locked to Neptune: it turns exactly once each time it goes round, so the same face is always pointed at Neptune and the other side was never seen until a spacecraft went to look. One day here lasts 26h 56m, which is about half that in sunlight and then the same again in darkness.",
+        "badge": "day 26h 56m · month 26h 56m",
+        "badgeShort": "month 26h 56m"
       }
     }
   ]

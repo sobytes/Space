@@ -41,7 +41,7 @@ import { totalAngularMomentum, advance } from "@solar/engine/nbody";
 import { SECONDS_PER_JULIAN_YEAR } from "@solar/engine/units";
 import type { Vec3 } from "@solar/engine/vec";
 import { markIntervalFor, orbitTimeMarks } from "@solar/engine/orbit-time";
-import { timeHeadline, timeSense } from "@solar/engine/time-sense";
+import { timeBadge, timeBadgeShort, timeHeadline, timeSense } from "@solar/engine/time-sense";
 import { placeLabels, type LabelInput } from "@solar/engine/labels";
 import { levelFor, metresPerPixel, tileExtent, visibleCapAngle } from "./view/core/tiles";
 
@@ -261,6 +261,8 @@ function compute(domain: string, testCase: Case): unknown {
         monthDays: t.monthDays,
         synodicMonthDays: t.synodicMonthDays,
         headline: timeHeadline(input.body as BodyId),
+        badge: timeBadge(input.body as BodyId),
+        badgeShort: timeBadgeShort(input.body as BodyId),
       };
     }
 

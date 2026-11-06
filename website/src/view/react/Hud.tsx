@@ -240,10 +240,11 @@ function BodyPanel({ epoch }: { epoch: JdTdb }) {
             far apart in time two of them are. The marks are drawn whenever that orbit is on
             screen, which for a moon is while its planet is in view.
           */}
-          {derived.orbitDays !== null ? (
+          {/* Only a planet's orbit carries marks, so only a planet's panel describes them. */}
+          {derived.orbitDays !== null && contract.ephemeris.kind === "standish-elements" ? (
             <span className="mt-0.5 block text-[11px] leading-snug text-zinc-500">
-              orbit marks every {markIntervalFor(derived.orbitDays).label}, crowding where it
-              moves fastest
+              marked every {markIntervalFor(derived.orbitDays).label} in the system view,
+              crowding where it moves fastest
             </span>
           ) : null}
         </dd>

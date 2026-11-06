@@ -412,7 +412,8 @@ private struct BodyPanel: View {
             Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 4) {
                 row("From the Sun", distance(fromSun),
                     simulated: orbitDays.map { $0 * Constants.secondsPerDay }, label: "one orbit",
-                    marksForPeriodDays: orbitDays)
+                    // Only a planet's orbit carries marks, so only a planet's panel says so.
+                    marksForPeriodDays: isPlanet ? orbitDays : nil)
                 row("Equatorial radius", "\(Int(contract.equatorialRadiusM / 1_000).formatted()) km")
                 row("Rotation", rotationText,
                     simulated: abs(contract.siderealRotationDays) * Constants.secondsPerDay,
@@ -573,6 +574,11 @@ private struct BodyPanel: View {
         }
     }
 
+    private var isPlanet: Bool {
+        if case .standishElements = contract.ephemeris { return true }
+        return false
+    }
+
     private var time: TimeSense { timeSense(id) }
 
     private var dayText: String {
@@ -640,7 +646,7 @@ private struct BodyPanel: View {
                  */
                 if let marksForPeriodDays {
                     let interval = markIntervalFor(periodDays: marksForPeriodDays)
-                    Text("orbit marks every \(interval.label), crowding where it moves fastest")
+                    Text("marked every \(interval.label) in the system view, crowding where it moves fastest")
                         .font(.system(size: 10))
                         .foregroundStyle(.secondary)
                 }

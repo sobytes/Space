@@ -295,6 +295,8 @@ final class ConformanceTests: XCTestCase {
                 "monthDays": t.monthDays.map { JSON.number($0) } ?? .null,
                 "synodicMonthDays": t.synodicMonthDays.map { JSON.number($0) } ?? .null,
                 "headline": .string(timeHeadline(body)),
+                "badge": .string(timeBadge(body)),
+                "badgeShort": .string(timeBadgeShort(body)),
             ])
 
         /// What a mark on an orbit is worth, and where the marks go.

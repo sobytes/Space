@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { BODY_CONTRACTS, childrenOf } from "@solar/engine/bodies/registry";
 import { placeLabels, type LabelInput } from "@solar/engine/labels";
+import { timeBadge, timeBadgeShort } from "@solar/engine/time-sense";
 import { useViewport } from "./ViewportContext";
 
 /**
@@ -93,16 +94,34 @@ export function LabelLayer({ visible }: { visible: boolean }) {
         return (
           <div
             key={placement.id}
-            className={`absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 whitespace-nowrap rounded-full px-1.5 py-0.5 ${
+            className={`absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center whitespace-nowrap rounded-lg px-1.5 py-0.5 ${
               isFocus
                 ? "bg-black/35 text-[12px] font-medium text-white"
                 : "bg-black/35 text-[10px] text-white/70"
             } ${placement.clamped ? "bg-black/55" : ""}`}
             style={{ left: placement.x, top: placement.y }}
           >
-            {!trailing ? arrow : null}
-            {contract.displayName}
-            {trailing ? arrow : null}
+            <span className="flex items-center gap-1">
+              {!trailing ? arrow : null}
+              {contract.displayName}
+              {trailing ? arrow : null}
+            </span>
+            {/*
+              The day and the orbit, under the name.
+
+              The panel was the wrong place for this. It is the first thing anyone hides to
+              look at the planets, and with it hidden there was no time anywhere on screen.
+              Here the labels sit side by side, so Earth's year and the Moon's month can be
+              compared rather than remembered.
+
+              On clamped labels too, which was not the first instinct. An edge pointer is
+              exactly where the Moon's label usually ends up while framed with Earth, so
+              suppressing it there removed the one comparison most worth having. The clamp
+              keeps labels 44 px inside the viewport, which is room enough for a second line.
+            */}
+            <span className="text-[9px] font-normal leading-tight text-white/45">
+              {placement.clamped ? timeBadgeShort(placement.id) : timeBadge(placement.id)}
+            </span>
           </div>
         );
       })}

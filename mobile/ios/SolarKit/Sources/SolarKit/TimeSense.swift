@@ -219,3 +219,58 @@ public func timeHeadline(_ id: BodyId) -> String {
         + "back round. Those slivers add up: a year holds \(String(format: "%.2f", t.solarDaysPerYear)) days "
         + "but \(String(format: "%.2f", t.spinsPerYear)) spins, exactly one more."
 }
+
+/// The shortest honest form: hours under two days, then days, then years.
+public func shortDuration(days: Double) -> String {
+    let magnitude = abs(days)
+    if magnitude < 2 {
+        let hours = magnitude * 24
+        let whole = Int(hours.rounded(.down))
+        let minutes = Int(((hours - Double(whole)) * 60).rounded())
+        if minutes == 60 { return "\(whole + 1)h 00m" }
+        return "\(whole)h \(String(format: "%02d", minutes))m"
+    }
+    if magnitude < 700 { return String(format: "%.1f d", magnitude) }
+    return String(format: "%.1f y", magnitude / heliocentricPeriodDays(.embary))
+}
+
+/**
+ A body's day and its orbit, short enough to sit under its name in the scene.
+
+ This exists because the panel was the wrong place for it. All of the timing was put in the
+ body panel, and the panel is the first thing anyone hides to actually look at the planets:
+ reported twice, from a screenshot with the overlay hidden, as still not being able to see any
+ times. A number only counts as visible where the person is looking.
+
+ Under a label it also does what the panel could not. The panel describes one body, and the
+ question was how the Moon's month compares to Earth's day and year. On screen the labels are
+ side by side, so the comparison is there to be read rather than remembered.
+
+ A moon is given its month rather than its year, because its year is its planet's and saying
+ so under a moon's name invites exactly the wrong reading.
+ */
+public func timeBadge(_ id: BodyId) -> String {
+    let t = timeSense(id)
+    if id == .sun { return "turns every \(shortDuration(days: abs(t.siderealSpinDays)))" }
+    let day = "day \(shortDuration(days: t.dayInEarthDays))"
+    if let month = t.monthDays {
+        return "\(day) · month \(shortDuration(days: month))"
+    }
+    return "\(day) · year \(shortDuration(days: t.yearDays))"
+}
+
+/**
+ The same badge, cut to one figure, for a label pinned to the edge of the screen.
+
+ The clamp keeps a label's anchor 44 points inside the viewport, and that was sized for a name.
+ A label is centred on its anchor, so a second line wider than the name overhangs by half its
+ own width and the full badge ran off the edge: "month 27.3" with the unit cut away, on the
+ Moon, which is precisely the label most often clamped because it is framed just outside the
+ view. One figure fits inside the existing inset, and an edge pointer is a summary anyway.
+ */
+public func timeBadgeShort(_ id: BodyId) -> String {
+    let t = timeSense(id)
+    if id == .sun { return "turns every \(shortDuration(days: abs(t.siderealSpinDays)))" }
+    if let month = t.monthDays { return "month \(shortDuration(days: month))" }
+    return "year \(shortDuration(days: t.yearDays))"
+}

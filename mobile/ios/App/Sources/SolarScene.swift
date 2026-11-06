@@ -519,13 +519,21 @@ final class SolarScene {
             }
             orbitNodes[id] = path
 
-            // The marks share the orbit's parent, so they inherit the same origin handling:
-            // the heliocentric root for a planet, the per-planet anchor for a moon.
-            let marks = SCNNode()
-            path.parent?.addChildNode(marks)
-            marks.position = path.position
-            markNodes[id] = marks
-            orbitPeriodDays[id] = periodDaysFor(contract)
+            /**
+             Time marks, on planetary orbits only.
+
+             A moon's marks are drawn in that moon's own tint, which for the Moon is the same
+             pale grey as its orbit line, so they were indistinguishable from the line they sat
+             on and were reported as invisible. In the system view each planet's colour reads
+             against its own line at a far larger scale.
+             */
+            if case .standishElements = contract.ephemeris {
+                let marks = SCNNode()
+                path.parent?.addChildNode(marks)
+                marks.position = path.position
+                markNodes[id] = marks
+                orbitPeriodDays[id] = periodDaysFor(contract)
+            }
         }
         refreshTimeMarks(force: true)
     }
@@ -929,7 +937,6 @@ final class SolarScene {
         for (moon, parent) in orbitAnchors {
             guard let at = positions[parent] else { continue }
             orbitNodes[moon]?.position = renderPosition(at)
-            markNodes[moon]?.position = renderPosition(at)
         }
 
         markEpoch = epoch

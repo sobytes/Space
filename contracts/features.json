@@ -229,8 +229,8 @@
     },
     {
       "id": "orbit-time-marks",
-      "title": "Time marks along an orbit, so a path says when and not only where",
-      "why": "Asked for directly: an orbit view with no concept of time in it. Marks at equal intervals of time counted from now, sampled from the same ephemeris that drew the line, so a mark is the body's real future position at a stated time. Equal in time means unequal along the path, which makes Kepler's second law something you can see rather than be told. The interval choice is shared and gated by the orbit-time conformance domain, since a mark meaning two days on one client and one day on the other is a quiet lie.",
+      "title": "Time marks along a planet's orbit in the system view",
+      "why": "Marks at equal intervals of time counted from now, sampled from the same ephemeris that drew the line, so a mark is the body's real future position at a stated time. Equal in time means unequal along the path, which makes Kepler's second law something you can see. Planetary orbits only: a moon's marks are drawn in that moon's own tint, which for the Moon is the same pale grey as its line, so they were indistinguishable from the line they sat on and were reported as invisible. The interval choice is shared and gated by the orbit-time conformance domain.",
       "web": {
         "status": "shipped",
         "paths": [
@@ -257,20 +257,22 @@
     },
     {
       "id": "time-sense",
-      "title": "How long a day, a month and a year are here, and how they compare to ours",
-      "why": "Asked for after the orbit marks answered the wrong question: the point was for a child to see how a spin and an orbit relate. All of it is derived from one measured constant and one formula, 1/day = 1/spin - 1/year, which alone explains Earth's 24h day against its 23h56m spin, Venus's year being under two Venus days, Mercury's day lasting two Mercury years, and the Moon's day being the 29.5 day month. The headline sentence is gated as an exact string: it is the part a child reads, and two clients telling them different things is worse than neither speaking.",
+      "title": "How long a day, a month and a year are here, shown in the scene and in the panel",
+      "why": "Asked for so a child could see how a spin and an orbit relate. All of it derived from one measured constant and one formula, 1/day = 1/spin - 1/year, which alone explains Earth's 24h day against its 23h56m spin, Venus's year being under two Venus days, Mercury's day lasting two Mercury years, and the Moon's day being the 29.5 day month. It sits under each body's label as well as in the panel, because the panel is the first thing anyone hides to look at the planets and with it hidden there was no time anywhere on screen. Under labels the bodies are side by side, so Earth's year and the Moon's month are compared rather than remembered. The strings are gated as exact matches: they are what a child reads.",
       "web": {
         "status": "shipped",
         "paths": [
           "engine/src/time-sense.ts",
-          "website/src/view/react/Hud.tsx"
+          "website/src/view/react/Hud.tsx",
+          "website/src/view/react/LabelLayer.tsx"
         ]
       },
       "ios": {
         "status": "shipped",
         "paths": [
           "mobile/ios/SolarKit/Sources/SolarKit/TimeSense.swift",
-          "mobile/ios/App/Sources/ContentView.swift"
+          "mobile/ios/App/Sources/ContentView.swift",
+          "mobile/ios/App/Sources/LabelLayer.swift"
         ]
       },
       "android": {

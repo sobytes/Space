@@ -93,6 +93,11 @@ interface Orbit {
  * A `Points` object rather than meshes. There are at most 24 of them per orbit and they are
  * rewritten whenever the clock publishes, so one buffer and one draw call is the right shape;
  * two dozen sprites would be two dozen objects to keep in step with the group they hang in.
+ *
+ * Planetary orbits only. A moon's ring is drawn in that moon's own tint, which for the Moon is
+ * the same pale grey as its orbit line, so the marks were indistinguishable from the line they
+ * sat on: reported as not being able to see them at all. In the system view each planet has a
+ * distinct colour against a line of the same colour at a much larger scale, where they read.
  */
 function TimeMarks({ orbit, colour }: { orbit: Orbit; colour: string }) {
   const epoch = useViewportValue(selectEpoch);
@@ -204,7 +209,6 @@ function MoonOrbit({ orbit }: { orbit: Orbit }) {
   return (
     <group ref={group}>
       <primitive object={orbit.line} material-opacity={0.5} />
-      <TimeMarks orbit={orbit} colour={BODY_CONTRACTS[orbit.id].appearance.tint} />
     </group>
   );
 }

@@ -68,18 +68,41 @@ struct LabelLayer: View {
          */
         let bearing = placement.bearingRadians
         let arrowTrails = bearing.map { abs($0) < .pi / 2 } ?? false
-        return HStack(spacing: 3) {
-            if placement.clamped, let bearing, !arrowTrails { arrow(bearing) }
-            Text(contract.displayName)
-                .font(.system(size: isFocus ? 12 : 10, weight: isFocus ? .semibold : .regular))
-            if placement.clamped, let bearing, arrowTrails { arrow(bearing) }
+        return VStack(spacing: 0) {
+            HStack(spacing: 3) {
+                if placement.clamped, let bearing, !arrowTrails { arrow(bearing) }
+                Text(contract.displayName)
+                    .font(.system(size: isFocus ? 12 : 10, weight: isFocus ? .semibold : .regular))
+                    .foregroundStyle(isFocus ? .white : .white.opacity(0.72))
+                if placement.clamped, let bearing, arrowTrails { arrow(bearing) }
+            }
+            /**
+             The day and the orbit, under the name.
+
+             The panel was the wrong place for this. It is the first thing anyone hides to
+             look at the planets, and with it hidden there was no time anywhere on screen,
+             which is what was reported. Here the labels sit side by side, so Earth's year and
+             the Moon's month can be compared rather than remembered.
+
+             On clamped labels too, which was not the first instinct. An edge pointer is
+             exactly where the Moon's label usually ends up while framed with Earth, so
+             suppressing it there removed the one comparison most worth having. The clamp
+             keeps labels 44 points inside the viewport, which is room enough for a second
+             line.
+             */
+            Text(placement.clamped ? timeBadgeShort(placement.id) : timeBadge(placement.id))
+                .font(.system(size: 9))
+                .foregroundStyle(.white.opacity(0.45))
         }
         .foregroundStyle(isFocus ? .white : .white.opacity(0.72))
         .padding(.horizontal, 5)
         .padding(.vertical, 2)
         // A plate behind the text, because white on a starfield is legible everywhere except
         // over a lit planet, which is exactly where the focused body's own label sits.
-        .background(.black.opacity(placement.clamped ? 0.55 : 0.35), in: Capsule())
+        .background(
+            .black.opacity(placement.clamped ? 0.55 : 0.35),
+            in: RoundedRectangle(cornerRadius: 8)
+        )
         .fixedSize()
     }
 }

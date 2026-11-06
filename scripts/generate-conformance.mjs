@@ -436,6 +436,10 @@ domains["time-sense"] = {
         monthDays: t.monthDays === null ? null : round(t.monthDays),
         synodicMonthDays: t.synodicMonthDays === null ? null : round(t.synodicMonthDays),
         headline: timeSense.timeHeadline(id),
+        // The line under a body's name in the scene. Gated for the same reason as the
+        // headline: it is read, and it must say the same thing on both.
+        badge: timeSense.timeBadge(id),
+        badgeShort: timeSense.timeBadgeShort(id),
       },
     };
   }),
