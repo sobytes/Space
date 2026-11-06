@@ -102,6 +102,41 @@ final class InteractionTests: XCTestCase {
     }
 
     /**
+     Go to date moves the clock to the instant you asked for.
+
+     Asked for as working out the time from a specific date or a Unix timestamp. The assertion
+     is on the clock's own readout afterwards, because the sheet showing the right date proves
+     only that the conversion ran, not that anything was told about it.
+
+     1712600220 is the 2024 North American total solar eclipse, which is a date worth being
+     able to reach and an obvious one to check against.
+     */
+    func testGoToDateMovesTheClock() {
+        app.buttons["time.goTo"].tap()
+
+        let field = app.textFields["goTo.stamp"]
+        XCTAssertTrue(field.waitForExistence(timeout: 20), "the go-to-date sheet did not open")
+        field.tap()
+        // Clear whatever the sheet seeded itself with before typing.
+        field.press(forDuration: 1.2)
+        if app.menuItems["Select All"].waitForExistence(timeout: 3) {
+            app.menuItems["Select All"].tap()
+        }
+        field.typeText("1712600220")
+
+        app.buttons["Go"].tap()
+
+        let date = app.staticTexts.matching(
+            NSPredicate(format: "label ENDSWITH %@", "UTC")
+        ).firstMatch
+        XCTAssertTrue(date.waitForExistence(timeout: 10), "no date on screen")
+        XCTAssertTrue(
+            settles(timeout: 10) { date.label.hasPrefix("2024-04-08") },
+            "asked for the 2024 eclipse and the clock reads \(date.label)"
+        )
+    }
+
+    /**
      Tapping a planet in the top picker focuses it.
 
      The other reported interaction failure, and the same cause. Focus is observable from the

@@ -786,6 +786,7 @@ private struct GravityBar: View {
 
 private struct TimeBar: View {
     @Bindable var clock: Clock
+    @State private var showingGoTo = false
 
     var body: some View {
         VStack(spacing: 8) {
@@ -795,6 +796,8 @@ private struct TimeBar: View {
                 Button(clock.running ? "Pause" : "Play") { clock.running.toggle() }
                 Button("Reverse") { clock.direction *= -1 }
                 Button("Now") { clock.resetToNow() }
+                Button("Go to date") { showingGoTo = true }
+                    .accessibilityIdentifier("time.goTo")
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
@@ -817,5 +820,108 @@ private struct TimeBar: View {
         }
         .padding(12)
         .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 12))
+        .sheet(isPresented: $showingGoTo) { GoToDateView(clock: clock) }
+    }
+}
+
+/**
+ Go to a date, by calendar or by Unix timestamp.
+
+ Asked for as "can we work out time from a specific date like a unix timestamp". The whole
+ simulation is a pure function of one epoch, so this only has to produce that epoch; SolarKit's
+ `when` does the conversion and says which fitted table answers for it.
+
+ Both ways in, because they are the two ways people hold a moment. A calendar is how someone
+ thinks about a birthday or an eclipse; a raw timestamp is how a log file holds the same
+ instant. The resolved date is shown back either way, which is also what makes the seconds
+ against milliseconds guess safe to make.
+
+ Handed the `Clock` rather than its epoch. A sheet given a value that changes sixty times a
+ second is rebuilt under the finger and discards every tap, which is the failure this app has
+ now had three times.
+ */
+private struct GoToDateView: View {
+    let clock: Clock
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var date = Date()
+    @State private var stamp = ""
+    /// Which field the Go button should believe. Typing in one wins until the other is used.
+    @State private var usingStamp = false
+
+    private var parsed: JdTdb? {
+        if usingStamp {
+            let trimmed = stamp.trimmingCharacters(in: .whitespaces)
+            guard let value = Double(trimmed) else { return nil }
+            return epochFromUnixTimestamp(value)
+        }
+        return epochFromUnixTimestamp(date.timeIntervalSince1970)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Date and time, UTC") {
+                    DatePicker(
+                        "Go to", selection: $date,
+                        displayedComponents: [.date, .hourAndMinute]
+                    )
+                    .environment(\.timeZone, TimeZone(identifier: "UTC")!)
+                    .onChange(of: date) { _, _ in usingStamp = false }
+                }
+
+                Section("or a Unix timestamp") {
+                    TextField("seconds, or milliseconds", text: $stamp)
+                        .keyboardType(.numbersAndPunctuation)
+                        .font(.system(.body, design: .monospaced))
+                        .onChange(of: stamp) { _, _ in usingStamp = true }
+                        .accessibilityIdentifier("goTo.stamp")
+                }
+
+                Section {
+                    if let parsed {
+                        Text(Self.formatted(parsed))
+                            .font(.system(.footnote, design: .monospaced))
+                        let standing = ephemerisStandingAt(parsed)
+                        Text(standing.note)
+                            .font(.caption2)
+                            .foregroundStyle(standing.inside ? .secondary : Color.orange)
+                    } else {
+                        Text("Not a date this can read.")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                    }
+                }
+            }
+            .navigationTitle("Go to date")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Go") {
+                        if let parsed { clock.setEpoch(parsed) }
+                        dismiss()
+                    }
+                    .disabled(parsed == nil)
+                }
+            }
+            .onAppear {
+                // Seeded from the clock, so it starts where you already are.
+                date = Date(timeIntervalSince1970: unixSecondsFromEpoch(clock.epoch))
+                stamp = String(Int(unixSecondsFromEpoch(clock.epoch).rounded()))
+                usingStamp = false
+            }
+        }
+    }
+
+    private static func formatted(_ epoch: JdTdb) -> String {
+        let ms = unixMillisecondsFromJdUtc(utcFromTdb(epoch))
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter.string(from: Date(timeIntervalSince1970: ms / 1_000)) + " UTC"
     }
 }

@@ -1,0 +1,220 @@
+{
+  "domain": "when",
+  "absoluteTolerance": 0.000001,
+  "description": "Unix timestamps to epochs, and which fitted table answers there.",
+  "tolerance": 1e-12,
+  "cases": [
+    {
+      "id": "stamp-epoch",
+      "input": {
+        "value": 0
+      },
+      "expected": {
+        "epoch": 2440587.50048824,
+        "unixSeconds": 0
+      }
+    },
+    {
+      "id": "stamp-one-second",
+      "input": {
+        "value": 1
+      },
+      "expected": {
+        "epoch": 2440587.50049981,
+        "unixSeconds": 0.999994575977325
+      }
+    },
+    {
+      "id": "stamp-negative",
+      "input": {
+        "value": -1000000000
+      },
+      "expected": {
+        "epoch": 2429013.42641418,
+        "unixSeconds": -1000000000.00001
+      }
+    },
+    {
+      "id": "stamp-apollo-11",
+      "input": {
+        "value": -14182916
+      },
+      "expected": {
+        "epoch": 2440423.34636787,
+        "unixSeconds": -14182915.9999922
+      }
+    },
+    {
+      "id": "stamp-now-ish",
+      "input": {
+        "value": 1700000000
+      },
+      "expected": {
+        "epoch": 2460263.42672665,
+        "unixSeconds": 1699999999.99999
+      }
+    },
+    {
+      "id": "stamp-eclipse-2024",
+      "input": {
+        "value": 1712600220
+      },
+      "expected": {
+        "epoch": 2460409.26260632,
+        "unixSeconds": 1712600220.00002
+      }
+    },
+    {
+      "id": "stamp-as-milliseconds",
+      "input": {
+        "value": 1700000000000
+      },
+      "expected": {
+        "epoch": 2460263.42672665,
+        "unixSeconds": 1699999999.99999
+      }
+    },
+    {
+      "id": "stamp-year-3001",
+      "input": {
+        "value": 32535885600
+      },
+      "expected": {
+        "epoch": 2817160.25080074,
+        "unixSeconds": 32535885600
+      }
+    },
+    {
+      "id": "standing--4000",
+      "input": {
+        "epoch": 260045
+      },
+      "expected": {
+        "model": "long-span",
+        "inside": false,
+        "year": -4000,
+        "note": "Beyond 3000 BC to 3000 AD, which no table here was fitted for. The planets are still drawn, by extrapolating a polynomial past its range, and where they are shown is not where they were."
+      }
+    },
+    {
+      "id": "standing--3000",
+      "input": {
+        "epoch": 625295
+      },
+      "expected": {
+        "model": "long-span",
+        "inside": true,
+        "year": -3000,
+        "note": "Outside 1800 to 2050, so positions come from the long-span table. It is fitted for 3000 BC to 3000 AD and its quoted errors are far wider, by about an order of magnitude for the outer planets."
+      }
+    },
+    {
+      "id": "standing-1066",
+      "input": {
+        "epoch": 2110401.5
+      },
+      "expected": {
+        "model": "long-span",
+        "inside": true,
+        "year": 1066,
+        "note": "Outside 1800 to 2050, so positions come from the long-span table. It is fitted for 3000 BC to 3000 AD and its quoted errors are far wider, by about an order of magnitude for the outer planets."
+      }
+    },
+    {
+      "id": "standing-1799",
+      "input": {
+        "epoch": 2378129.75
+      },
+      "expected": {
+        "model": "long-span",
+        "inside": true,
+        "year": 1799,
+        "note": "Outside 1800 to 2050, so positions come from the long-span table. It is fitted for 3000 BC to 3000 AD and its quoted errors are far wider, by about an order of magnitude for the outer planets."
+      }
+    },
+    {
+      "id": "standing-1800",
+      "input": {
+        "epoch": 2378495
+      },
+      "expected": {
+        "model": "short-span",
+        "inside": true,
+        "year": 1800,
+        "note": "Positions from the 1800 to 2050 element table, which is the one these accuracy figures were measured against."
+      }
+    },
+    {
+      "id": "standing-2000",
+      "input": {
+        "epoch": 2451545
+      },
+      "expected": {
+        "model": "short-span",
+        "inside": true,
+        "year": 2000,
+        "note": "Positions from the 1800 to 2050 element table, which is the one these accuracy figures were measured against."
+      }
+    },
+    {
+      "id": "standing-2050",
+      "input": {
+        "epoch": 2469807.5
+      },
+      "expected": {
+        "model": "short-span",
+        "inside": true,
+        "year": 2050,
+        "note": "Positions from the 1800 to 2050 element table, which is the one these accuracy figures were measured against."
+      }
+    },
+    {
+      "id": "standing-2051",
+      "input": {
+        "epoch": 2470172.75
+      },
+      "expected": {
+        "model": "long-span",
+        "inside": true,
+        "year": 2051,
+        "note": "Outside 1800 to 2050, so positions come from the long-span table. It is fitted for 3000 BC to 3000 AD and its quoted errors are far wider, by about an order of magnitude for the outer planets."
+      }
+    },
+    {
+      "id": "standing-2999",
+      "input": {
+        "epoch": 2816429.75
+      },
+      "expected": {
+        "model": "long-span",
+        "inside": true,
+        "year": 2999,
+        "note": "Outside 1800 to 2050, so positions come from the long-span table. It is fitted for 3000 BC to 3000 AD and its quoted errors are far wider, by about an order of magnitude for the outer planets."
+      }
+    },
+    {
+      "id": "standing-3000",
+      "input": {
+        "epoch": 2816795
+      },
+      "expected": {
+        "model": "long-span",
+        "inside": true,
+        "year": 3000,
+        "note": "Outside 1800 to 2050, so positions come from the long-span table. It is fitted for 3000 BC to 3000 AD and its quoted errors are far wider, by about an order of magnitude for the outer planets."
+      }
+    },
+    {
+      "id": "standing-4000",
+      "input": {
+        "epoch": 3182045
+      },
+      "expected": {
+        "model": "long-span",
+        "inside": false,
+        "year": 4000,
+        "note": "Beyond 3000 BC to 3000 AD, which no table here was fitted for. The planets are still drawn, by extrapolating a polynomial past its range, and where they are shown is not where they were."
+      }
+    }
+  ]
+}

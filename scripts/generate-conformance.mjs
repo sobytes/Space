@@ -40,6 +40,7 @@ const tiles = await import(`${ROOT}website/src/view/core/tiles.ts`);
 const labels = await import(`${ROOT}engine/src/labels.ts`);
 const orbitTime = await import(`${ROOT}engine/src/orbit-time.ts`);
 const timeSense = await import(`${ROOT}engine/src/time-sense.ts`);
+const when = await import(`${ROOT}engine/src/when.ts`);
 
 /** Epochs chosen to exercise the element drift, the leap table and the model seam. */
 const EPOCHS = [
@@ -405,6 +406,53 @@ domains.propagate = {
       }
     }
 
+    return out;
+  })(),
+};
+
+/**
+ * Going to a date, and what the tables can honestly say there.
+ *
+ * Gated because both halves are easy to get subtly wrong in a way nothing catches. The
+ * seconds-or-milliseconds guess is a magnitude test that must agree, or a timestamp pasted
+ * into one client lands centuries from where it lands in the other. And the standing is the
+ * sentence printed next to the planets at that date, so a client that silently promotes an
+ * extrapolation to a fitted answer is the exact dishonesty the note exists to prevent.
+ */
+domains.when = {
+  absoluteTolerance: 1e-6,
+  description: "Unix timestamps to epochs, and which fitted table answers there.",
+  tolerance: 1e-12,
+  cases: (() => {
+    const out = [];
+    const stamps = [
+      ["epoch", 0], ["one-second", 1], ["negative", -1_000_000_000],
+      ["apollo-11", -14_182_916], ["now-ish", 1_700_000_000],
+      ["eclipse-2024", 1_712_600_220], ["as-milliseconds", 1_700_000_000_000],
+      ["year-3001", 32_535_885_600],
+    ];
+    for (const [id, value] of stamps) {
+      const epoch = when.epochFromUnixTimestamp(value);
+      out.push({
+        id: `stamp-${id}`,
+        input: { value },
+        expected: {
+          epoch: round(epoch),
+          unixSeconds: round(when.unixSecondsFromEpoch(epoch)),
+        },
+      });
+    }
+    // One epoch per band, including both sides of each boundary.
+    for (const year of [-4000, -3000, 1066, 1799, 1800, 2000, 2050, 2051, 2999, 3000, 4000]) {
+      const epoch = time.jdTdb(2_451_545.0 + (year - 2000) * 365.25);
+      const standing = when.ephemerisStandingAt(epoch);
+      out.push({
+        id: `standing-${year}`,
+        input: { epoch },
+        expected: { model: standing.model, inside: standing.inside, year: standing.year,
+          note: standing.note },
+      });
+    }
     return out;
   })(),
 };

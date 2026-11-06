@@ -42,6 +42,9 @@ import { SECONDS_PER_JULIAN_YEAR } from "@solar/engine/units";
 import type { Vec3 } from "@solar/engine/vec";
 import { markIntervalFor, orbitTimeMarks } from "@solar/engine/orbit-time";
 import { timeBadge, timeBadgeShort, timeHeadline, timeSense } from "@solar/engine/time-sense";
+import {
+  ephemerisStandingAt, epochFromUnixTimestamp, unixSecondsFromEpoch,
+} from "@solar/engine/when";
 import { placeLabels, type LabelInput } from "@solar/engine/labels";
 import { levelFor, metresPerPixel, tileExtent, visibleCapAngle } from "./view/core/tiles";
 
@@ -246,6 +249,21 @@ function compute(domain: string, testCase: Case): unknown {
       }
 
       throw new Error(`unhandled propagate case ${testCase.id}`);
+    }
+
+    /** Going to a date, and what the tables can honestly say there. */
+    case "when": {
+      if (testCase.id.startsWith("stamp")) {
+        const epoch = epochFromUnixTimestamp(input.value);
+        return { epoch, unixSeconds: unixSecondsFromEpoch(epoch) };
+      }
+      const standing = ephemerisStandingAt(jdTdb(input.epoch));
+      return {
+        model: standing.model,
+        inside: standing.inside,
+        year: standing.year,
+        note: standing.note,
+      };
     }
 
     /** How long a day, a month and a year are here, and the sentence that explains them. */

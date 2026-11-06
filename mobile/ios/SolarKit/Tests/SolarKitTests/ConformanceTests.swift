@@ -281,6 +281,23 @@ final class ConformanceTests: XCTestCase {
             XCTFail("no runner for propagate case \"\(c.id)\"")
             return .null
 
+        /// Going to a date, and what the tables can honestly say there.
+        case "when":
+            if c.id.hasPrefix("stamp") {
+                let epoch = epochFromUnixTimestamp(number(input, "value"))
+                return .object([
+                    "epoch": .number(epoch.value),
+                    "unixSeconds": .number(unixSecondsFromEpoch(epoch)),
+                ])
+            }
+            let standing = ephemerisStandingAt(JdTdb(number(input, "epoch")))
+            return .object([
+                "model": .string(standing.model),
+                "inside": .bool(standing.inside),
+                "year": .number(Double(standing.year)),
+                "note": .string(standing.note),
+            ])
+
         /// How long a day, a month and a year are here, and the sentence that explains them.
         case "time-sense":
             let body = BodyId(rawValue: text(input, "body"))!

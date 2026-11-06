@@ -80,6 +80,20 @@ final class Clock {
         }
     }
 
+    /**
+     Jump to a chosen instant.
+
+     Published immediately rather than on the next throttle tick, for the same reason "Now"
+     is: this is a direct request to move the clock, and a tenth of a second still showing
+     the old date reads as a control that did nothing. It also has to work while paused,
+     where nothing else publishes at all.
+     */
+    func setEpoch(_ next: JdTdb) {
+        epoch = next
+        displayEpoch = next
+        sincePublish = 0
+    }
+
     func resetToNow() {
         epoch = tdbFromUtc(jdUtcFromUnixMilliseconds(Date().timeIntervalSince1970 * 1_000))
         // Published immediately rather than on the next throttle tick. "Now" is a direct
@@ -111,7 +125,7 @@ final class Clock {
 
     /// Reads `displayEpoch`, not `epoch`, so showing the date costs ten renders a second.
     var formattedEpoch: String {
-        let ms = unixMillisecondsFromJdUtc(utcFromTt(JdTt(displayEpoch.value)))
+        let ms = unixMillisecondsFromJdUtc(utcFromTdb(displayEpoch))
         let date = Date(timeIntervalSince1970: ms / 1_000)
         return Self.utcFormatter.string(from: date) + " UTC"
     }

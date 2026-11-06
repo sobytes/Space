@@ -103,4 +103,20 @@ public func tdbFromTt(_ jd: JdTt) -> JdTdb {
     return JdTdb(jd.value + tdbMinusTtSeconds(daysSinceJ2000: days) / Constants.secondsPerDay)
 }
 
+public func ttFromTdb(_ jd: JdTdb) -> JdTt {
+    let days = jd.value - Epochs.j2000
+    return JdTt(jd.value - tdbMinusTtSeconds(daysSinceJ2000: days) / Constants.secondsPerDay)
+}
+
 public func tdbFromUtc(_ jd: JdUtc) -> JdTdb { tdbFromTt(ttFromUtc(jd)) }
+
+/**
+ The simulation's own time scale back to civil time, through TT.
+
+ Written out because the short version was wrong everywhere it mattered. Three places formatted
+ a date by calling `utcFromTt(JdTt(epoch.value))`, which takes a TDB number and relabels it TT
+ rather than converting it, silently skipping the periodic term. It is at most 1.7 milliseconds,
+ which is why nobody saw it; the `when` conformance domain did, as a 0.08 ms disagreement with
+ the website on a round trip that should have been exact.
+ */
+public func utcFromTdb(_ jd: JdTdb) -> JdUtc { utcFromTt(ttFromTdb(jd)) }

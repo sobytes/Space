@@ -26,6 +26,7 @@ export * from "./habitability";
 export * from "./labels";
 export * from "./orbit-time";
 export * from "./time-sense";
+export * from "./when";
 export * from "./surface-views";
 export * from "./data/surface-imagery";
 export * from "./data/habitability-environment";

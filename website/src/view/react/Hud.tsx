@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import {
+  ephemerisStandingAt, epochFromIsoUtc, epochFromUnixTimestamp, unixSecondsFromEpoch,
+} from "@solar/engine/when";
 import { markIntervalFor } from "@solar/engine/orbit-time";
 import { formatDuration, timeHeadline, timeSense } from "@solar/engine/time-sense";
 import { BODY_CONTRACTS, BODY_IDS, satelliteSystemRadiusM, type BodyId } from "@solar/engine/bodies/registry";
@@ -380,6 +383,123 @@ function BodyPanel({ epoch }: { epoch: JdTdb }) {
   );
 }
 
+/**
+ * Go to a date, by calendar or by Unix timestamp.
+ *
+ * Asked for as "can we work out time from a specific date like a unix timestamp". The whole
+ * simulation is a pure function of one epoch, so this only has to produce that epoch; the
+ * engine's `when` module does the conversion and says which fitted table answers for it.
+ *
+ * Both fields are shown because they are the two ways people hold a moment. A calendar input
+ * is how a person thinks about a birthday or an eclipse, and a raw timestamp is how a log
+ * file or a database holds the same instant. Each updates the other on open, so the control
+ * also works as a converter even if you never press Go.
+ */
+function GoToDate({ epoch, onGo }: { epoch: JdTdb; onGo: (next: JdTdb) => void }) {
+  const [open, setOpen] = useState(false);
+  const [iso, setIso] = useState("");
+  const [stamp, setStamp] = useState("");
+
+  // Seeded from the clock each time it opens, so it starts from where you already are
+  // rather than from whatever was typed into it last.
+  function show() {
+    const ms = unixSecondsFromEpoch(epoch) * 1000;
+    setIso(new Date(ms).toISOString().slice(0, 19));
+    setStamp(String(Math.round(ms / 1000)));
+    setOpen(true);
+  }
+
+  const parsed = (() => {
+    const trimmed = stamp.trim();
+    if (trimmed !== "" && Number.isFinite(Number(trimmed))) {
+      return epochFromUnixTimestamp(Number(trimmed));
+    }
+    return epochFromIsoUtc(iso);
+  })();
+  const standing = parsed === null ? null : ephemerisStandingAt(parsed);
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={show}
+        className="rounded-md border border-white/10 px-2.5 py-1 text-xs text-zinc-200 transition hover:bg-white/10"
+      >
+        Go to date
+      </button>
+    );
+  }
+
+  return (
+    <div className="absolute bottom-full left-0 mb-2 w-[22rem] rounded-xl border border-white/10 bg-black/90 p-3 text-xs backdrop-blur-md">
+      <label className="block text-zinc-400">
+        Date and time, UTC
+        <input
+          type="datetime-local"
+          step={1}
+          value={iso}
+          onChange={(event) => {
+            setIso(event.target.value);
+            // Typing in one field clears the other, so there is never a question about which
+            // of two disagreeing values the Go button is about to use.
+            setStamp("");
+          }}
+          className="mt-1 w-full rounded-md border border-white/10 bg-black/60 px-2 py-1 text-zinc-100"
+        />
+      </label>
+
+      <label className="mt-2 block text-zinc-400">
+        or a Unix timestamp
+        <input
+          type="text"
+          inputMode="numeric"
+          placeholder="seconds, or milliseconds"
+          value={stamp}
+          onChange={(event) => setStamp(event.target.value)}
+          className="mt-1 w-full rounded-md border border-white/10 bg-black/60 px-2 py-1 font-mono text-zinc-100"
+        />
+      </label>
+
+      {parsed !== null ? (
+        <p className="mt-2 font-mono text-[11px] text-zinc-300">{formatEpoch(parsed)}</p>
+      ) : (
+        <p className="mt-2 text-[11px] text-amber-300">Not a date this can read.</p>
+      )}
+      {standing !== null ? (
+        <p
+          className={`mt-1 text-[11px] leading-snug ${
+            standing.inside ? "text-zinc-500" : "text-amber-300"
+          }`}
+        >
+          {standing.note}
+        </p>
+      ) : null}
+
+      <div className="mt-3 flex gap-2">
+        <button
+          type="button"
+          disabled={parsed === null}
+          onClick={() => {
+            if (parsed === null) return;
+            onGo(parsed);
+            setOpen(false);
+          }}
+          className="rounded-md border border-sky-400/40 bg-sky-400/10 px-3 py-1 text-sky-200 transition hover:bg-sky-400/20 disabled:opacity-40"
+        >
+          Go
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="rounded-md border border-white/10 px-3 py-1 text-zinc-300 transition hover:bg-white/10"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function TimeBar() {
   const viewport = useViewport();
   const epoch = useViewportValue(selectEpoch);
@@ -392,8 +512,9 @@ function TimeBar() {
   );
 
   return (
-    <div className="pointer-events-auto flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-black/70 px-4 py-3 backdrop-blur-md">
+    <div className="pointer-events-auto relative flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-black/70 px-4 py-3 backdrop-blur-md">
       <time className="font-mono text-sm tabular-nums text-zinc-100">{formatEpoch(epoch)}</time>
+      <GoToDate epoch={epoch} onGo={(next) => viewport.send({ kind: "scrubTo", epoch: next })} />
 
       <div className="flex items-center gap-1.5">
         <button

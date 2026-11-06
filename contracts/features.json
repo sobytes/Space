@@ -766,6 +766,34 @@
       "androidtv": {
         "status": "planned"
       }
+    },
+    {
+      "id": "go-to-date",
+      "title": "Go to a date, by calendar or by Unix timestamp",
+      "why": "The simulation is a pure function of one epoch, so the arithmetic existed from the start and only the way in was missing. Both inputs are offered because they are the two ways people hold a moment: a calendar for a birthday or an eclipse, a raw timestamp for a log file. A bare number above 1e11 is read as milliseconds, which is unambiguous because 1e11 seconds is the year 5138 and 1e11 milliseconds is 1973. Every jump states which fitted element table answers there, and refuses to dress up an extrapolation beyond 3000 BC to 3000 AD as a position.",
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "engine/src/when.ts",
+          "website/src/view/react/Hud.tsx"
+        ]
+      },
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/SolarKit/Sources/SolarKit/When.swift",
+          "mobile/ios/App/Sources/ContentView.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     }
   ]
 }
