@@ -55,6 +55,16 @@ final class SolarScene {
      */
     private(set) var frameCounter: UInt64 = 0
 
+    /**
+     The local date and time at each body, refreshed about ten times a second.
+
+     Cached rather than computed in the label layer, which redraws every frame so the bodies
+     and their names stay together during a drag. Each entry is an ephemeris evaluation, and
+     doing six of those sixty times a second to move a clock that only shows minutes is the
+     same mistake the overlay rebuild was.
+     */
+    private(set) var localTimes: [BodyId: String] = [:]
+
     private(set) var focus: BodyId = .embary
     private var nodes: [BodyId: SCNNode] = [:]
     private var orbitNodes: [BodyId: SCNNode] = [:]
@@ -565,6 +575,16 @@ final class SolarScene {
      hertz that is six thousand Kepler solves a second to move dots by less than a pixel. The
      same ten hertz the clock publishes its date on, and for the same reason.
      */
+    /// Ten hertz, on the same cadence as the marks and the clock's own publish.
+    private func refreshLocalTimes() {
+        guard frameCounter % 6 == 0 else { return }
+        var next: [BodyId: String] = [:]
+        for id in bodyIds {
+            if let label = localTimeLabel(id, at: markEpoch) { next[id] = label }
+        }
+        localTimes = next
+    }
+
     private func refreshTimeMarks(force: Bool = false) {
         guard force || frameCounter % 6 == 0 else { return }
 
@@ -941,6 +961,7 @@ final class SolarScene {
 
         markEpoch = epoch
         refreshTimeMarks()
+        refreshLocalTimes()
 
         for id in bodyIds {
             guard let node = nodes[id], let position = positions[id] else { continue }

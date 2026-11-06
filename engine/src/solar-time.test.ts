@@ -11,11 +11,19 @@
 
 import { describe, expect, it } from "vitest";
 import { BODY_CONTRACTS, BODY_IDS } from "./bodies/registry";
-import { solarClock, subSolarPoint } from "./solar-time";
+import { localTimeLabel, solarClock, subSolarPoint } from "./solar-time";
 import { timeSense } from "./time-sense";
 import { jdTdb, type JdTdb } from "./time";
+import { epochFromIsoUtc } from "./when";
 
-const at = (iso: string): JdTdb => jdTdb(2_440_587.5 + Date.parse(iso) / 86_400_000);
+/**
+ * A UTC instant as the epoch the simulation runs on.
+ *
+ * Through the real conversion, not by relabelling a UTC Julian date as TDB. That shortcut was
+ * here first and it is wrong by TT minus UTC, about 69 seconds in 2026, which is invisible in
+ * a solstice test and decisive in one that compares a clock reading against the wall.
+ */
+const at = (iso: string): JdTdb => epochFromIsoUtc(iso)!;
 
 describe("the Sun's declination, against seasons nobody has to take on trust", () => {
   /**
@@ -189,19 +197,22 @@ describe("the clock at the prime meridian", () => {
  * rotation, the node, the sense of W and the Sun direction are all correct together: a sign
  * error anywhere turns a sixteen minute swing into hours.
  *
- * The shape is what is tested, not the absolute value, because there is a constant offset and
- * it is a property of the model rather than a defect. The IAU gives Earth a uniformly rotating
- * prime meridian, W = 190.147 + 360.9856235 d, which places the meridian at right ascension
- * 280.147 degrees at J2000 where true Greenwich sidereal time is 280.46. That 0.313 degree
- * rounding is 75 seconds of rotation, and the rest of the measured 92 is the drift of a linear
- * rate against Earth's actual, irregular UT1 by 2026. Reproducing a real sundial to the second
- * needs ERA, precession-nutation and UT1, none of which this engine carries, and every other
- * body in the registry is served correctly by the same uniform model. So the constant is
- * pinned and explained rather than tuned away.
+ * The shape is what is tested, not the absolute value, because a small constant offset remains
+ * and it is a property of the model rather than a defect. The IAU gives Earth a uniformly
+ * rotating prime meridian, W = 190.147 + 360.9856235 d, which does not track Earth's actual,
+ * irregular rotation: reproducing a real sundial to the second needs ERA, precession-nutation
+ * and UT1, none of which this engine carries, and every other body in the registry is served
+ * correctly by the same uniform model.
+ *
+ * The constant is 22.8 seconds, measured flat to six seconds from February to November. It was
+ * 92 until the helper above was fixed: `at` relabelled a UTC Julian date as TDB rather than
+ * converting it, so every epoch here was 69 seconds early and I had attributed that to the
+ * model and written a confident explanation of it. The shape agreed either way, which is what
+ * let a wrong constant sit behind a passing test.
  */
 describe("Earth's sundial against the clock", () => {
   /** Measured, explained above, and asserted below so it cannot drift unnoticed. */
-  const MODEL_OFFSET_MINUTES = -1.533;
+  const MODEL_OFFSET_MINUTES = -0.380;
 
   const offsetMinutes = (iso: string) => {
     const utcHours = (Date.parse(iso) % 86_400_000) / 3_600_000;
@@ -233,7 +244,7 @@ describe("Earth's sundial against the clock", () => {
   it("holds that offset constant all year, which is what makes it a model constant", () => {
     const offsets = PUBLISHED.map(([iso, published]) => offsetMinutes(iso) - published);
     const spread = Math.max(...offsets) - Math.min(...offsets);
-    // Three seconds of spread across February to November. A geometry error would not be flat.
+    // Six seconds of spread across February to November. A geometry error would not be flat.
     expect(spread * 60).toBeLessThan(10);
     for (const offset of offsets) {
       expect(Math.abs(offset - MODEL_OFFSET_MINUTES)).toBeLessThan(0.17);
@@ -273,6 +284,56 @@ describe("what a body's hour is worth", () => {
       if (id === "sun") continue;
       expect(solarClock(id, jdTdb(2_451_545))!.formatted, id).toMatch(/^\d\d:\d\d:\d\d$/);
     }
+  });
+});
+
+/**
+ * The label a body carries on screen, which is the thing that was actually asked for.
+ *
+ * The first version showed how long a day and a year last there, which is a fact about the
+ * body and never changes. What was wanted was the reading: "i expect it to say year 2026 and
+ * month etc and increase by the time setting". So these check both halves of that, the
+ * calendar on Earth and the advancing, which a screenshot cannot show in a reasonable time:
+ * at real-time rate a clock showing minutes takes a minute to move.
+ */
+describe("the local time on a label", () => {
+  it("gives Earth the calendar date, because Earth has a calendar", () => {
+    expect(localTimeLabel("embary", at("2026-11-06T21:52:00Z"))).toBe("2026-11-06 21:52");
+  });
+
+  it("gives everywhere else its own day count and the time at its prime meridian", () => {
+    expect(localTimeLabel("mars", at("2026-11-06T21:52:00Z"))).toMatch(/^day [\d,]+ · \d\d:\d\d$/);
+    expect(localTimeLabel("moon", at("2026-11-06T21:52:00Z"))).toMatch(/^day [\d,]+ · \d\d:\d\d$/);
+  });
+
+  it("has nothing to say about the Sun, which has no sunrise", () => {
+    expect(localTimeLabel("sun", at("2026-11-06T21:52:00Z"))).toBeNull();
+  });
+
+  it.each(["embary", "mars", "venus", "moon", "jupiter"] as const)(
+    "advances on %s when the clock does",
+    (id) => {
+      const before = localTimeLabel(id, at("2026-11-06T00:00:00Z"));
+      const after = localTimeLabel(id, at("2026-11-06T06:00:00Z"));
+      expect(before).not.toBeNull();
+      expect(after).not.toEqual(before);
+    },
+  );
+
+  it("rolls Earth's date over at midnight rather than sticking", () => {
+    expect(localTimeLabel("embary", at("2026-11-06T23:59:00Z"))).toBe("2026-11-06 23:59");
+    expect(localTimeLabel("embary", at("2026-11-07T00:01:00Z"))).toBe("2026-11-07 00:01");
+  });
+
+  /** A day on Mars is 24h 39m of ours, so its day count must not advance once per Earth day. */
+  it("counts Mars days at the Martian rate, not ours", () => {
+    const start = at("2026-01-01T00:00:00Z");
+    const dayOf = (label: string | null) => Number(label!.split(" ")[1].replace(/,/g, ""));
+    const a = dayOf(localTimeLabel("mars", start));
+    const b = dayOf(localTimeLabel("mars", jdTdb(start + 687)));
+    // One Martian year is 687 Earth days and 668.6 sols, so the count must move by that.
+    expect(b - a).toBeGreaterThan(660);
+    expect(b - a).toBeLessThan(676);
   });
 });
 

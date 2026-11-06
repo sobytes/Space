@@ -41,7 +41,7 @@ import { totalAngularMomentum, advance } from "@solar/engine/nbody";
 import { SECONDS_PER_JULIAN_YEAR } from "@solar/engine/units";
 import type { Vec3 } from "@solar/engine/vec";
 import { markIntervalFor, orbitTimeMarks } from "@solar/engine/orbit-time";
-import { solarClock } from "@solar/engine/solar-time";
+import { localTimeLabel, solarClock } from "@solar/engine/solar-time";
 import { timeBadge, timeBadgeShort, timeHeadline, timeSense } from "@solar/engine/time-sense";
 import {
   ephemerisStandingAt, epochFromUnixTimestamp, unixSecondsFromEpoch,
@@ -265,6 +265,7 @@ function compute(domain: string, testCase: Case): unknown {
         dayNumber: clock.dayNumber,
         hourInEarthSeconds: clock.hourInEarthSeconds,
         sunRisesInTheWest: clock.sunRisesInTheWest,
+        localTime: localTimeLabel(input.body as BodyId, jdTdb(input.epoch)),
       };
     }
 

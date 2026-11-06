@@ -797,20 +797,22 @@
     },
     {
       "id": "solar-clock",
-      "title": "The time at each body's own Greenwich",
-      "why": "Asked as: if it is Sunday 22:30 on Earth, what is it on Mars, and is there a universal time system. Two questions. Coordinate time is solved and already running here: the IAU defines TDB, every JPL ephemeris is published in it, and this clock has been a TDB value since it was written. Civil time has no universal answer, because a civil clock says where the Sun is and the Sun is elsewhere, moving at a different rate, at every body. What generalises is the construction: the IAU fixes a prime meridian for all 32 bodies through the W angle this engine already draws with, so the Sun's hour angle from it is a real local time, computed from geometry rather than a table of offsets that could not exist because the days are different lengths.",
+      "title": "The date and time at each body, on its label and in its panel",
+      "why": "Asked as: if it is Sunday 22:30 on Earth, what is it on Mars, and is there a universal time system. Coordinate time is solved and already running here, since the clock is a TDB value and every JPL ephemeris is published in it. Civil time has no universal answer, because a civil clock says where the Sun is and the Sun is elsewhere, moving at a different rate, at every body. What generalises is the construction: the IAU fixes a prime meridian for all 32 bodies, so the Sun's hour angle from it is a real local time. Each label carries the live reading and it ticks with the clock. Earth gets the calendar because Earth has one; everywhere else gets a count of its own days and the time at its prime meridian, which is what Mars missions run on. Inventing Martian months would be making something up and printing it beside measured figures.",
       "web": {
         "status": "shipped",
         "paths": [
           "engine/src/solar-time.ts",
-          "website/src/view/react/Hud.tsx"
+          "website/src/view/react/Hud.tsx",
+          "website/src/view/react/LabelLayer.tsx"
         ]
       },
       "ios": {
         "status": "shipped",
         "paths": [
           "mobile/ios/SolarKit/Sources/SolarKit/SolarTime.swift",
-          "mobile/ios/App/Sources/ContentView.swift"
+          "mobile/ios/App/Sources/ContentView.swift",
+          "mobile/ios/App/Sources/LabelLayer.swift"
         ]
       },
       "android": {

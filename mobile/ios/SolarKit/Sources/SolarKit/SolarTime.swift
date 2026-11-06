@@ -173,3 +173,40 @@ public func solarClock(_ body: BodyId, at epoch: JdTdb) -> SolarClock? {
         sunRisesInTheWest: retrograde
     )
 }
+
+/**
+ The date and time where that body is, now, as a label can carry it.
+
+ Ported from `engine/src/solar-time.ts` and gated by the `solar-time` conformance domain.
+
+ Earth gets the calendar, because Earth has one and nowhere else does. A date is a count of
+ days into a year with names agreed by people who live there, and the only body with people on
+ it has already agreed them; inventing Martian months would be making something up and printing
+ it beside measured figures. What every body does have is a count of its own days and a time of
+ day at its prime meridian, which is exactly what Mars missions run on: sols since a fixed
+ epoch and the clock at Airy-0. That generalises honestly to all 32.
+
+ Nil for the Sun, which has no sunrise to count from.
+ */
+public func localTimeLabel(_ body: BodyId, at epoch: JdTdb) -> String? {
+    guard let clock = solarClock(body, at: epoch) else { return nil }
+
+    if body == .embary {
+        /**
+         Snapped to the second before truncating to the minute.
+
+         The round trip through TDB is good to about four microseconds, and truncation turns
+         four microseconds short of a minute into a whole minute lost: an exact 00:01:00 came
+         back as 00:00:59.999996 and displayed as 00:00.
+         */
+        let ms = (unixMillisecondsFromJdUtc(utcFromTdb(epoch)) / 1000).rounded() * 1000
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm"
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter.string(from: Date(timeIntervalSince1970: ms / 1_000))
+    }
+
+    let hhmm = String(clock.formatted.prefix(5))
+    return "day \(clock.dayNumber.formatted()) · \(hhmm)"
+}

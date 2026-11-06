@@ -456,6 +456,7 @@ domains["solar-time"] = {
             dayNumber: clock.dayNumber,
             hourInEarthSeconds: round(clock.hourInEarthSeconds),
             sunRisesInTheWest: clock.sunRisesInTheWest,
+            localTime: solarTime.localTimeLabel(id, epoch),
           },
         });
       }

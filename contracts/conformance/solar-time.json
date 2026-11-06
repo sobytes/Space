@@ -57,7 +57,8 @@
         "formatted": "05:42:14",
         "dayNumber": 0,
         "hourInEarthSeconds": 633379.587236905,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 0 · 05:42"
       }
     },
     {
@@ -73,7 +74,8 @@
         "formatted": "18:29:59",
         "dayNumber": 0,
         "hourInEarthSeconds": 633379.587236905,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 0 · 18:29"
       }
     },
     {
@@ -89,7 +91,8 @@
         "formatted": "07:17:22",
         "dayNumber": 1,
         "hourInEarthSeconds": 633379.587236905,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 1 · 07:17"
       }
     },
     {
@@ -105,7 +108,8 @@
         "formatted": "20:03:46",
         "dayNumber": 1,
         "hourInEarthSeconds": 633379.587236905,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 1 · 20:03"
       }
     },
     {
@@ -121,7 +125,8 @@
         "formatted": "21:40:24",
         "dayNumber": 52,
         "hourInEarthSeconds": 633379.587236905,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 52 · 21:40"
       }
     },
     {
@@ -137,7 +142,8 @@
         "formatted": "01:19:35",
         "dayNumber": 0,
         "hourInEarthSeconds": 420301.302795179,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 0 · 01:19"
       }
     },
     {
@@ -153,7 +159,8 @@
         "formatted": "20:04:43",
         "dayNumber": 0,
         "hourInEarthSeconds": 420301.302795179,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 0 · 20:04"
       }
     },
     {
@@ -169,7 +176,8 @@
         "formatted": "14:53:11",
         "dayNumber": 1,
         "hourInEarthSeconds": 420301.302795179,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 1 · 14:53"
       }
     },
     {
@@ -185,7 +193,8 @@
         "formatted": "09:45:00",
         "dayNumber": 2,
         "hourInEarthSeconds": 420301.302795179,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 2 · 09:45"
       }
     },
     {
@@ -201,7 +210,8 @@
         "formatted": "07:53:57",
         "dayNumber": 79,
         "hourInEarthSeconds": 420301.302795179,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 79 · 07:53"
       }
     },
     {
@@ -217,7 +227,8 @@
         "formatted": "11:55:25",
         "dayNumber": 0,
         "hourInEarthSeconds": 3600.00118713258,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "2000-01-01 11:58"
       }
     },
     {
@@ -233,7 +244,8 @@
         "formatted": "23:55:05",
         "dayNumber": 91,
         "hourInEarthSeconds": 3600.00118713258,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "2000-04-01 23:58"
       }
     },
     {
@@ -249,7 +261,8 @@
         "formatted": "11:54:37",
         "dayNumber": 183,
         "hourInEarthSeconds": 3600.00118713258,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "2000-07-02 11:58"
       }
     },
     {
@@ -265,7 +278,8 @@
         "formatted": "00:09:20",
         "dayNumber": 274,
         "hourInEarthSeconds": 3600.00118713258,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "2000-10-01 23:58"
       }
     },
     {
@@ -281,7 +295,8 @@
         "formatted": "18:01:44",
         "dayNumber": 9254,
         "hourInEarthSeconds": 3600.00118713258,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "2025-05-04 17:58"
       }
     },
     {
@@ -297,7 +312,8 @@
         "formatted": "14:32:20",
         "dayNumber": -1,
         "hourInEarthSeconds": 3698.96935643406,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day -1 · 14:32"
       }
     },
     {
@@ -313,7 +329,8 @@
         "formatted": "15:13:20",
         "dayNumber": 88,
         "hourInEarthSeconds": 3698.96935643406,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 88 · 15:13"
       }
     },
     {
@@ -329,7 +346,8 @@
         "formatted": "16:46:09",
         "dayNumber": 177,
         "hourInEarthSeconds": 3698.96935643406,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 177 · 16:46"
       }
     },
     {
@@ -345,7 +363,8 @@
         "formatted": "18:31:50",
         "dayNumber": 266,
         "hourInEarthSeconds": 3698.96935643406,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 266 · 18:31"
       }
     },
     {
@@ -361,7 +380,8 @@
         "formatted": "05:51:51",
         "dayNumber": 9007,
         "hourInEarthSeconds": 3698.96935643406,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 9,007 · 05:51"
       }
     },
     {
@@ -377,7 +397,8 @@
         "formatted": "16:27:22",
         "dayNumber": -1,
         "hourInEarthSeconds": 1488.88610476502,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day -1 · 16:27"
       }
     },
     {
@@ -393,7 +414,8 @@
         "formatted": "22:10:16",
         "dayNumber": 220,
         "hourInEarthSeconds": 1488.88610476502,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 220 · 22:10"
       }
     },
     {
@@ -409,7 +431,8 @@
         "formatted": "03:53:23",
         "dayNumber": 442,
         "hourInEarthSeconds": 1488.88610476502,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 442 · 03:53"
       }
     },
     {
@@ -425,7 +448,8 @@
         "formatted": "09:36:46",
         "dayNumber": 663,
         "hourInEarthSeconds": 1488.88610476502,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 663 · 09:36"
       }
     },
     {
@@ -441,7 +465,8 @@
         "formatted": "04:11:16",
         "dayNumber": 22378,
         "hourInEarthSeconds": 1488.88610476502,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 22,378 · 04:11"
       }
     },
     {
@@ -457,7 +482,8 @@
         "formatted": "08:22:16",
         "dayNumber": 0,
         "hourInEarthSeconds": 1598.50198721641,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 0 · 08:22"
       }
     },
     {
@@ -473,7 +499,8 @@
         "formatted": "09:59:13",
         "dayNumber": 206,
         "hourInEarthSeconds": 1598.50198721641,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 206 · 09:59"
       }
     },
     {
@@ -489,7 +516,8 @@
         "formatted": "11:35:55",
         "dayNumber": 412,
         "hourInEarthSeconds": 1598.50198721641,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 412 · 11:35"
       }
     },
     {
@@ -505,7 +533,8 @@
         "formatted": "13:12:25",
         "dayNumber": 618,
         "hourInEarthSeconds": 1598.50198721641,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 618 · 13:12"
       }
     },
     {
@@ -521,7 +550,8 @@
         "formatted": "04:58:23",
         "dayNumber": 20844,
         "hourInEarthSeconds": 1598.50198721641,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 20,844 · 04:58"
       }
     },
     {
@@ -537,7 +567,8 @@
         "formatted": "09:42:43",
         "dayNumber": 0,
         "hourInEarthSeconds": 2585.92746866821,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 0 · 09:42"
       }
     },
     {
@@ -553,7 +584,8 @@
         "formatted": "18:48:02",
         "dayNumber": 127,
         "hourInEarthSeconds": 2585.92746866821,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 127 · 18:48"
       }
     },
     {
@@ -569,7 +601,8 @@
         "formatted": "03:53:20",
         "dayNumber": 255,
         "hourInEarthSeconds": 2585.92746866821,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 255 · 03:53"
       }
     },
     {
@@ -585,7 +618,8 @@
         "formatted": "12:58:38",
         "dayNumber": 382,
         "hourInEarthSeconds": 2585.92746866821,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 382 · 12:58"
       }
     },
     {
@@ -601,7 +635,8 @@
         "formatted": "19:27:49",
         "dayNumber": 12884,
         "hourInEarthSeconds": 2585.92746866821,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 12,884 · 19:27"
       }
     },
     {
@@ -617,7 +652,8 @@
         "formatted": "22:10:55",
         "dayNumber": -1,
         "hourInEarthSeconds": 2416.52694970767,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day -1 · 22:10"
       }
     },
     {
@@ -633,7 +669,8 @@
         "formatted": "11:05:38",
         "dayNumber": 136,
         "hourInEarthSeconds": 2416.52694970767,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 136 · 11:05"
       }
     },
     {
@@ -649,7 +686,8 @@
         "formatted": "00:00:21",
         "dayNumber": 273,
         "hourInEarthSeconds": 2416.52694970767,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 273 · 00:00"
       }
     },
     {
@@ -665,7 +703,8 @@
         "formatted": "12:55:04",
         "dayNumber": 408,
         "hourInEarthSeconds": 2416.52694970767,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 408 · 12:55"
       }
     },
     {
@@ -681,7 +720,8 @@
         "formatted": "22:23:53",
         "dayNumber": 13787,
         "hourInEarthSeconds": 2416.52694970767,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 13,787 · 22:23"
       }
     },
     {
@@ -697,7 +737,8 @@
         "formatted": "19:51:13",
         "dayNumber": -1,
         "hourInEarthSeconds": 106309.785227367,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day -1 · 19:51"
       }
     },
     {
@@ -713,7 +754,8 @@
         "formatted": "22:05:13",
         "dayNumber": 2,
         "hourInEarthSeconds": 106309.785227367,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 2 · 22:05"
       }
     },
     {
@@ -729,7 +771,8 @@
         "formatted": "00:34:52",
         "dayNumber": 6,
         "hourInEarthSeconds": 106309.785227367,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 6 · 00:34"
       }
     },
     {
@@ -745,7 +788,8 @@
         "formatted": "03:04:57",
         "dayNumber": 9,
         "hourInEarthSeconds": 106309.785227367,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 9 · 03:04"
       }
     },
     {
@@ -761,7 +805,8 @@
         "formatted": "05:39:06",
         "dayNumber": 313,
         "hourInEarthSeconds": 106309.785227367,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 313 · 05:39"
       }
     },
     {
@@ -777,7 +822,8 @@
         "formatted": "05:08:22",
         "dayNumber": 0,
         "hourInEarthSeconds": 1148.60956815073,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 0 · 05:08"
       }
     },
     {
@@ -793,7 +839,8 @@
         "formatted": "23:20:28",
         "dayNumber": 286,
         "hourInEarthSeconds": 1148.60956815073,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 286 · 23:20"
       }
     },
     {
@@ -809,7 +856,8 @@
         "formatted": "18:25:51",
         "dayNumber": 573,
         "hourInEarthSeconds": 1148.60956815073,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 573 · 18:25"
       }
     },
     {
@@ -825,7 +873,8 @@
         "formatted": "13:41:52",
         "dayNumber": 860,
         "hourInEarthSeconds": 1148.60956815073,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 860 · 13:41"
       }
     },
     {
@@ -841,7 +890,8 @@
         "formatted": "06:18:24",
         "dayNumber": 29008,
         "hourInEarthSeconds": 1148.60956815073,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 29,008 · 06:18"
       }
     },
     {
@@ -857,7 +907,8 @@
         "formatted": "08:02:05",
         "dayNumber": 0,
         "hourInEarthSeconds": 4553.15403026054,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 0 · 08:02"
       }
     },
     {
@@ -873,7 +924,8 @@
         "formatted": "15:46:50",
         "dayNumber": 72,
         "hourInEarthSeconds": 4553.15403026054,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 72 · 15:46"
       }
     },
     {
@@ -889,7 +941,8 @@
         "formatted": "00:23:12",
         "dayNumber": 145,
         "hourInEarthSeconds": 4553.15403026054,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 145 · 00:23"
       }
     },
     {
@@ -905,7 +958,8 @@
         "formatted": "09:10:54",
         "dayNumber": 217,
         "hourInEarthSeconds": 4553.15403026054,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 217 · 09:10"
       }
     },
     {
@@ -921,7 +975,8 @@
         "formatted": "02:48:05",
         "dayNumber": 7318,
         "hourInEarthSeconds": 4553.15403026054,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 7,318 · 02:48"
       }
     },
     {
@@ -937,7 +992,8 @@
         "formatted": "10:49:12",
         "dayNumber": 0,
         "hourInEarthSeconds": 6371.49763390246,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 0 · 10:49"
       }
     },
     {
@@ -953,7 +1009,8 @@
         "formatted": "03:32:40",
         "dayNumber": 52,
         "hourInEarthSeconds": 6371.49763390246,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 52 · 03:32"
       }
     },
     {
@@ -969,7 +1026,8 @@
         "formatted": "20:16:39",
         "dayNumber": 103,
         "hourInEarthSeconds": 6371.49763390246,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 103 · 20:16"
       }
     },
     {
@@ -985,7 +1043,8 @@
         "formatted": "13:00:59",
         "dayNumber": 155,
         "hourInEarthSeconds": 6371.49763390246,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 155 · 13:00"
       }
     },
     {
@@ -1001,7 +1060,8 @@
         "formatted": "19:24:18",
         "dayNumber": 5229,
         "hourInEarthSeconds": 6371.49763390246,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 5,229 · 19:24"
       }
     },
     {
@@ -1017,7 +1077,8 @@
         "formatted": "23:51:33",
         "dayNumber": -1,
         "hourInEarthSeconds": 12794.7384679395,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day -1 · 23:51"
       }
     },
     {
@@ -1033,7 +1094,8 @@
         "formatted": "17:41:42",
         "dayNumber": 25,
         "hourInEarthSeconds": 12794.7384679395,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 25 · 17:41"
       }
     },
     {
@@ -1049,7 +1111,8 @@
         "formatted": "11:31:53",
         "dayNumber": 51,
         "hourInEarthSeconds": 12794.7384679395,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 51 · 11:31"
       }
     },
     {
@@ -1065,7 +1128,8 @@
         "formatted": "05:21:58",
         "dayNumber": 77,
         "hourInEarthSeconds": 12794.7384679395,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 77 · 05:21"
       }
     },
     {
@@ -1081,7 +1145,8 @@
         "formatted": "02:15:50",
         "dayNumber": 2604,
         "hourInEarthSeconds": 12794.7384679395,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 2,604 · 02:15"
       }
     },
     {
@@ -1097,7 +1162,8 @@
         "formatted": "00:24:26",
         "dayNumber": 0,
         "hourInEarthSeconds": 25798.9917506672,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 0 · 00:24"
       }
     },
     {
@@ -1113,7 +1179,8 @@
         "formatted": "18:47:38",
         "dayNumber": 12,
         "hourInEarthSeconds": 25798.9917506672,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 12 · 18:47"
       }
     },
     {
@@ -1129,7 +1196,8 @@
         "formatted": "13:10:28",
         "dayNumber": 25,
         "hourInEarthSeconds": 25798.9917506672,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 25 · 13:10"
       }
     },
     {
@@ -1145,7 +1213,8 @@
         "formatted": "07:33:38",
         "dayNumber": 38,
         "hourInEarthSeconds": 25798.9917506672,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 38 · 07:33"
       }
     },
     {
@@ -1161,7 +1230,8 @@
         "formatted": "11:43:01",
         "dayNumber": 1291,
         "hourInEarthSeconds": 25798.9917506672,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 1,291 · 11:43"
       }
     },
     {
@@ -1177,7 +1247,8 @@
         "formatted": "14:48:12",
         "dayNumber": -1,
         "hourInEarthSeconds": 60312.7756729163,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day -1 · 14:48"
       }
     },
     {
@@ -1193,7 +1264,8 @@
         "formatted": "01:49:40",
         "dayNumber": 5,
         "hourInEarthSeconds": 60312.7756729163,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 5 · 01:49"
       }
     },
     {
@@ -1209,7 +1281,8 @@
         "formatted": "12:51:38",
         "dayNumber": 10,
         "hourInEarthSeconds": 60312.7756729163,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 10 · 12:51"
       }
     },
     {
@@ -1225,7 +1298,8 @@
         "formatted": "23:54:09",
         "dayNumber": 15,
         "hourInEarthSeconds": 60312.7756729163,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 15 · 23:54"
       }
     },
     {
@@ -1241,7 +1315,8 @@
         "formatted": "01:01:23",
         "dayNumber": 552,
         "hourInEarthSeconds": 60312.7756729163,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 552 · 01:01"
       }
     },
     {
@@ -1257,7 +1332,8 @@
         "formatted": "12:54:17",
         "dayNumber": -1,
         "hourInEarthSeconds": 1793.65153071504,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day -1 · 12:54"
       }
     },
     {
@@ -1273,7 +1349,8 @@
         "formatted": "04:24:01",
         "dayNumber": 183,
         "hourInEarthSeconds": 1793.65153071504,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 183 · 04:24"
       }
     },
     {
@@ -1289,7 +1366,8 @@
         "formatted": "19:54:06",
         "dayNumber": 366,
         "hourInEarthSeconds": 1793.65153071504,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 366 · 19:54"
       }
     },
     {
@@ -1305,7 +1383,8 @@
         "formatted": "11:24:29",
         "dayNumber": 550,
         "hourInEarthSeconds": 1793.65153071504,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 550 · 11:24"
       }
     },
     {
@@ -1321,7 +1400,8 @@
         "formatted": "13:04:03",
         "dayNumber": 18575,
         "hourInEarthSeconds": 1793.65153071504,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 18,575 · 13:04"
       }
     },
     {
@@ -1337,7 +1417,8 @@
         "formatted": "04:00:48",
         "dayNumber": 0,
         "hourInEarthSeconds": 3393.01580927691,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 0 · 04:00"
       }
     },
     {
@@ -1353,7 +1434,8 @@
         "formatted": "05:57:12",
         "dayNumber": 97,
         "hourInEarthSeconds": 3393.01580927691,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 97 · 05:57"
       }
     },
     {
@@ -1369,7 +1451,8 @@
         "formatted": "07:53:21",
         "dayNumber": 194,
         "hourInEarthSeconds": 3393.01580927691,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 194 · 07:53"
       }
     },
     {
@@ -1385,7 +1468,8 @@
         "formatted": "09:49:17",
         "dayNumber": 291,
         "hourInEarthSeconds": 3393.01580927691,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 291 · 09:49"
       }
     },
     {
@@ -1401,7 +1485,8 @@
         "formatted": "00:16:15",
         "dayNumber": 9820,
         "hourInEarthSeconds": 3393.01580927691,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 9,820 · 00:16"
       }
     },
     {
@@ -1417,7 +1502,8 @@
         "formatted": "06:12:16",
         "dayNumber": 0,
         "hourInEarthSeconds": 4933.41356746808,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 0 · 06:12"
       }
     },
     {
@@ -1433,7 +1519,8 @@
         "formatted": "00:38:28",
         "dayNumber": 67,
         "hourInEarthSeconds": 4933.41356746808,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 67 · 00:38"
       }
     },
     {
@@ -1449,7 +1536,8 @@
         "formatted": "19:04:29",
         "dayNumber": 133,
         "hourInEarthSeconds": 4933.41356746808,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 133 · 19:04"
       }
     },
     {
@@ -1465,7 +1553,8 @@
         "formatted": "13:30:19",
         "dayNumber": 200,
         "hourInEarthSeconds": 4933.41356746808,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 200 · 13:30"
       }
     },
     {
@@ -1481,7 +1570,8 @@
         "formatted": "23:24:54",
         "dayNumber": 6753,
         "hourInEarthSeconds": 4933.41356746808,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 6,753 · 23:24"
       }
     },
     {
@@ -1497,7 +1587,8 @@
         "formatted": "06:22:48",
         "dayNumber": 0,
         "hourInEarthSeconds": 6797.28223057648,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 0 · 06:22"
       }
     },
     {
@@ -1513,7 +1604,8 @@
         "formatted": "17:24:32",
         "dayNumber": 48,
         "hourInEarthSeconds": 6797.28223057648,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 48 · 17:24"
       }
     },
     {
@@ -1529,7 +1621,8 @@
         "formatted": "04:26:11",
         "dayNumber": 97,
         "hourInEarthSeconds": 6797.28223057648,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 97 · 04:26"
       }
     },
     {
@@ -1545,7 +1638,8 @@
         "formatted": "15:27:28",
         "dayNumber": 145,
         "hourInEarthSeconds": 6797.28223057648,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 145 · 15:27"
       }
     },
     {
@@ -1561,7 +1655,8 @@
         "formatted": "01:25:06",
         "dayNumber": 4902,
         "hourInEarthSeconds": 6797.28223057648,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 4,902 · 01:25"
       }
     },
     {
@@ -1577,7 +1672,8 @@
         "formatted": "05:37:21",
         "dayNumber": 0,
         "hourInEarthSeconds": 9855.40376150484,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 0 · 05:37"
       }
     },
     {
@@ -1593,7 +1689,8 @@
         "formatted": "15:45:30",
         "dayNumber": 33,
         "hourInEarthSeconds": 9855.40376150484,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 33 · 15:45"
       }
     },
     {
@@ -1609,7 +1706,8 @@
         "formatted": "01:53:29",
         "dayNumber": 67,
         "hourInEarthSeconds": 9855.40376150484,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 67 · 01:53"
       }
     },
     {
@@ -1625,7 +1723,8 @@
         "formatted": "12:01:06",
         "dayNumber": 100,
         "hourInEarthSeconds": 9855.40376150484,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 100 · 12:01"
       }
     },
     {
@@ -1641,7 +1740,8 @@
         "formatted": "00:07:09",
         "dayNumber": 3381,
         "hourInEarthSeconds": 9855.40376150484,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 3,381 · 00:07"
       }
     },
     {
@@ -1657,7 +1757,8 @@
         "formatted": "21:26:31",
         "dayNumber": -1,
         "hourInEarthSeconds": 16269.8428131743,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day -1 · 21:26"
       }
     },
     {
@@ -1673,7 +1774,8 @@
         "formatted": "03:19:24",
         "dayNumber": 20,
         "hourInEarthSeconds": 16269.8428131743,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 20 · 03:19"
       }
     },
     {
@@ -1689,7 +1791,8 @@
         "formatted": "09:12:00",
         "dayNumber": 40,
         "hourInEarthSeconds": 16269.8428131743,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 40 · 09:12"
       }
     },
     {
@@ -1705,7 +1808,8 @@
         "formatted": "15:04:31",
         "dayNumber": 60,
         "hourInEarthSeconds": 16269.8428131743,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 60 · 15:04"
       }
     },
     {
@@ -1721,7 +1825,8 @@
         "formatted": "18:46:50",
         "dayNumber": 2047,
         "hourInEarthSeconds": 16269.8428131743,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 2,047 · 18:46"
       }
     },
     {
@@ -1737,7 +1842,8 @@
         "formatted": "18:08:14",
         "dayNumber": -1,
         "hourInEarthSeconds": 57488.8376830655,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day -1 · 18:08"
       }
     },
     {
@@ -1753,7 +1859,8 @@
         "formatted": "11:37:56",
         "dayNumber": 5,
         "hourInEarthSeconds": 57488.8376830655,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 5 · 11:37"
       }
     },
     {
@@ -1769,7 +1876,8 @@
         "formatted": "05:07:27",
         "dayNumber": 11,
         "hourInEarthSeconds": 57488.8376830655,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 11 · 05:07"
       }
     },
     {
@@ -1785,7 +1893,8 @@
         "formatted": "22:36:18",
         "dayNumber": 16,
         "hourInEarthSeconds": 57488.8376830655,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 16 · 22:36"
       }
     },
     {
@@ -1801,7 +1910,8 @@
         "formatted": "07:46:02",
         "dayNumber": 579,
         "hourInEarthSeconds": 57488.8376830655,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 579 · 07:46"
       }
     },
     {
@@ -1817,7 +1927,8 @@
         "formatted": "23:42:30",
         "dayNumber": -1,
         "hourInEarthSeconds": 287713.108542894,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day -1 · 23:42"
       }
     },
     {
@@ -1833,7 +1944,8 @@
         "formatted": "03:09:10",
         "dayNumber": 1,
         "hourInEarthSeconds": 287713.108542894,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 1 · 03:09"
       }
     },
     {
@@ -1849,7 +1961,8 @@
         "formatted": "06:36:08",
         "dayNumber": 2,
         "hourInEarthSeconds": 287713.108542894,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 2 · 06:36"
       }
     },
     {
@@ -1865,7 +1978,8 @@
         "formatted": "10:03:28",
         "dayNumber": 3,
         "hourInEarthSeconds": 287713.108542894,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 3 · 10:03"
       }
     },
     {
@@ -1881,7 +1995,8 @@
         "formatted": "19:08:47",
         "dayNumber": 115,
         "hourInEarthSeconds": 287713.108542894,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 115 · 19:08"
       }
     },
     {
@@ -1897,7 +2012,8 @@
         "formatted": "14:35:46",
         "dayNumber": -1,
         "hourInEarthSeconds": 1391.14675032125,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day -1 · 14:35"
       }
     },
     {
@@ -1913,7 +2029,8 @@
         "formatted": "09:21:53",
         "dayNumber": 236,
         "hourInEarthSeconds": 1391.14675032125,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 236 · 09:21"
       }
     },
     {
@@ -1929,7 +2046,8 @@
         "formatted": "04:04:59",
         "dayNumber": 473,
         "hourInEarthSeconds": 1391.14675032125,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 473 · 04:04"
       }
     },
     {
@@ -1945,7 +2063,8 @@
         "formatted": "22:48:29",
         "dayNumber": 709,
         "hourInEarthSeconds": 1391.14675032125,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 709 · 22:48"
       }
     },
     {
@@ -1961,7 +2080,8 @@
         "formatted": "06:47:44",
         "dayNumber": 23950,
         "hourInEarthSeconds": 1391.14675032125,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 23,950 · 06:47"
       }
     },
     {
@@ -1977,7 +2097,8 @@
         "formatted": "12:52:59",
         "dayNumber": -1,
         "hourInEarthSeconds": 9072.6187911402,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day -1 · 12:52"
       }
     },
     {
@@ -1993,7 +2114,8 @@
         "formatted": "20:11:33",
         "dayNumber": 35,
         "hourInEarthSeconds": 9072.6187911402,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 35 · 20:11"
       }
     },
     {
@@ -2009,7 +2131,8 @@
         "formatted": "03:30:09",
         "dayNumber": 72,
         "hourInEarthSeconds": 9072.6187911402,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 72 · 03:30"
       }
     },
     {
@@ -2025,7 +2148,8 @@
         "formatted": "10:48:42",
         "dayNumber": 108,
         "hourInEarthSeconds": 9072.6187911402,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 108 · 10:48"
       }
     },
     {
@@ -2041,7 +2165,8 @@
         "formatted": "18:30:11",
         "dayNumber": 3672,
         "hourInEarthSeconds": 9072.6187911402,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 3,672 · 18:30"
       }
     },
     {
@@ -2057,7 +2182,8 @@
         "formatted": "16:05:38",
         "dayNumber": -1,
         "hourInEarthSeconds": 14917.0200329147,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day -1 · 16:05"
       }
     },
     {
@@ -2073,7 +2199,8 @@
         "formatted": "18:00:23",
         "dayNumber": 21,
         "hourInEarthSeconds": 14917.0200329147,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 21 · 18:00"
       }
     },
     {
@@ -2089,7 +2216,8 @@
         "formatted": "19:55:07",
         "dayNumber": 43,
         "hourInEarthSeconds": 14917.0200329147,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 43 · 19:55"
       }
     },
     {
@@ -2105,7 +2233,8 @@
         "formatted": "21:49:51",
         "dayNumber": 65,
         "hourInEarthSeconds": 14917.0200329147,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 65 · 21:49"
       }
     },
     {
@@ -2121,7 +2250,8 @@
         "formatted": "01:16:53",
         "dayNumber": 2234,
         "hourInEarthSeconds": 14917.0200329147,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 2,234 · 01:16"
       }
     },
     {
@@ -2137,7 +2267,8 @@
         "formatted": "18:06:52",
         "dayNumber": -1,
         "hourInEarthSeconds": 31332.2268567291,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day -1 · 18:06"
       }
     },
     {
@@ -2153,7 +2284,8 @@
         "formatted": "06:22:18",
         "dayNumber": 10,
         "hourInEarthSeconds": 31332.2268567291,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 10 · 06:22"
       }
     },
     {
@@ -2169,7 +2301,8 @@
         "formatted": "18:37:34",
         "dayNumber": 20,
         "hourInEarthSeconds": 31332.2268567291,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 20 · 18:37"
       }
     },
     {
@@ -2185,7 +2318,8 @@
         "formatted": "06:52:58",
         "dayNumber": 31,
         "hourInEarthSeconds": 31332.2268567291,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 31 · 06:52"
       }
     },
     {
@@ -2201,7 +2335,8 @@
         "formatted": "22:16:09",
         "dayNumber": 1062,
         "hourInEarthSeconds": 31332.2268567291,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 1,062 · 22:16"
       }
     },
     {
@@ -2217,7 +2352,8 @@
         "formatted": "22:50:46",
         "dayNumber": -1,
         "hourInEarthSeconds": 48446.3806447095,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day -1 · 22:50"
       }
     },
     {
@@ -2233,7 +2369,8 @@
         "formatted": "17:58:07",
         "dayNumber": 6,
         "hourInEarthSeconds": 48446.3806447095,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 6 · 17:58"
       }
     },
     {
@@ -2249,7 +2386,8 @@
         "formatted": "13:05:31",
         "dayNumber": 13,
         "hourInEarthSeconds": 48446.3806447095,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 13 · 13:05"
       }
     },
     {
@@ -2265,7 +2403,8 @@
         "formatted": "08:12:56",
         "dayNumber": 20,
         "hourInEarthSeconds": 48446.3806447095,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 20 · 08:12"
       }
     },
     {
@@ -2281,7 +2420,8 @@
         "formatted": "11:11:35",
         "dayNumber": 687,
         "hourInEarthSeconds": 48446.3806447095,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 687 · 11:11"
       }
     },
     {
@@ -2297,7 +2437,8 @@
         "formatted": "21:15:00",
         "dayNumber": -1,
         "hourInEarthSeconds": 5088.29085841815,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day -1 · 21:15"
       }
     },
     {
@@ -2313,7 +2454,8 @@
         "formatted": "14:52:32",
         "dayNumber": 64,
         "hourInEarthSeconds": 5088.29085841815,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 64 · 14:52"
       }
     },
     {
@@ -2329,7 +2471,8 @@
         "formatted": "08:30:04",
         "dayNumber": 129,
         "hourInEarthSeconds": 5088.29085841815,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 129 · 08:30"
       }
     },
     {
@@ -2345,7 +2488,8 @@
         "formatted": "02:07:33",
         "dayNumber": 194,
         "hourInEarthSeconds": 5088.29085841815,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 194 · 02:07"
       }
     },
     {
@@ -2361,7 +2505,8 @@
         "formatted": "19:17:12",
         "dayNumber": 6547,
         "hourInEarthSeconds": 5088.29085841815,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 6,547 · 19:17"
       }
     },
     {
@@ -2377,7 +2522,8 @@
         "formatted": "22:43:29",
         "dayNumber": -1,
         "hourInEarthSeconds": 21154.6091745336,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day -1 · 22:43"
       }
     },
     {
@@ -2393,7 +2539,8 @@
         "formatted": "12:26:08",
         "dayNumber": 15,
         "hourInEarthSeconds": 21154.6091745336,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 15 · 12:26"
       }
     },
     {
@@ -2409,7 +2556,8 @@
         "formatted": "02:08:48",
         "dayNumber": 31,
         "hourInEarthSeconds": 21154.6091745336,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 31 · 02:08"
       }
     },
     {
@@ -2425,7 +2573,8 @@
         "formatted": "15:51:26",
         "dayNumber": 46,
         "hourInEarthSeconds": 21154.6091745336,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 46 · 15:51"
       }
     },
     {
@@ -2441,7 +2590,8 @@
         "formatted": "23:33:49",
         "dayNumber": 1574,
         "hourInEarthSeconds": 21154.6091745336,
-        "sunRisesInTheWest": true
+        "sunRisesInTheWest": true,
+        "localTime": "day 1,574 · 23:33"
       }
     },
     {
@@ -2457,7 +2607,8 @@
         "formatted": "11:44:00",
         "dayNumber": 0,
         "hourInEarthSeconds": 4040.41106678676,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 0 · 11:44"
       }
     },
     {
@@ -2473,7 +2624,8 @@
         "formatted": "00:21:41",
         "dayNumber": 82,
         "hourInEarthSeconds": 4040.41106678676,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 82 · 00:21"
       }
     },
     {
@@ -2489,7 +2641,8 @@
         "formatted": "12:59:23",
         "dayNumber": 163,
         "hourInEarthSeconds": 4040.41106678676,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 163 · 12:59"
       }
     },
     {
@@ -2505,7 +2658,8 @@
         "formatted": "01:37:04",
         "dayNumber": 245,
         "hourInEarthSeconds": 4040.41106678676,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 245 · 01:37"
       }
     },
     {
@@ -2521,7 +2675,8 @@
         "formatted": "21:17:33",
         "dayNumber": 8246,
         "hourInEarthSeconds": 4040.41106678676,
-        "sunRisesInTheWest": false
+        "sunRisesInTheWest": false,
+        "localTime": "day 8,246 · 21:17"
       }
     }
   ]

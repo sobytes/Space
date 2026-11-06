@@ -27,13 +27,11 @@
  * because the days are different lengths.
  *
  * One caveat belongs on Earth specifically. The IAU gives it a uniformly rotating prime
- * meridian, W = 190.147 + 360.9856235 d, which puts the meridian at right ascension 280.147
- * degrees at J2000 where true Greenwich sidereal time is 280.46. That rounding is 75 seconds
- * of rotation, and by 2026 a linear rate has drifted a little further from Earth's actual,
- * irregular UT1, for a measured constant 92 seconds. The shape of the equation of time comes
- * out to within ten seconds across the year, so the geometry is right; matching a real sundial
- * to the second would need ERA, precession-nutation and UT1, none of which this engine carries
- * and none of which the other 31 bodies need. The constant is documented and pinned by a test
+ * meridian, W = 190.147 + 360.9856235 d, which does not track Earth's actual, irregular
+ * rotation. Against the published equation of time the shape comes out right, to about six
+ * seconds across the year, with a constant 22.8 second offset left over. Matching a real
+ * sundial to the second would need ERA, precession-nutation and UT1, none of which this engine
+ * carries and none of which the other 31 bodies need, so the constant is pinned by a test
  * rather than tuned away.
  *
  * What this returns is apparent solar time, the sundial reading, because that is what the
@@ -47,7 +45,7 @@ import { BODY_CONTRACTS, type BodyId } from "./bodies/registry";
 import { heliocentricPositionOf } from "./bodies/position";
 import { OBLIQUITY_J2000_DEG } from "./rotation";
 import { timeSense } from "./time-sense";
-import { J2000_JD, type JdTdb } from "./time";
+import { J2000_JD, epochMsFromJdUtc, utcFromTdb, type JdTdb } from "./time";
 import { DAYS_PER_JULIAN_CENTURY } from "./units";
 import type { Vec3 } from "./vec";
 
@@ -196,7 +194,14 @@ export function solarClock(body: BodyId, epoch: JdTdb): SolarClock | null {
    * notice. So the fraction is taken from the clock itself and subtracted off first.
    */
   const elapsedSols = (epoch - J2000_JD) / solLengthDays;
-  const dayNumber = Math.round(elapsedSols - hours / 24);
+  /**
+   * Normalised away from negative zero, which JavaScript has and Swift does not.
+   *
+   * `Math.round(-0.3)` is -0, and `(-0).toLocaleString()` prints "-0", so the day before the
+   * epoch read "day -0" in a browser and "day 0" on a phone. The conformance caught it; the
+   * screen would have shown it to someone eventually.
+   */
+  const dayNumber = Math.round(elapsedSols - hours / 24) + 0;
 
   // Belt and braces after the crash above. Nothing should reach here non-finite now, and a
   // wrong number on a panel is still better than a trap on a phone.
@@ -217,4 +222,42 @@ export function solarClock(body: BodyId, epoch: JdTdb): SolarClock | null {
     dayNumber,
     sunRisesInTheWest: retrograde,
   };
+}
+
+/**
+ * The date and time where that body is, now, as a label can carry it.
+ *
+ * Asked for after the first attempt showed how long a day and a year last there, which is a
+ * fact about the body and not a clock: "i expect it to say year 2026 and month etc and
+ * increase by the time setting". So this is the reading, and it moves when the clock does.
+ *
+ * Earth gets the calendar, because Earth has one. Nowhere else does. A date is a count of days
+ * into a year with names agreed by people who live there, and the only body with people on it
+ * has already agreed them, so inventing Martian months would be making something up and
+ * printing it next to measured figures. What every body does have is a count of its own days
+ * and a time of day at its prime meridian, which is exactly what Mars missions run on: sols
+ * since a fixed epoch, and the clock at Airy-0. That generalises honestly to all 32.
+ *
+ * Null for the Sun, which has no sunrise to count from.
+ */
+export function localTimeLabel(body: BodyId, epoch: JdTdb): string | null {
+  const clock = solarClock(body, epoch);
+  if (clock === null) return null;
+
+  if (body === "embary") {
+    // Earth's civil time, which is what the clock at the bottom of the screen already shows.
+    /**
+     * Snapped to the second before truncating to the minute.
+     *
+     * The round trip through TDB is good to about four microseconds, and truncation turns
+     * four microseconds short of a minute into a whole minute lost: an exact 00:01:00 came
+     * back as 00:00:59.999996 and displayed as 00:00. Rounding away float noise is not the
+     * same as inventing precision.
+     */
+    const ms = Math.round(epochMsFromJdUtc(utcFromTdb(epoch)) / 1000) * 1000;
+    return new Date(ms).toISOString().slice(0, 16).replace("T", " ");
+  }
+
+  const hhmm = clock.formatted.slice(0, 5);
+  return `day ${clock.dayNumber.toLocaleString()} · ${hhmm}`;
 }

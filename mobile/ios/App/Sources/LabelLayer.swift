@@ -101,19 +101,22 @@ struct LabelLayer: View {
              labels on screen then, not six.
              */
             /**
-             Satellites of the focus, except in the system view, where every planet is one.
+             The date and time where that body is, now, ticking with the clock.
 
-             The first version of this rule said "the focus and its satellites", which with the
-             Sun focused means all eight planets, so nothing was thinned and the sprawl stayed
-             exactly as reported. Focusing a planet is the case the full badge is for: two or
-             three labels, and the Moon's month next to Earth's year.
+             This showed how long a day and a year last there, which is a fact about the body
+             rather than a clock, and was asked to be the reading instead: "i expect it to say
+             year 2026 and month etc and increase by the time setting". Earth gets the
+             calendar because Earth has one; everywhere else gets a count of its own days and
+             the time at its prime meridian, which is what Mars missions actually run on.
+
+             Read from the scene's cache rather than computed here, because this view redraws
+             every frame and each of these is an ephemeris evaluation.
              */
-            let detailed = !placement.clamped
-                && (isFocus
-                    || (scene.focus != .sun && childrenOf(scene.focus).contains(placement.id)))
-            Text(detailed ? timeBadge(placement.id) : timeBadgeShort(placement.id))
-                .font(.system(size: 9))
-                .foregroundStyle(.white.opacity(0.45))
+            if let local = scene.localTimes[placement.id] {
+                Text(local)
+                    .font(.system(size: 9).monospacedDigit())
+                    .foregroundStyle(.white.opacity(0.5))
+            }
         }
         .foregroundStyle(isFocus ? .white : .white.opacity(0.72))
         .padding(.horizontal, 5)

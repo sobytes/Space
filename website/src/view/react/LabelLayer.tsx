@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { BODY_CONTRACTS, childrenOf } from "@solar/engine/bodies/registry";
 import { placeLabels, type LabelInput } from "@solar/engine/labels";
-import { timeBadge, timeBadgeShort } from "@solar/engine/time-sense";
+import { localTimeLabel } from "@solar/engine/solar-time";
 import { useViewport } from "./ViewportContext";
 
 /**
@@ -44,7 +44,7 @@ export function LabelLayer({ visible }: { visible: boolean }) {
 
   if (!visible) return null;
 
-  const { focus } = viewport.snapshot();
+  const { focus, epoch: publishedEpoch } = viewport.snapshot();
   const satellites = new Set(childrenOf(focus));
   const width = window.innerWidth;
   const height = window.innerHeight;
@@ -84,9 +84,7 @@ export function LabelLayer({ visible }: { visible: boolean }) {
          * sprawl stayed exactly as reported. Focusing a planet is the case the full badge is
          * for: two or three labels, and the Moon's month next to Earth's year.
          */
-        const detailed =
-          !placement.clamped
-          && (isFocus || (focus !== "sun" && satellites.has(placement.id)));
+        const localTime = localTimeLabel(placement.id, publishedEpoch);
         // The arrow goes on the side the body is on. Always placing it first put a pointer
         // on the left of a name whose body was off to the right.
         const trailing =
@@ -131,18 +129,21 @@ export function LabelLayer({ visible }: { visible: boolean }) {
               keeps labels 44 px inside the viewport, which is room enough for a second line.
             */}
             {/*
-              The full two-figure badge only where the comparison is the point: the body in
-              focus and the moons going round it. Everything else gets one figure.
+              The date and time where that body is, now, ticking with the clock.
 
-              Both figures on every label made each one several times wider than its name, and
-              in the system view six of them sprawled across each other and across the planets
-              between them, which read as the times belonging to the wrong bodies. The moment
-              the comparison actually matters is Earth against its own Moon, and there are two
-              labels on screen then, not six.
+              This showed how long a day and a year last there, which is a fact about the body
+              rather than a clock, and was asked to be the reading instead. Earth gets the
+              calendar because Earth has one; everywhere else gets a count of its own days and
+              the time at its prime meridian, which is what Mars missions actually run on.
+
+              Read from the throttled epoch, not the animation frame this layer redraws on: a
+              clock showing minutes has no use for sixty ephemeris evaluations a second.
             */}
-            <span className="text-[9px] font-normal leading-tight text-white/45">
-              {detailed ? timeBadge(placement.id) : timeBadgeShort(placement.id)}
-            </span>
+            {localTime !== null ? (
+              <span className="font-mono text-[9px] leading-tight tabular-nums text-white/50">
+                {localTime}
+              </span>
+            ) : null}
           </div>
         );
       })}

@@ -296,6 +296,8 @@ final class ConformanceTests: XCTestCase {
                 "dayNumber": .number(Double(clock.dayNumber)),
                 "hourInEarthSeconds": .number(clock.hourInEarthSeconds),
                 "sunRisesInTheWest": .bool(clock.sunRisesInTheWest),
+                "localTime": localTimeLabel(clockBody, at: JdTdb(number(input, "epoch")))
+                    .map { JSON.string($0) } ?? .null,
             ])
 
         /// Going to a date, and what the tables can honestly say there.
