@@ -192,6 +192,12 @@ ${credited
   )
   .join("\n")}
 
+## The app icon
+
+The icon on both clients is a render of Earth made from \`earth-day\`, \`earth-night\` and
+\`earth-clouds\` above, by \`scripts/make-icon.mjs\`. It is a derivative of those textures and
+carries their licence and this credit; it is not a separate work.
+
 ## Deliberately not used
 
 ${manifest.excluded.map((e) => `- **${e.source}**: ${e.reason}`).join("\n")}

@@ -35,6 +35,10 @@ targets:
       - path: App/Sources
       - path: App/Resources
         buildPhase: resources
+      # Its own entry rather than a file inside App/Resources. That folder is copied
+      # verbatim, and a catalogue copied verbatim is never run through actool, so the icon
+      # ships as an unreferenced .xcassets folder and the home screen stays blank.
+      - path: App/Assets.xcassets
     dependencies:
       - package: SolarKit
         product: SolarKit
@@ -69,6 +73,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.sobytes.solar
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         GENERATE_INFOPLIST_FILE: NO
         SWIFT_VERSION: "6.0"
         TARGETED_DEVICE_FAMILY: "1,2"

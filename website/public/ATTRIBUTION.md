@@ -52,6 +52,12 @@ Terms: https://www.solarsystemscope.com/textures/
 | uranus | `uranus.webp` | 2048 | 9 KB | CC BY 4.0 | https://www.solarsystemscope.com/textures/download/2k_uranus.jpg |
 | neptune | `neptune.webp` | 2048 | 16 KB | CC BY 4.0 | https://www.solarsystemscope.com/textures/download/2k_neptune.jpg |
 
+## The app icon
+
+The icon on both clients is a render of Earth made from `earth-day`, `earth-night` and
+`earth-clouds` above, by `scripts/make-icon.mjs`. It is a derivative of those textures and
+carries their licence and this credit; it is not a separate work.
+
 ## Deliberately not used
 
 - **bjj.mmedia.is**: its own terms forbid hosting a copy of the maps
