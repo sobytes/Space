@@ -298,12 +298,37 @@ describe("what a body's hour is worth", () => {
  */
 describe("the local time on a label", () => {
   it("gives Earth the calendar date, because Earth has a calendar", () => {
-    expect(localTimeLabel("embary", at("2026-11-06T21:52:00Z"))).toBe("2026-11-06 21:52");
+    expect(localTimeLabel("embary", at("2026-11-06T21:52:00Z"))).toBe("2026-11-06 21:52 UTC");
   });
 
   it("gives everywhere else its own day count and the time at its prime meridian", () => {
     expect(localTimeLabel("mars", at("2026-11-06T21:52:00Z"))).toMatch(/^day [\d,]+ · \d\d:\d\d$/);
     expect(localTimeLabel("moon", at("2026-11-06T21:52:00Z"))).toMatch(/^day [\d,]+ · \d\d:\d\d$/);
+  });
+
+  /**
+   * A time with no zone on it is not a time, it is a number that looks like one.
+   *
+   * The zone is passed in rather than read from the machine, so this is deterministic and the
+   * same cases can be gated across both clients. Offsets are applied to the instant, not to a
+   * formatter, which is what makes a half-hour offset and a date rollover both come out right.
+   */
+  it("quotes Earth's time in the zone it was given", () => {
+    const epoch = at("2026-11-06T22:04:00Z");
+    expect(localTimeLabel("embary", epoch)).toBe("2026-11-06 22:04 UTC");
+    expect(localTimeLabel("embary", epoch, { offsetMinutes: -300, label: "EST" }))
+      .toBe("2026-11-06 17:04 EST");
+    expect(localTimeLabel("embary", epoch, { offsetMinutes: 540, label: "JST" }))
+      .toBe("2026-11-07 07:04 JST");
+    // Half-hour offsets exist and are the ones a naive hour-based shift gets wrong.
+    expect(localTimeLabel("embary", epoch, { offsetMinutes: 330, label: "+05:30" }))
+      .toBe("2026-11-07 03:34 +05:30");
+  });
+
+  it("leaves every other body alone, because a zone is an Earth idea", () => {
+    const epoch = at("2026-11-06T22:04:00Z");
+    expect(localTimeLabel("mars", epoch, { offsetMinutes: -300, label: "EST" }))
+      .toBe(localTimeLabel("mars", epoch));
   });
 
   it("has nothing to say about the Sun, which has no sunrise", () => {
@@ -321,8 +346,8 @@ describe("the local time on a label", () => {
   );
 
   it("rolls Earth's date over at midnight rather than sticking", () => {
-    expect(localTimeLabel("embary", at("2026-11-06T23:59:00Z"))).toBe("2026-11-06 23:59");
-    expect(localTimeLabel("embary", at("2026-11-07T00:01:00Z"))).toBe("2026-11-07 00:01");
+    expect(localTimeLabel("embary", at("2026-11-06T23:59:00Z"))).toBe("2026-11-06 23:59 UTC");
+    expect(localTimeLabel("embary", at("2026-11-07T00:01:00Z"))).toBe("2026-11-07 00:01 UTC");
   });
 
   /** A day on Mars is 24h 39m of ours, so its day count must not advance once per Earth day. */

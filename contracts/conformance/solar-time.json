@@ -58,7 +58,9 @@
         "dayNumber": 0,
         "hourInEarthSeconds": 633379.587236905,
         "sunRisesInTheWest": false,
-        "localTime": "day 0 · 05:42"
+        "localTime": "day 0 · 05:42",
+        "localTimeNewYork": "day 0 · 05:42",
+        "localTimeIndia": "day 0 · 05:42"
       }
     },
     {
@@ -75,7 +77,9 @@
         "dayNumber": 0,
         "hourInEarthSeconds": 633379.587236905,
         "sunRisesInTheWest": false,
-        "localTime": "day 0 · 18:29"
+        "localTime": "day 0 · 18:29",
+        "localTimeNewYork": "day 0 · 18:29",
+        "localTimeIndia": "day 0 · 18:29"
       }
     },
     {
@@ -92,7 +96,9 @@
         "dayNumber": 1,
         "hourInEarthSeconds": 633379.587236905,
         "sunRisesInTheWest": false,
-        "localTime": "day 1 · 07:17"
+        "localTime": "day 1 · 07:17",
+        "localTimeNewYork": "day 1 · 07:17",
+        "localTimeIndia": "day 1 · 07:17"
       }
     },
     {
@@ -109,7 +115,9 @@
         "dayNumber": 1,
         "hourInEarthSeconds": 633379.587236905,
         "sunRisesInTheWest": false,
-        "localTime": "day 1 · 20:03"
+        "localTime": "day 1 · 20:03",
+        "localTimeNewYork": "day 1 · 20:03",
+        "localTimeIndia": "day 1 · 20:03"
       }
     },
     {
@@ -126,7 +134,9 @@
         "dayNumber": 52,
         "hourInEarthSeconds": 633379.587236905,
         "sunRisesInTheWest": false,
-        "localTime": "day 52 · 21:40"
+        "localTime": "day 52 · 21:40",
+        "localTimeNewYork": "day 52 · 21:40",
+        "localTimeIndia": "day 52 · 21:40"
       }
     },
     {
@@ -143,7 +153,9 @@
         "dayNumber": 0,
         "hourInEarthSeconds": 420301.302795179,
         "sunRisesInTheWest": true,
-        "localTime": "day 0 · 01:19"
+        "localTime": "day 0 · 01:19",
+        "localTimeNewYork": "day 0 · 01:19",
+        "localTimeIndia": "day 0 · 01:19"
       }
     },
     {
@@ -160,7 +172,9 @@
         "dayNumber": 0,
         "hourInEarthSeconds": 420301.302795179,
         "sunRisesInTheWest": true,
-        "localTime": "day 0 · 20:04"
+        "localTime": "day 0 · 20:04",
+        "localTimeNewYork": "day 0 · 20:04",
+        "localTimeIndia": "day 0 · 20:04"
       }
     },
     {
@@ -177,7 +191,9 @@
         "dayNumber": 1,
         "hourInEarthSeconds": 420301.302795179,
         "sunRisesInTheWest": true,
-        "localTime": "day 1 · 14:53"
+        "localTime": "day 1 · 14:53",
+        "localTimeNewYork": "day 1 · 14:53",
+        "localTimeIndia": "day 1 · 14:53"
       }
     },
     {
@@ -194,7 +210,9 @@
         "dayNumber": 2,
         "hourInEarthSeconds": 420301.302795179,
         "sunRisesInTheWest": true,
-        "localTime": "day 2 · 09:45"
+        "localTime": "day 2 · 09:45",
+        "localTimeNewYork": "day 2 · 09:45",
+        "localTimeIndia": "day 2 · 09:45"
       }
     },
     {
@@ -211,7 +229,9 @@
         "dayNumber": 79,
         "hourInEarthSeconds": 420301.302795179,
         "sunRisesInTheWest": true,
-        "localTime": "day 79 · 07:53"
+        "localTime": "day 79 · 07:53",
+        "localTimeNewYork": "day 79 · 07:53",
+        "localTimeIndia": "day 79 · 07:53"
       }
     },
     {
@@ -228,7 +248,9 @@
         "dayNumber": 0,
         "hourInEarthSeconds": 3600.00118713258,
         "sunRisesInTheWest": false,
-        "localTime": "2000-01-01 11:58"
+        "localTime": "2000-01-01 11:58 UTC",
+        "localTimeNewYork": "2000-01-01 06:58 EST",
+        "localTimeIndia": "2000-01-01 17:28 +05:30"
       }
     },
     {
@@ -245,7 +267,9 @@
         "dayNumber": 91,
         "hourInEarthSeconds": 3600.00118713258,
         "sunRisesInTheWest": false,
-        "localTime": "2000-04-01 23:58"
+        "localTime": "2000-04-01 23:58 UTC",
+        "localTimeNewYork": "2000-04-01 18:58 EST",
+        "localTimeIndia": "2000-04-02 05:28 +05:30"
       }
     },
     {
@@ -262,7 +286,9 @@
         "dayNumber": 183,
         "hourInEarthSeconds": 3600.00118713258,
         "sunRisesInTheWest": false,
-        "localTime": "2000-07-02 11:58"
+        "localTime": "2000-07-02 11:58 UTC",
+        "localTimeNewYork": "2000-07-02 06:58 EST",
+        "localTimeIndia": "2000-07-02 17:28 +05:30"
       }
     },
     {
@@ -279,7 +305,9 @@
         "dayNumber": 274,
         "hourInEarthSeconds": 3600.00118713258,
         "sunRisesInTheWest": false,
-        "localTime": "2000-10-01 23:58"
+        "localTime": "2000-10-01 23:58 UTC",
+        "localTimeNewYork": "2000-10-01 18:58 EST",
+        "localTimeIndia": "2000-10-02 05:28 +05:30"
       }
     },
     {
@@ -296,7 +324,9 @@
         "dayNumber": 9254,
         "hourInEarthSeconds": 3600.00118713258,
         "sunRisesInTheWest": false,
-        "localTime": "2025-05-04 17:58"
+        "localTime": "2025-05-04 17:58 UTC",
+        "localTimeNewYork": "2025-05-04 12:58 EST",
+        "localTimeIndia": "2025-05-04 23:28 +05:30"
       }
     },
     {
@@ -313,7 +343,9 @@
         "dayNumber": -1,
         "hourInEarthSeconds": 3698.96935643406,
         "sunRisesInTheWest": false,
-        "localTime": "day -1 · 14:32"
+        "localTime": "day -1 · 14:32",
+        "localTimeNewYork": "day -1 · 14:32",
+        "localTimeIndia": "day -1 · 14:32"
       }
     },
     {
@@ -330,7 +362,9 @@
         "dayNumber": 88,
         "hourInEarthSeconds": 3698.96935643406,
         "sunRisesInTheWest": false,
-        "localTime": "day 88 · 15:13"
+        "localTime": "day 88 · 15:13",
+        "localTimeNewYork": "day 88 · 15:13",
+        "localTimeIndia": "day 88 · 15:13"
       }
     },
     {
@@ -347,7 +381,9 @@
         "dayNumber": 177,
         "hourInEarthSeconds": 3698.96935643406,
         "sunRisesInTheWest": false,
-        "localTime": "day 177 · 16:46"
+        "localTime": "day 177 · 16:46",
+        "localTimeNewYork": "day 177 · 16:46",
+        "localTimeIndia": "day 177 · 16:46"
       }
     },
     {
@@ -364,7 +400,9 @@
         "dayNumber": 266,
         "hourInEarthSeconds": 3698.96935643406,
         "sunRisesInTheWest": false,
-        "localTime": "day 266 · 18:31"
+        "localTime": "day 266 · 18:31",
+        "localTimeNewYork": "day 266 · 18:31",
+        "localTimeIndia": "day 266 · 18:31"
       }
     },
     {
@@ -381,7 +419,9 @@
         "dayNumber": 9007,
         "hourInEarthSeconds": 3698.96935643406,
         "sunRisesInTheWest": false,
-        "localTime": "day 9,007 · 05:51"
+        "localTime": "day 9,007 · 05:51",
+        "localTimeNewYork": "day 9,007 · 05:51",
+        "localTimeIndia": "day 9,007 · 05:51"
       }
     },
     {
@@ -398,7 +438,9 @@
         "dayNumber": -1,
         "hourInEarthSeconds": 1488.88610476502,
         "sunRisesInTheWest": false,
-        "localTime": "day -1 · 16:27"
+        "localTime": "day -1 · 16:27",
+        "localTimeNewYork": "day -1 · 16:27",
+        "localTimeIndia": "day -1 · 16:27"
       }
     },
     {
@@ -415,7 +457,9 @@
         "dayNumber": 220,
         "hourInEarthSeconds": 1488.88610476502,
         "sunRisesInTheWest": false,
-        "localTime": "day 220 · 22:10"
+        "localTime": "day 220 · 22:10",
+        "localTimeNewYork": "day 220 · 22:10",
+        "localTimeIndia": "day 220 · 22:10"
       }
     },
     {
@@ -432,7 +476,9 @@
         "dayNumber": 442,
         "hourInEarthSeconds": 1488.88610476502,
         "sunRisesInTheWest": false,
-        "localTime": "day 442 · 03:53"
+        "localTime": "day 442 · 03:53",
+        "localTimeNewYork": "day 442 · 03:53",
+        "localTimeIndia": "day 442 · 03:53"
       }
     },
     {
@@ -449,7 +495,9 @@
         "dayNumber": 663,
         "hourInEarthSeconds": 1488.88610476502,
         "sunRisesInTheWest": false,
-        "localTime": "day 663 · 09:36"
+        "localTime": "day 663 · 09:36",
+        "localTimeNewYork": "day 663 · 09:36",
+        "localTimeIndia": "day 663 · 09:36"
       }
     },
     {
@@ -466,7 +514,9 @@
         "dayNumber": 22378,
         "hourInEarthSeconds": 1488.88610476502,
         "sunRisesInTheWest": false,
-        "localTime": "day 22,378 · 04:11"
+        "localTime": "day 22,378 · 04:11",
+        "localTimeNewYork": "day 22,378 · 04:11",
+        "localTimeIndia": "day 22,378 · 04:11"
       }
     },
     {
@@ -483,7 +533,9 @@
         "dayNumber": 0,
         "hourInEarthSeconds": 1598.50198721641,
         "sunRisesInTheWest": false,
-        "localTime": "day 0 · 08:22"
+        "localTime": "day 0 · 08:22",
+        "localTimeNewYork": "day 0 · 08:22",
+        "localTimeIndia": "day 0 · 08:22"
       }
     },
     {
@@ -500,7 +552,9 @@
         "dayNumber": 206,
         "hourInEarthSeconds": 1598.50198721641,
         "sunRisesInTheWest": false,
-        "localTime": "day 206 · 09:59"
+        "localTime": "day 206 · 09:59",
+        "localTimeNewYork": "day 206 · 09:59",
+        "localTimeIndia": "day 206 · 09:59"
       }
     },
     {
@@ -517,7 +571,9 @@
         "dayNumber": 412,
         "hourInEarthSeconds": 1598.50198721641,
         "sunRisesInTheWest": false,
-        "localTime": "day 412 · 11:35"
+        "localTime": "day 412 · 11:35",
+        "localTimeNewYork": "day 412 · 11:35",
+        "localTimeIndia": "day 412 · 11:35"
       }
     },
     {
@@ -534,7 +590,9 @@
         "dayNumber": 618,
         "hourInEarthSeconds": 1598.50198721641,
         "sunRisesInTheWest": false,
-        "localTime": "day 618 · 13:12"
+        "localTime": "day 618 · 13:12",
+        "localTimeNewYork": "day 618 · 13:12",
+        "localTimeIndia": "day 618 · 13:12"
       }
     },
     {
@@ -551,7 +609,9 @@
         "dayNumber": 20844,
         "hourInEarthSeconds": 1598.50198721641,
         "sunRisesInTheWest": false,
-        "localTime": "day 20,844 · 04:58"
+        "localTime": "day 20,844 · 04:58",
+        "localTimeNewYork": "day 20,844 · 04:58",
+        "localTimeIndia": "day 20,844 · 04:58"
       }
     },
     {
@@ -568,7 +628,9 @@
         "dayNumber": 0,
         "hourInEarthSeconds": 2585.92746866821,
         "sunRisesInTheWest": true,
-        "localTime": "day 0 · 09:42"
+        "localTime": "day 0 · 09:42",
+        "localTimeNewYork": "day 0 · 09:42",
+        "localTimeIndia": "day 0 · 09:42"
       }
     },
     {
@@ -585,7 +647,9 @@
         "dayNumber": 127,
         "hourInEarthSeconds": 2585.92746866821,
         "sunRisesInTheWest": true,
-        "localTime": "day 127 · 18:48"
+        "localTime": "day 127 · 18:48",
+        "localTimeNewYork": "day 127 · 18:48",
+        "localTimeIndia": "day 127 · 18:48"
       }
     },
     {
@@ -602,7 +666,9 @@
         "dayNumber": 255,
         "hourInEarthSeconds": 2585.92746866821,
         "sunRisesInTheWest": true,
-        "localTime": "day 255 · 03:53"
+        "localTime": "day 255 · 03:53",
+        "localTimeNewYork": "day 255 · 03:53",
+        "localTimeIndia": "day 255 · 03:53"
       }
     },
     {
@@ -619,7 +685,9 @@
         "dayNumber": 382,
         "hourInEarthSeconds": 2585.92746866821,
         "sunRisesInTheWest": true,
-        "localTime": "day 382 · 12:58"
+        "localTime": "day 382 · 12:58",
+        "localTimeNewYork": "day 382 · 12:58",
+        "localTimeIndia": "day 382 · 12:58"
       }
     },
     {
@@ -636,7 +704,9 @@
         "dayNumber": 12884,
         "hourInEarthSeconds": 2585.92746866821,
         "sunRisesInTheWest": true,
-        "localTime": "day 12,884 · 19:27"
+        "localTime": "day 12,884 · 19:27",
+        "localTimeNewYork": "day 12,884 · 19:27",
+        "localTimeIndia": "day 12,884 · 19:27"
       }
     },
     {
@@ -653,7 +723,9 @@
         "dayNumber": -1,
         "hourInEarthSeconds": 2416.52694970767,
         "sunRisesInTheWest": false,
-        "localTime": "day -1 · 22:10"
+        "localTime": "day -1 · 22:10",
+        "localTimeNewYork": "day -1 · 22:10",
+        "localTimeIndia": "day -1 · 22:10"
       }
     },
     {
@@ -670,7 +742,9 @@
         "dayNumber": 136,
         "hourInEarthSeconds": 2416.52694970767,
         "sunRisesInTheWest": false,
-        "localTime": "day 136 · 11:05"
+        "localTime": "day 136 · 11:05",
+        "localTimeNewYork": "day 136 · 11:05",
+        "localTimeIndia": "day 136 · 11:05"
       }
     },
     {
@@ -687,7 +761,9 @@
         "dayNumber": 273,
         "hourInEarthSeconds": 2416.52694970767,
         "sunRisesInTheWest": false,
-        "localTime": "day 273 · 00:00"
+        "localTime": "day 273 · 00:00",
+        "localTimeNewYork": "day 273 · 00:00",
+        "localTimeIndia": "day 273 · 00:00"
       }
     },
     {
@@ -704,7 +780,9 @@
         "dayNumber": 408,
         "hourInEarthSeconds": 2416.52694970767,
         "sunRisesInTheWest": false,
-        "localTime": "day 408 · 12:55"
+        "localTime": "day 408 · 12:55",
+        "localTimeNewYork": "day 408 · 12:55",
+        "localTimeIndia": "day 408 · 12:55"
       }
     },
     {
@@ -721,7 +799,9 @@
         "dayNumber": 13787,
         "hourInEarthSeconds": 2416.52694970767,
         "sunRisesInTheWest": false,
-        "localTime": "day 13,787 · 22:23"
+        "localTime": "day 13,787 · 22:23",
+        "localTimeNewYork": "day 13,787 · 22:23",
+        "localTimeIndia": "day 13,787 · 22:23"
       }
     },
     {
@@ -738,7 +818,9 @@
         "dayNumber": -1,
         "hourInEarthSeconds": 106309.785227367,
         "sunRisesInTheWest": false,
-        "localTime": "day -1 · 19:51"
+        "localTime": "day -1 · 19:51",
+        "localTimeNewYork": "day -1 · 19:51",
+        "localTimeIndia": "day -1 · 19:51"
       }
     },
     {
@@ -755,7 +837,9 @@
         "dayNumber": 2,
         "hourInEarthSeconds": 106309.785227367,
         "sunRisesInTheWest": false,
-        "localTime": "day 2 · 22:05"
+        "localTime": "day 2 · 22:05",
+        "localTimeNewYork": "day 2 · 22:05",
+        "localTimeIndia": "day 2 · 22:05"
       }
     },
     {
@@ -772,7 +856,9 @@
         "dayNumber": 6,
         "hourInEarthSeconds": 106309.785227367,
         "sunRisesInTheWest": false,
-        "localTime": "day 6 · 00:34"
+        "localTime": "day 6 · 00:34",
+        "localTimeNewYork": "day 6 · 00:34",
+        "localTimeIndia": "day 6 · 00:34"
       }
     },
     {
@@ -789,7 +875,9 @@
         "dayNumber": 9,
         "hourInEarthSeconds": 106309.785227367,
         "sunRisesInTheWest": false,
-        "localTime": "day 9 · 03:04"
+        "localTime": "day 9 · 03:04",
+        "localTimeNewYork": "day 9 · 03:04",
+        "localTimeIndia": "day 9 · 03:04"
       }
     },
     {
@@ -806,7 +894,9 @@
         "dayNumber": 313,
         "hourInEarthSeconds": 106309.785227367,
         "sunRisesInTheWest": false,
-        "localTime": "day 313 · 05:39"
+        "localTime": "day 313 · 05:39",
+        "localTimeNewYork": "day 313 · 05:39",
+        "localTimeIndia": "day 313 · 05:39"
       }
     },
     {
@@ -823,7 +913,9 @@
         "dayNumber": 0,
         "hourInEarthSeconds": 1148.60956815073,
         "sunRisesInTheWest": false,
-        "localTime": "day 0 · 05:08"
+        "localTime": "day 0 · 05:08",
+        "localTimeNewYork": "day 0 · 05:08",
+        "localTimeIndia": "day 0 · 05:08"
       }
     },
     {
@@ -840,7 +932,9 @@
         "dayNumber": 286,
         "hourInEarthSeconds": 1148.60956815073,
         "sunRisesInTheWest": false,
-        "localTime": "day 286 · 23:20"
+        "localTime": "day 286 · 23:20",
+        "localTimeNewYork": "day 286 · 23:20",
+        "localTimeIndia": "day 286 · 23:20"
       }
     },
     {
@@ -857,7 +951,9 @@
         "dayNumber": 573,
         "hourInEarthSeconds": 1148.60956815073,
         "sunRisesInTheWest": false,
-        "localTime": "day 573 · 18:25"
+        "localTime": "day 573 · 18:25",
+        "localTimeNewYork": "day 573 · 18:25",
+        "localTimeIndia": "day 573 · 18:25"
       }
     },
     {
@@ -874,7 +970,9 @@
         "dayNumber": 860,
         "hourInEarthSeconds": 1148.60956815073,
         "sunRisesInTheWest": false,
-        "localTime": "day 860 · 13:41"
+        "localTime": "day 860 · 13:41",
+        "localTimeNewYork": "day 860 · 13:41",
+        "localTimeIndia": "day 860 · 13:41"
       }
     },
     {
@@ -891,7 +989,9 @@
         "dayNumber": 29008,
         "hourInEarthSeconds": 1148.60956815073,
         "sunRisesInTheWest": false,
-        "localTime": "day 29,008 · 06:18"
+        "localTime": "day 29,008 · 06:18",
+        "localTimeNewYork": "day 29,008 · 06:18",
+        "localTimeIndia": "day 29,008 · 06:18"
       }
     },
     {
@@ -908,7 +1008,9 @@
         "dayNumber": 0,
         "hourInEarthSeconds": 4553.15403026054,
         "sunRisesInTheWest": false,
-        "localTime": "day 0 · 08:02"
+        "localTime": "day 0 · 08:02",
+        "localTimeNewYork": "day 0 · 08:02",
+        "localTimeIndia": "day 0 · 08:02"
       }
     },
     {
@@ -925,7 +1027,9 @@
         "dayNumber": 72,
         "hourInEarthSeconds": 4553.15403026054,
         "sunRisesInTheWest": false,
-        "localTime": "day 72 · 15:46"
+        "localTime": "day 72 · 15:46",
+        "localTimeNewYork": "day 72 · 15:46",
+        "localTimeIndia": "day 72 · 15:46"
       }
     },
     {
@@ -942,7 +1046,9 @@
         "dayNumber": 145,
         "hourInEarthSeconds": 4553.15403026054,
         "sunRisesInTheWest": false,
-        "localTime": "day 145 · 00:23"
+        "localTime": "day 145 · 00:23",
+        "localTimeNewYork": "day 145 · 00:23",
+        "localTimeIndia": "day 145 · 00:23"
       }
     },
     {
@@ -959,7 +1065,9 @@
         "dayNumber": 217,
         "hourInEarthSeconds": 4553.15403026054,
         "sunRisesInTheWest": false,
-        "localTime": "day 217 · 09:10"
+        "localTime": "day 217 · 09:10",
+        "localTimeNewYork": "day 217 · 09:10",
+        "localTimeIndia": "day 217 · 09:10"
       }
     },
     {
@@ -976,7 +1084,9 @@
         "dayNumber": 7318,
         "hourInEarthSeconds": 4553.15403026054,
         "sunRisesInTheWest": false,
-        "localTime": "day 7,318 · 02:48"
+        "localTime": "day 7,318 · 02:48",
+        "localTimeNewYork": "day 7,318 · 02:48",
+        "localTimeIndia": "day 7,318 · 02:48"
       }
     },
     {
@@ -993,7 +1103,9 @@
         "dayNumber": 0,
         "hourInEarthSeconds": 6371.49763390246,
         "sunRisesInTheWest": false,
-        "localTime": "day 0 · 10:49"
+        "localTime": "day 0 · 10:49",
+        "localTimeNewYork": "day 0 · 10:49",
+        "localTimeIndia": "day 0 · 10:49"
       }
     },
     {
@@ -1010,7 +1122,9 @@
         "dayNumber": 52,
         "hourInEarthSeconds": 6371.49763390246,
         "sunRisesInTheWest": false,
-        "localTime": "day 52 · 03:32"
+        "localTime": "day 52 · 03:32",
+        "localTimeNewYork": "day 52 · 03:32",
+        "localTimeIndia": "day 52 · 03:32"
       }
     },
     {
@@ -1027,7 +1141,9 @@
         "dayNumber": 103,
         "hourInEarthSeconds": 6371.49763390246,
         "sunRisesInTheWest": false,
-        "localTime": "day 103 · 20:16"
+        "localTime": "day 103 · 20:16",
+        "localTimeNewYork": "day 103 · 20:16",
+        "localTimeIndia": "day 103 · 20:16"
       }
     },
     {
@@ -1044,7 +1160,9 @@
         "dayNumber": 155,
         "hourInEarthSeconds": 6371.49763390246,
         "sunRisesInTheWest": false,
-        "localTime": "day 155 · 13:00"
+        "localTime": "day 155 · 13:00",
+        "localTimeNewYork": "day 155 · 13:00",
+        "localTimeIndia": "day 155 · 13:00"
       }
     },
     {
@@ -1061,7 +1179,9 @@
         "dayNumber": 5229,
         "hourInEarthSeconds": 6371.49763390246,
         "sunRisesInTheWest": false,
-        "localTime": "day 5,229 · 19:24"
+        "localTime": "day 5,229 · 19:24",
+        "localTimeNewYork": "day 5,229 · 19:24",
+        "localTimeIndia": "day 5,229 · 19:24"
       }
     },
     {
@@ -1078,7 +1198,9 @@
         "dayNumber": -1,
         "hourInEarthSeconds": 12794.7384679395,
         "sunRisesInTheWest": false,
-        "localTime": "day -1 · 23:51"
+        "localTime": "day -1 · 23:51",
+        "localTimeNewYork": "day -1 · 23:51",
+        "localTimeIndia": "day -1 · 23:51"
       }
     },
     {
@@ -1095,7 +1217,9 @@
         "dayNumber": 25,
         "hourInEarthSeconds": 12794.7384679395,
         "sunRisesInTheWest": false,
-        "localTime": "day 25 · 17:41"
+        "localTime": "day 25 · 17:41",
+        "localTimeNewYork": "day 25 · 17:41",
+        "localTimeIndia": "day 25 · 17:41"
       }
     },
     {
@@ -1112,7 +1236,9 @@
         "dayNumber": 51,
         "hourInEarthSeconds": 12794.7384679395,
         "sunRisesInTheWest": false,
-        "localTime": "day 51 · 11:31"
+        "localTime": "day 51 · 11:31",
+        "localTimeNewYork": "day 51 · 11:31",
+        "localTimeIndia": "day 51 · 11:31"
       }
     },
     {
@@ -1129,7 +1255,9 @@
         "dayNumber": 77,
         "hourInEarthSeconds": 12794.7384679395,
         "sunRisesInTheWest": false,
-        "localTime": "day 77 · 05:21"
+        "localTime": "day 77 · 05:21",
+        "localTimeNewYork": "day 77 · 05:21",
+        "localTimeIndia": "day 77 · 05:21"
       }
     },
     {
@@ -1146,7 +1274,9 @@
         "dayNumber": 2604,
         "hourInEarthSeconds": 12794.7384679395,
         "sunRisesInTheWest": false,
-        "localTime": "day 2,604 · 02:15"
+        "localTime": "day 2,604 · 02:15",
+        "localTimeNewYork": "day 2,604 · 02:15",
+        "localTimeIndia": "day 2,604 · 02:15"
       }
     },
     {
@@ -1163,7 +1293,9 @@
         "dayNumber": 0,
         "hourInEarthSeconds": 25798.9917506672,
         "sunRisesInTheWest": false,
-        "localTime": "day 0 · 00:24"
+        "localTime": "day 0 · 00:24",
+        "localTimeNewYork": "day 0 · 00:24",
+        "localTimeIndia": "day 0 · 00:24"
       }
     },
     {
@@ -1180,7 +1312,9 @@
         "dayNumber": 12,
         "hourInEarthSeconds": 25798.9917506672,
         "sunRisesInTheWest": false,
-        "localTime": "day 12 · 18:47"
+        "localTime": "day 12 · 18:47",
+        "localTimeNewYork": "day 12 · 18:47",
+        "localTimeIndia": "day 12 · 18:47"
       }
     },
     {
@@ -1197,7 +1331,9 @@
         "dayNumber": 25,
         "hourInEarthSeconds": 25798.9917506672,
         "sunRisesInTheWest": false,
-        "localTime": "day 25 · 13:10"
+        "localTime": "day 25 · 13:10",
+        "localTimeNewYork": "day 25 · 13:10",
+        "localTimeIndia": "day 25 · 13:10"
       }
     },
     {
@@ -1214,7 +1350,9 @@
         "dayNumber": 38,
         "hourInEarthSeconds": 25798.9917506672,
         "sunRisesInTheWest": false,
-        "localTime": "day 38 · 07:33"
+        "localTime": "day 38 · 07:33",
+        "localTimeNewYork": "day 38 · 07:33",
+        "localTimeIndia": "day 38 · 07:33"
       }
     },
     {
@@ -1231,7 +1369,9 @@
         "dayNumber": 1291,
         "hourInEarthSeconds": 25798.9917506672,
         "sunRisesInTheWest": false,
-        "localTime": "day 1,291 · 11:43"
+        "localTime": "day 1,291 · 11:43",
+        "localTimeNewYork": "day 1,291 · 11:43",
+        "localTimeIndia": "day 1,291 · 11:43"
       }
     },
     {
@@ -1248,7 +1388,9 @@
         "dayNumber": -1,
         "hourInEarthSeconds": 60312.7756729163,
         "sunRisesInTheWest": false,
-        "localTime": "day -1 · 14:48"
+        "localTime": "day -1 · 14:48",
+        "localTimeNewYork": "day -1 · 14:48",
+        "localTimeIndia": "day -1 · 14:48"
       }
     },
     {
@@ -1265,7 +1407,9 @@
         "dayNumber": 5,
         "hourInEarthSeconds": 60312.7756729163,
         "sunRisesInTheWest": false,
-        "localTime": "day 5 · 01:49"
+        "localTime": "day 5 · 01:49",
+        "localTimeNewYork": "day 5 · 01:49",
+        "localTimeIndia": "day 5 · 01:49"
       }
     },
     {
@@ -1282,7 +1426,9 @@
         "dayNumber": 10,
         "hourInEarthSeconds": 60312.7756729163,
         "sunRisesInTheWest": false,
-        "localTime": "day 10 · 12:51"
+        "localTime": "day 10 · 12:51",
+        "localTimeNewYork": "day 10 · 12:51",
+        "localTimeIndia": "day 10 · 12:51"
       }
     },
     {
@@ -1299,7 +1445,9 @@
         "dayNumber": 15,
         "hourInEarthSeconds": 60312.7756729163,
         "sunRisesInTheWest": false,
-        "localTime": "day 15 · 23:54"
+        "localTime": "day 15 · 23:54",
+        "localTimeNewYork": "day 15 · 23:54",
+        "localTimeIndia": "day 15 · 23:54"
       }
     },
     {
@@ -1316,7 +1464,9 @@
         "dayNumber": 552,
         "hourInEarthSeconds": 60312.7756729163,
         "sunRisesInTheWest": false,
-        "localTime": "day 552 · 01:01"
+        "localTime": "day 552 · 01:01",
+        "localTimeNewYork": "day 552 · 01:01",
+        "localTimeIndia": "day 552 · 01:01"
       }
     },
     {
@@ -1333,7 +1483,9 @@
         "dayNumber": -1,
         "hourInEarthSeconds": 1793.65153071504,
         "sunRisesInTheWest": false,
-        "localTime": "day -1 · 12:54"
+        "localTime": "day -1 · 12:54",
+        "localTimeNewYork": "day -1 · 12:54",
+        "localTimeIndia": "day -1 · 12:54"
       }
     },
     {
@@ -1350,7 +1502,9 @@
         "dayNumber": 183,
         "hourInEarthSeconds": 1793.65153071504,
         "sunRisesInTheWest": false,
-        "localTime": "day 183 · 04:24"
+        "localTime": "day 183 · 04:24",
+        "localTimeNewYork": "day 183 · 04:24",
+        "localTimeIndia": "day 183 · 04:24"
       }
     },
     {
@@ -1367,7 +1521,9 @@
         "dayNumber": 366,
         "hourInEarthSeconds": 1793.65153071504,
         "sunRisesInTheWest": false,
-        "localTime": "day 366 · 19:54"
+        "localTime": "day 366 · 19:54",
+        "localTimeNewYork": "day 366 · 19:54",
+        "localTimeIndia": "day 366 · 19:54"
       }
     },
     {
@@ -1384,7 +1540,9 @@
         "dayNumber": 550,
         "hourInEarthSeconds": 1793.65153071504,
         "sunRisesInTheWest": false,
-        "localTime": "day 550 · 11:24"
+        "localTime": "day 550 · 11:24",
+        "localTimeNewYork": "day 550 · 11:24",
+        "localTimeIndia": "day 550 · 11:24"
       }
     },
     {
@@ -1401,7 +1559,9 @@
         "dayNumber": 18575,
         "hourInEarthSeconds": 1793.65153071504,
         "sunRisesInTheWest": false,
-        "localTime": "day 18,575 · 13:04"
+        "localTime": "day 18,575 · 13:04",
+        "localTimeNewYork": "day 18,575 · 13:04",
+        "localTimeIndia": "day 18,575 · 13:04"
       }
     },
     {
@@ -1418,7 +1578,9 @@
         "dayNumber": 0,
         "hourInEarthSeconds": 3393.01580927691,
         "sunRisesInTheWest": false,
-        "localTime": "day 0 · 04:00"
+        "localTime": "day 0 · 04:00",
+        "localTimeNewYork": "day 0 · 04:00",
+        "localTimeIndia": "day 0 · 04:00"
       }
     },
     {
@@ -1435,7 +1597,9 @@
         "dayNumber": 97,
         "hourInEarthSeconds": 3393.01580927691,
         "sunRisesInTheWest": false,
-        "localTime": "day 97 · 05:57"
+        "localTime": "day 97 · 05:57",
+        "localTimeNewYork": "day 97 · 05:57",
+        "localTimeIndia": "day 97 · 05:57"
       }
     },
     {
@@ -1452,7 +1616,9 @@
         "dayNumber": 194,
         "hourInEarthSeconds": 3393.01580927691,
         "sunRisesInTheWest": false,
-        "localTime": "day 194 · 07:53"
+        "localTime": "day 194 · 07:53",
+        "localTimeNewYork": "day 194 · 07:53",
+        "localTimeIndia": "day 194 · 07:53"
       }
     },
     {
@@ -1469,7 +1635,9 @@
         "dayNumber": 291,
         "hourInEarthSeconds": 3393.01580927691,
         "sunRisesInTheWest": false,
-        "localTime": "day 291 · 09:49"
+        "localTime": "day 291 · 09:49",
+        "localTimeNewYork": "day 291 · 09:49",
+        "localTimeIndia": "day 291 · 09:49"
       }
     },
     {
@@ -1486,7 +1654,9 @@
         "dayNumber": 9820,
         "hourInEarthSeconds": 3393.01580927691,
         "sunRisesInTheWest": false,
-        "localTime": "day 9,820 · 00:16"
+        "localTime": "day 9,820 · 00:16",
+        "localTimeNewYork": "day 9,820 · 00:16",
+        "localTimeIndia": "day 9,820 · 00:16"
       }
     },
     {
@@ -1503,7 +1673,9 @@
         "dayNumber": 0,
         "hourInEarthSeconds": 4933.41356746808,
         "sunRisesInTheWest": false,
-        "localTime": "day 0 · 06:12"
+        "localTime": "day 0 · 06:12",
+        "localTimeNewYork": "day 0 · 06:12",
+        "localTimeIndia": "day 0 · 06:12"
       }
     },
     {
@@ -1520,7 +1692,9 @@
         "dayNumber": 67,
         "hourInEarthSeconds": 4933.41356746808,
         "sunRisesInTheWest": false,
-        "localTime": "day 67 · 00:38"
+        "localTime": "day 67 · 00:38",
+        "localTimeNewYork": "day 67 · 00:38",
+        "localTimeIndia": "day 67 · 00:38"
       }
     },
     {
@@ -1537,7 +1711,9 @@
         "dayNumber": 133,
         "hourInEarthSeconds": 4933.41356746808,
         "sunRisesInTheWest": false,
-        "localTime": "day 133 · 19:04"
+        "localTime": "day 133 · 19:04",
+        "localTimeNewYork": "day 133 · 19:04",
+        "localTimeIndia": "day 133 · 19:04"
       }
     },
     {
@@ -1554,7 +1730,9 @@
         "dayNumber": 200,
         "hourInEarthSeconds": 4933.41356746808,
         "sunRisesInTheWest": false,
-        "localTime": "day 200 · 13:30"
+        "localTime": "day 200 · 13:30",
+        "localTimeNewYork": "day 200 · 13:30",
+        "localTimeIndia": "day 200 · 13:30"
       }
     },
     {
@@ -1571,7 +1749,9 @@
         "dayNumber": 6753,
         "hourInEarthSeconds": 4933.41356746808,
         "sunRisesInTheWest": false,
-        "localTime": "day 6,753 · 23:24"
+        "localTime": "day 6,753 · 23:24",
+        "localTimeNewYork": "day 6,753 · 23:24",
+        "localTimeIndia": "day 6,753 · 23:24"
       }
     },
     {
@@ -1588,7 +1768,9 @@
         "dayNumber": 0,
         "hourInEarthSeconds": 6797.28223057648,
         "sunRisesInTheWest": false,
-        "localTime": "day 0 · 06:22"
+        "localTime": "day 0 · 06:22",
+        "localTimeNewYork": "day 0 · 06:22",
+        "localTimeIndia": "day 0 · 06:22"
       }
     },
     {
@@ -1605,7 +1787,9 @@
         "dayNumber": 48,
         "hourInEarthSeconds": 6797.28223057648,
         "sunRisesInTheWest": false,
-        "localTime": "day 48 · 17:24"
+        "localTime": "day 48 · 17:24",
+        "localTimeNewYork": "day 48 · 17:24",
+        "localTimeIndia": "day 48 · 17:24"
       }
     },
     {
@@ -1622,7 +1806,9 @@
         "dayNumber": 97,
         "hourInEarthSeconds": 6797.28223057648,
         "sunRisesInTheWest": false,
-        "localTime": "day 97 · 04:26"
+        "localTime": "day 97 · 04:26",
+        "localTimeNewYork": "day 97 · 04:26",
+        "localTimeIndia": "day 97 · 04:26"
       }
     },
     {
@@ -1639,7 +1825,9 @@
         "dayNumber": 145,
         "hourInEarthSeconds": 6797.28223057648,
         "sunRisesInTheWest": false,
-        "localTime": "day 145 · 15:27"
+        "localTime": "day 145 · 15:27",
+        "localTimeNewYork": "day 145 · 15:27",
+        "localTimeIndia": "day 145 · 15:27"
       }
     },
     {
@@ -1656,7 +1844,9 @@
         "dayNumber": 4902,
         "hourInEarthSeconds": 6797.28223057648,
         "sunRisesInTheWest": false,
-        "localTime": "day 4,902 · 01:25"
+        "localTime": "day 4,902 · 01:25",
+        "localTimeNewYork": "day 4,902 · 01:25",
+        "localTimeIndia": "day 4,902 · 01:25"
       }
     },
     {
@@ -1673,7 +1863,9 @@
         "dayNumber": 0,
         "hourInEarthSeconds": 9855.40376150484,
         "sunRisesInTheWest": false,
-        "localTime": "day 0 · 05:37"
+        "localTime": "day 0 · 05:37",
+        "localTimeNewYork": "day 0 · 05:37",
+        "localTimeIndia": "day 0 · 05:37"
       }
     },
     {
@@ -1690,7 +1882,9 @@
         "dayNumber": 33,
         "hourInEarthSeconds": 9855.40376150484,
         "sunRisesInTheWest": false,
-        "localTime": "day 33 · 15:45"
+        "localTime": "day 33 · 15:45",
+        "localTimeNewYork": "day 33 · 15:45",
+        "localTimeIndia": "day 33 · 15:45"
       }
     },
     {
@@ -1707,7 +1901,9 @@
         "dayNumber": 67,
         "hourInEarthSeconds": 9855.40376150484,
         "sunRisesInTheWest": false,
-        "localTime": "day 67 · 01:53"
+        "localTime": "day 67 · 01:53",
+        "localTimeNewYork": "day 67 · 01:53",
+        "localTimeIndia": "day 67 · 01:53"
       }
     },
     {
@@ -1724,7 +1920,9 @@
         "dayNumber": 100,
         "hourInEarthSeconds": 9855.40376150484,
         "sunRisesInTheWest": false,
-        "localTime": "day 100 · 12:01"
+        "localTime": "day 100 · 12:01",
+        "localTimeNewYork": "day 100 · 12:01",
+        "localTimeIndia": "day 100 · 12:01"
       }
     },
     {
@@ -1741,7 +1939,9 @@
         "dayNumber": 3381,
         "hourInEarthSeconds": 9855.40376150484,
         "sunRisesInTheWest": false,
-        "localTime": "day 3,381 · 00:07"
+        "localTime": "day 3,381 · 00:07",
+        "localTimeNewYork": "day 3,381 · 00:07",
+        "localTimeIndia": "day 3,381 · 00:07"
       }
     },
     {
@@ -1758,7 +1958,9 @@
         "dayNumber": -1,
         "hourInEarthSeconds": 16269.8428131743,
         "sunRisesInTheWest": false,
-        "localTime": "day -1 · 21:26"
+        "localTime": "day -1 · 21:26",
+        "localTimeNewYork": "day -1 · 21:26",
+        "localTimeIndia": "day -1 · 21:26"
       }
     },
     {
@@ -1775,7 +1977,9 @@
         "dayNumber": 20,
         "hourInEarthSeconds": 16269.8428131743,
         "sunRisesInTheWest": false,
-        "localTime": "day 20 · 03:19"
+        "localTime": "day 20 · 03:19",
+        "localTimeNewYork": "day 20 · 03:19",
+        "localTimeIndia": "day 20 · 03:19"
       }
     },
     {
@@ -1792,7 +1996,9 @@
         "dayNumber": 40,
         "hourInEarthSeconds": 16269.8428131743,
         "sunRisesInTheWest": false,
-        "localTime": "day 40 · 09:12"
+        "localTime": "day 40 · 09:12",
+        "localTimeNewYork": "day 40 · 09:12",
+        "localTimeIndia": "day 40 · 09:12"
       }
     },
     {
@@ -1809,7 +2015,9 @@
         "dayNumber": 60,
         "hourInEarthSeconds": 16269.8428131743,
         "sunRisesInTheWest": false,
-        "localTime": "day 60 · 15:04"
+        "localTime": "day 60 · 15:04",
+        "localTimeNewYork": "day 60 · 15:04",
+        "localTimeIndia": "day 60 · 15:04"
       }
     },
     {
@@ -1826,7 +2034,9 @@
         "dayNumber": 2047,
         "hourInEarthSeconds": 16269.8428131743,
         "sunRisesInTheWest": false,
-        "localTime": "day 2,047 · 18:46"
+        "localTime": "day 2,047 · 18:46",
+        "localTimeNewYork": "day 2,047 · 18:46",
+        "localTimeIndia": "day 2,047 · 18:46"
       }
     },
     {
@@ -1843,7 +2053,9 @@
         "dayNumber": -1,
         "hourInEarthSeconds": 57488.8376830655,
         "sunRisesInTheWest": false,
-        "localTime": "day -1 · 18:08"
+        "localTime": "day -1 · 18:08",
+        "localTimeNewYork": "day -1 · 18:08",
+        "localTimeIndia": "day -1 · 18:08"
       }
     },
     {
@@ -1860,7 +2072,9 @@
         "dayNumber": 5,
         "hourInEarthSeconds": 57488.8376830655,
         "sunRisesInTheWest": false,
-        "localTime": "day 5 · 11:37"
+        "localTime": "day 5 · 11:37",
+        "localTimeNewYork": "day 5 · 11:37",
+        "localTimeIndia": "day 5 · 11:37"
       }
     },
     {
@@ -1877,7 +2091,9 @@
         "dayNumber": 11,
         "hourInEarthSeconds": 57488.8376830655,
         "sunRisesInTheWest": false,
-        "localTime": "day 11 · 05:07"
+        "localTime": "day 11 · 05:07",
+        "localTimeNewYork": "day 11 · 05:07",
+        "localTimeIndia": "day 11 · 05:07"
       }
     },
     {
@@ -1894,7 +2110,9 @@
         "dayNumber": 16,
         "hourInEarthSeconds": 57488.8376830655,
         "sunRisesInTheWest": false,
-        "localTime": "day 16 · 22:36"
+        "localTime": "day 16 · 22:36",
+        "localTimeNewYork": "day 16 · 22:36",
+        "localTimeIndia": "day 16 · 22:36"
       }
     },
     {
@@ -1911,7 +2129,9 @@
         "dayNumber": 579,
         "hourInEarthSeconds": 57488.8376830655,
         "sunRisesInTheWest": false,
-        "localTime": "day 579 · 07:46"
+        "localTime": "day 579 · 07:46",
+        "localTimeNewYork": "day 579 · 07:46",
+        "localTimeIndia": "day 579 · 07:46"
       }
     },
     {
@@ -1928,7 +2148,9 @@
         "dayNumber": -1,
         "hourInEarthSeconds": 287713.108542894,
         "sunRisesInTheWest": false,
-        "localTime": "day -1 · 23:42"
+        "localTime": "day -1 · 23:42",
+        "localTimeNewYork": "day -1 · 23:42",
+        "localTimeIndia": "day -1 · 23:42"
       }
     },
     {
@@ -1945,7 +2167,9 @@
         "dayNumber": 1,
         "hourInEarthSeconds": 287713.108542894,
         "sunRisesInTheWest": false,
-        "localTime": "day 1 · 03:09"
+        "localTime": "day 1 · 03:09",
+        "localTimeNewYork": "day 1 · 03:09",
+        "localTimeIndia": "day 1 · 03:09"
       }
     },
     {
@@ -1962,7 +2186,9 @@
         "dayNumber": 2,
         "hourInEarthSeconds": 287713.108542894,
         "sunRisesInTheWest": false,
-        "localTime": "day 2 · 06:36"
+        "localTime": "day 2 · 06:36",
+        "localTimeNewYork": "day 2 · 06:36",
+        "localTimeIndia": "day 2 · 06:36"
       }
     },
     {
@@ -1979,7 +2205,9 @@
         "dayNumber": 3,
         "hourInEarthSeconds": 287713.108542894,
         "sunRisesInTheWest": false,
-        "localTime": "day 3 · 10:03"
+        "localTime": "day 3 · 10:03",
+        "localTimeNewYork": "day 3 · 10:03",
+        "localTimeIndia": "day 3 · 10:03"
       }
     },
     {
@@ -1996,7 +2224,9 @@
         "dayNumber": 115,
         "hourInEarthSeconds": 287713.108542894,
         "sunRisesInTheWest": false,
-        "localTime": "day 115 · 19:08"
+        "localTime": "day 115 · 19:08",
+        "localTimeNewYork": "day 115 · 19:08",
+        "localTimeIndia": "day 115 · 19:08"
       }
     },
     {
@@ -2013,7 +2243,9 @@
         "dayNumber": -1,
         "hourInEarthSeconds": 1391.14675032125,
         "sunRisesInTheWest": false,
-        "localTime": "day -1 · 14:35"
+        "localTime": "day -1 · 14:35",
+        "localTimeNewYork": "day -1 · 14:35",
+        "localTimeIndia": "day -1 · 14:35"
       }
     },
     {
@@ -2030,7 +2262,9 @@
         "dayNumber": 236,
         "hourInEarthSeconds": 1391.14675032125,
         "sunRisesInTheWest": false,
-        "localTime": "day 236 · 09:21"
+        "localTime": "day 236 · 09:21",
+        "localTimeNewYork": "day 236 · 09:21",
+        "localTimeIndia": "day 236 · 09:21"
       }
     },
     {
@@ -2047,7 +2281,9 @@
         "dayNumber": 473,
         "hourInEarthSeconds": 1391.14675032125,
         "sunRisesInTheWest": false,
-        "localTime": "day 473 · 04:04"
+        "localTime": "day 473 · 04:04",
+        "localTimeNewYork": "day 473 · 04:04",
+        "localTimeIndia": "day 473 · 04:04"
       }
     },
     {
@@ -2064,7 +2300,9 @@
         "dayNumber": 709,
         "hourInEarthSeconds": 1391.14675032125,
         "sunRisesInTheWest": false,
-        "localTime": "day 709 · 22:48"
+        "localTime": "day 709 · 22:48",
+        "localTimeNewYork": "day 709 · 22:48",
+        "localTimeIndia": "day 709 · 22:48"
       }
     },
     {
@@ -2081,7 +2319,9 @@
         "dayNumber": 23950,
         "hourInEarthSeconds": 1391.14675032125,
         "sunRisesInTheWest": false,
-        "localTime": "day 23,950 · 06:47"
+        "localTime": "day 23,950 · 06:47",
+        "localTimeNewYork": "day 23,950 · 06:47",
+        "localTimeIndia": "day 23,950 · 06:47"
       }
     },
     {
@@ -2098,7 +2338,9 @@
         "dayNumber": -1,
         "hourInEarthSeconds": 9072.6187911402,
         "sunRisesInTheWest": true,
-        "localTime": "day -1 · 12:52"
+        "localTime": "day -1 · 12:52",
+        "localTimeNewYork": "day -1 · 12:52",
+        "localTimeIndia": "day -1 · 12:52"
       }
     },
     {
@@ -2115,7 +2357,9 @@
         "dayNumber": 35,
         "hourInEarthSeconds": 9072.6187911402,
         "sunRisesInTheWest": true,
-        "localTime": "day 35 · 20:11"
+        "localTime": "day 35 · 20:11",
+        "localTimeNewYork": "day 35 · 20:11",
+        "localTimeIndia": "day 35 · 20:11"
       }
     },
     {
@@ -2132,7 +2376,9 @@
         "dayNumber": 72,
         "hourInEarthSeconds": 9072.6187911402,
         "sunRisesInTheWest": true,
-        "localTime": "day 72 · 03:30"
+        "localTime": "day 72 · 03:30",
+        "localTimeNewYork": "day 72 · 03:30",
+        "localTimeIndia": "day 72 · 03:30"
       }
     },
     {
@@ -2149,7 +2395,9 @@
         "dayNumber": 108,
         "hourInEarthSeconds": 9072.6187911402,
         "sunRisesInTheWest": true,
-        "localTime": "day 108 · 10:48"
+        "localTime": "day 108 · 10:48",
+        "localTimeNewYork": "day 108 · 10:48",
+        "localTimeIndia": "day 108 · 10:48"
       }
     },
     {
@@ -2166,7 +2414,9 @@
         "dayNumber": 3672,
         "hourInEarthSeconds": 9072.6187911402,
         "sunRisesInTheWest": true,
-        "localTime": "day 3,672 · 18:30"
+        "localTime": "day 3,672 · 18:30",
+        "localTimeNewYork": "day 3,672 · 18:30",
+        "localTimeIndia": "day 3,672 · 18:30"
       }
     },
     {
@@ -2183,7 +2433,9 @@
         "dayNumber": -1,
         "hourInEarthSeconds": 14917.0200329147,
         "sunRisesInTheWest": true,
-        "localTime": "day -1 · 16:05"
+        "localTime": "day -1 · 16:05",
+        "localTimeNewYork": "day -1 · 16:05",
+        "localTimeIndia": "day -1 · 16:05"
       }
     },
     {
@@ -2200,7 +2452,9 @@
         "dayNumber": 21,
         "hourInEarthSeconds": 14917.0200329147,
         "sunRisesInTheWest": true,
-        "localTime": "day 21 · 18:00"
+        "localTime": "day 21 · 18:00",
+        "localTimeNewYork": "day 21 · 18:00",
+        "localTimeIndia": "day 21 · 18:00"
       }
     },
     {
@@ -2217,7 +2471,9 @@
         "dayNumber": 43,
         "hourInEarthSeconds": 14917.0200329147,
         "sunRisesInTheWest": true,
-        "localTime": "day 43 · 19:55"
+        "localTime": "day 43 · 19:55",
+        "localTimeNewYork": "day 43 · 19:55",
+        "localTimeIndia": "day 43 · 19:55"
       }
     },
     {
@@ -2234,7 +2490,9 @@
         "dayNumber": 65,
         "hourInEarthSeconds": 14917.0200329147,
         "sunRisesInTheWest": true,
-        "localTime": "day 65 · 21:49"
+        "localTime": "day 65 · 21:49",
+        "localTimeNewYork": "day 65 · 21:49",
+        "localTimeIndia": "day 65 · 21:49"
       }
     },
     {
@@ -2251,7 +2509,9 @@
         "dayNumber": 2234,
         "hourInEarthSeconds": 14917.0200329147,
         "sunRisesInTheWest": true,
-        "localTime": "day 2,234 · 01:16"
+        "localTime": "day 2,234 · 01:16",
+        "localTimeNewYork": "day 2,234 · 01:16",
+        "localTimeIndia": "day 2,234 · 01:16"
       }
     },
     {
@@ -2268,7 +2528,9 @@
         "dayNumber": -1,
         "hourInEarthSeconds": 31332.2268567291,
         "sunRisesInTheWest": true,
-        "localTime": "day -1 · 18:06"
+        "localTime": "day -1 · 18:06",
+        "localTimeNewYork": "day -1 · 18:06",
+        "localTimeIndia": "day -1 · 18:06"
       }
     },
     {
@@ -2285,7 +2547,9 @@
         "dayNumber": 10,
         "hourInEarthSeconds": 31332.2268567291,
         "sunRisesInTheWest": true,
-        "localTime": "day 10 · 06:22"
+        "localTime": "day 10 · 06:22",
+        "localTimeNewYork": "day 10 · 06:22",
+        "localTimeIndia": "day 10 · 06:22"
       }
     },
     {
@@ -2302,7 +2566,9 @@
         "dayNumber": 20,
         "hourInEarthSeconds": 31332.2268567291,
         "sunRisesInTheWest": true,
-        "localTime": "day 20 · 18:37"
+        "localTime": "day 20 · 18:37",
+        "localTimeNewYork": "day 20 · 18:37",
+        "localTimeIndia": "day 20 · 18:37"
       }
     },
     {
@@ -2319,7 +2585,9 @@
         "dayNumber": 31,
         "hourInEarthSeconds": 31332.2268567291,
         "sunRisesInTheWest": true,
-        "localTime": "day 31 · 06:52"
+        "localTime": "day 31 · 06:52",
+        "localTimeNewYork": "day 31 · 06:52",
+        "localTimeIndia": "day 31 · 06:52"
       }
     },
     {
@@ -2336,7 +2604,9 @@
         "dayNumber": 1062,
         "hourInEarthSeconds": 31332.2268567291,
         "sunRisesInTheWest": true,
-        "localTime": "day 1,062 · 22:16"
+        "localTime": "day 1,062 · 22:16",
+        "localTimeNewYork": "day 1,062 · 22:16",
+        "localTimeIndia": "day 1,062 · 22:16"
       }
     },
     {
@@ -2353,7 +2623,9 @@
         "dayNumber": -1,
         "hourInEarthSeconds": 48446.3806447095,
         "sunRisesInTheWest": true,
-        "localTime": "day -1 · 22:50"
+        "localTime": "day -1 · 22:50",
+        "localTimeNewYork": "day -1 · 22:50",
+        "localTimeIndia": "day -1 · 22:50"
       }
     },
     {
@@ -2370,7 +2642,9 @@
         "dayNumber": 6,
         "hourInEarthSeconds": 48446.3806447095,
         "sunRisesInTheWest": true,
-        "localTime": "day 6 · 17:58"
+        "localTime": "day 6 · 17:58",
+        "localTimeNewYork": "day 6 · 17:58",
+        "localTimeIndia": "day 6 · 17:58"
       }
     },
     {
@@ -2387,7 +2661,9 @@
         "dayNumber": 13,
         "hourInEarthSeconds": 48446.3806447095,
         "sunRisesInTheWest": true,
-        "localTime": "day 13 · 13:05"
+        "localTime": "day 13 · 13:05",
+        "localTimeNewYork": "day 13 · 13:05",
+        "localTimeIndia": "day 13 · 13:05"
       }
     },
     {
@@ -2404,7 +2680,9 @@
         "dayNumber": 20,
         "hourInEarthSeconds": 48446.3806447095,
         "sunRisesInTheWest": true,
-        "localTime": "day 20 · 08:12"
+        "localTime": "day 20 · 08:12",
+        "localTimeNewYork": "day 20 · 08:12",
+        "localTimeIndia": "day 20 · 08:12"
       }
     },
     {
@@ -2421,7 +2699,9 @@
         "dayNumber": 687,
         "hourInEarthSeconds": 48446.3806447095,
         "sunRisesInTheWest": true,
-        "localTime": "day 687 · 11:11"
+        "localTime": "day 687 · 11:11",
+        "localTimeNewYork": "day 687 · 11:11",
+        "localTimeIndia": "day 687 · 11:11"
       }
     },
     {
@@ -2438,7 +2718,9 @@
         "dayNumber": -1,
         "hourInEarthSeconds": 5088.29085841815,
         "sunRisesInTheWest": true,
-        "localTime": "day -1 · 21:15"
+        "localTime": "day -1 · 21:15",
+        "localTimeNewYork": "day -1 · 21:15",
+        "localTimeIndia": "day -1 · 21:15"
       }
     },
     {
@@ -2455,7 +2737,9 @@
         "dayNumber": 64,
         "hourInEarthSeconds": 5088.29085841815,
         "sunRisesInTheWest": true,
-        "localTime": "day 64 · 14:52"
+        "localTime": "day 64 · 14:52",
+        "localTimeNewYork": "day 64 · 14:52",
+        "localTimeIndia": "day 64 · 14:52"
       }
     },
     {
@@ -2472,7 +2756,9 @@
         "dayNumber": 129,
         "hourInEarthSeconds": 5088.29085841815,
         "sunRisesInTheWest": true,
-        "localTime": "day 129 · 08:30"
+        "localTime": "day 129 · 08:30",
+        "localTimeNewYork": "day 129 · 08:30",
+        "localTimeIndia": "day 129 · 08:30"
       }
     },
     {
@@ -2489,7 +2775,9 @@
         "dayNumber": 194,
         "hourInEarthSeconds": 5088.29085841815,
         "sunRisesInTheWest": true,
-        "localTime": "day 194 · 02:07"
+        "localTime": "day 194 · 02:07",
+        "localTimeNewYork": "day 194 · 02:07",
+        "localTimeIndia": "day 194 · 02:07"
       }
     },
     {
@@ -2506,7 +2794,9 @@
         "dayNumber": 6547,
         "hourInEarthSeconds": 5088.29085841815,
         "sunRisesInTheWest": true,
-        "localTime": "day 6,547 · 19:17"
+        "localTime": "day 6,547 · 19:17",
+        "localTimeNewYork": "day 6,547 · 19:17",
+        "localTimeIndia": "day 6,547 · 19:17"
       }
     },
     {
@@ -2523,7 +2813,9 @@
         "dayNumber": -1,
         "hourInEarthSeconds": 21154.6091745336,
         "sunRisesInTheWest": true,
-        "localTime": "day -1 · 22:43"
+        "localTime": "day -1 · 22:43",
+        "localTimeNewYork": "day -1 · 22:43",
+        "localTimeIndia": "day -1 · 22:43"
       }
     },
     {
@@ -2540,7 +2832,9 @@
         "dayNumber": 15,
         "hourInEarthSeconds": 21154.6091745336,
         "sunRisesInTheWest": true,
-        "localTime": "day 15 · 12:26"
+        "localTime": "day 15 · 12:26",
+        "localTimeNewYork": "day 15 · 12:26",
+        "localTimeIndia": "day 15 · 12:26"
       }
     },
     {
@@ -2557,7 +2851,9 @@
         "dayNumber": 31,
         "hourInEarthSeconds": 21154.6091745336,
         "sunRisesInTheWest": true,
-        "localTime": "day 31 · 02:08"
+        "localTime": "day 31 · 02:08",
+        "localTimeNewYork": "day 31 · 02:08",
+        "localTimeIndia": "day 31 · 02:08"
       }
     },
     {
@@ -2574,7 +2870,9 @@
         "dayNumber": 46,
         "hourInEarthSeconds": 21154.6091745336,
         "sunRisesInTheWest": true,
-        "localTime": "day 46 · 15:51"
+        "localTime": "day 46 · 15:51",
+        "localTimeNewYork": "day 46 · 15:51",
+        "localTimeIndia": "day 46 · 15:51"
       }
     },
     {
@@ -2591,7 +2889,9 @@
         "dayNumber": 1574,
         "hourInEarthSeconds": 21154.6091745336,
         "sunRisesInTheWest": true,
-        "localTime": "day 1,574 · 23:33"
+        "localTime": "day 1,574 · 23:33",
+        "localTimeNewYork": "day 1,574 · 23:33",
+        "localTimeIndia": "day 1,574 · 23:33"
       }
     },
     {
@@ -2608,7 +2908,9 @@
         "dayNumber": 0,
         "hourInEarthSeconds": 4040.41106678676,
         "sunRisesInTheWest": false,
-        "localTime": "day 0 · 11:44"
+        "localTime": "day 0 · 11:44",
+        "localTimeNewYork": "day 0 · 11:44",
+        "localTimeIndia": "day 0 · 11:44"
       }
     },
     {
@@ -2625,7 +2927,9 @@
         "dayNumber": 82,
         "hourInEarthSeconds": 4040.41106678676,
         "sunRisesInTheWest": false,
-        "localTime": "day 82 · 00:21"
+        "localTime": "day 82 · 00:21",
+        "localTimeNewYork": "day 82 · 00:21",
+        "localTimeIndia": "day 82 · 00:21"
       }
     },
     {
@@ -2642,7 +2946,9 @@
         "dayNumber": 163,
         "hourInEarthSeconds": 4040.41106678676,
         "sunRisesInTheWest": false,
-        "localTime": "day 163 · 12:59"
+        "localTime": "day 163 · 12:59",
+        "localTimeNewYork": "day 163 · 12:59",
+        "localTimeIndia": "day 163 · 12:59"
       }
     },
     {
@@ -2659,7 +2965,9 @@
         "dayNumber": 245,
         "hourInEarthSeconds": 4040.41106678676,
         "sunRisesInTheWest": false,
-        "localTime": "day 245 · 01:37"
+        "localTime": "day 245 · 01:37",
+        "localTimeNewYork": "day 245 · 01:37",
+        "localTimeIndia": "day 245 · 01:37"
       }
     },
     {
@@ -2676,7 +2984,9 @@
         "dayNumber": 8246,
         "hourInEarthSeconds": 4040.41106678676,
         "sunRisesInTheWest": false,
-        "localTime": "day 8,246 · 21:17"
+        "localTime": "day 8,246 · 21:17",
+        "localTimeNewYork": "day 8,246 · 21:17",
+        "localTimeIndia": "day 8,246 · 21:17"
       }
     }
   ]

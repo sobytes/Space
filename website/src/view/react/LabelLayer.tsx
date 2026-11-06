@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { BODY_CONTRACTS, childrenOf } from "@solar/engine/bodies/registry";
 import { placeLabels, type LabelInput } from "@solar/engine/labels";
 import { localTimeLabel } from "@solar/engine/solar-time";
+import { epochMsFromJdUtc, utcFromTdb } from "@solar/engine/time";
 import { useViewport } from "./ViewportContext";
 
 /**
@@ -45,6 +46,21 @@ export function LabelLayer({ visible }: { visible: boolean }) {
   if (!visible) return null;
 
   const { focus, epoch: publishedEpoch } = viewport.snapshot();
+
+  /**
+   * The viewer's own zone, named, because "what time is it on Earth" means the clock on their
+   * wall and a time with no zone on it is just a number that looks like one.
+   *
+   * Resolved for the instant being shown rather than for now, so scrubbing to a date in July
+   * carries the offset that was actually in force then, not today's.
+   */
+  const zone = (() => {
+    const date = new Date(epochMsFromJdUtc(utcFromTdb(publishedEpoch)));
+    const named = new Intl.DateTimeFormat(undefined, { timeZoneName: "short" })
+      .formatToParts(date)
+      .find((part) => part.type === "timeZoneName")?.value;
+    return { offsetMinutes: -date.getTimezoneOffset(), label: named ?? "UTC" };
+  })();
   const satellites = new Set(childrenOf(focus));
   const width = window.innerWidth;
   const height = window.innerHeight;
@@ -84,7 +100,7 @@ export function LabelLayer({ visible }: { visible: boolean }) {
          * sprawl stayed exactly as reported. Focusing a planet is the case the full badge is
          * for: two or three labels, and the Moon's month next to Earth's year.
          */
-        const localTime = localTimeLabel(placement.id, publishedEpoch);
+        const localTime = localTimeLabel(placement.id, publishedEpoch, zone);
         // The arrow goes on the side the body is on. Always placing it first put a pointer
         // on the left of a name whose body was off to the right.
         const trailing =

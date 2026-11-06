@@ -266,6 +266,12 @@ function compute(domain: string, testCase: Case): unknown {
         hourInEarthSeconds: clock.hourInEarthSeconds,
         sunRisesInTheWest: clock.sunRisesInTheWest,
         localTime: localTimeLabel(input.body as BodyId, jdTdb(input.epoch)),
+        localTimeNewYork: localTimeLabel(input.body as BodyId, jdTdb(input.epoch), {
+          offsetMinutes: -300, label: "EST",
+        }),
+        localTimeIndia: localTimeLabel(input.body as BodyId, jdTdb(input.epoch), {
+          offsetMinutes: 330, label: "+05:30",
+        }),
       };
     }
 

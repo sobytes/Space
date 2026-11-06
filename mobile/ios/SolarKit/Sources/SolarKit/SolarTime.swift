@@ -188,7 +188,11 @@ public func solarClock(_ body: BodyId, at epoch: JdTdb) -> SolarClock? {
 
  Nil for the Sun, which has no sunrise to count from.
  */
-public func localTimeLabel(_ body: BodyId, at epoch: JdTdb) -> String? {
+public func localTimeLabel(
+    _ body: BodyId,
+    at epoch: JdTdb,
+    zone: EarthZone = EarthZone(offsetMinutes: 0, label: "UTC")
+) -> String? {
     guard let clock = solarClock(body, at: epoch) else { return nil }
 
     if body == .embary {
@@ -204,9 +208,44 @@ public func localTimeLabel(_ body: BodyId, at epoch: JdTdb) -> String? {
         formatter.dateFormat = "yyyy-MM-dd HH:mm"
         formatter.timeZone = TimeZone(identifier: "UTC")
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        return formatter.string(from: Date(timeIntervalSince1970: ms / 1_000))
+        // Shift the instant and read it back as UTC, which is how you format in another zone
+        // without a timezone database: move the instant, not the formatter.
+        let shifted = Date(timeIntervalSince1970: ms / 1_000 + zone.offsetMinutes * 60)
+        return formatter.string(from: shifted) + " " + zone.label
     }
 
     let hhmm = String(clock.formatted.prefix(5))
     return "day \(clock.dayNumber.formatted()) · \(hhmm)"
+}
+
+/**
+ The zone an Earth time is quoted in.
+
+ A time with no zone on it is not a time, it is a number that looks like one. SolarKit cannot
+ read the device clock and stay a pure function the conformance can gate, so the client passes
+ the zone in and the arithmetic lives here. `offsetMinutes` is for the instant being shown and
+ not for now, which is what makes a date in July come out right when it is read in January.
+ */
+public struct EarthZone: Sendable {
+    public let offsetMinutes: Double
+    /// As a person writes it: "UTC", "GMT", "EST", "+05:30".
+    public let label: String
+
+    public init(offsetMinutes: Double, label: String) {
+        self.offsetMinutes = offsetMinutes
+        self.label = label
+    }
+}
+
+public let utcZone = EarthZone(offsetMinutes: 0, label: "UTC")
+
+/// The device's own zone, for the instant being shown rather than for now, so a summer date
+/// read in winter still carries the offset that was actually in force.
+public func deviceZone(at epoch: JdTdb) -> EarthZone {
+    let date = Date(timeIntervalSince1970: unixSecondsFromEpoch(epoch))
+    let zone = TimeZone.current
+    return EarthZone(
+        offsetMinutes: Double(zone.secondsFromGMT(for: date)) / 60,
+        label: zone.abbreviation(for: date) ?? "UTC"
+    )
 }

@@ -286,6 +286,18 @@ struct ContentView: View {
             scene.setFocus(body, at: clock.epoch)
             scene.update(to: clock.epoch, gravity: gravity)
         }
+        .task {
+            /**
+             `-rate <index>` starts the clock at a chosen speed preset, so a probe can observe
+             the scene with time running fast. Labels detaching from their bodies was reported
+             from a screenshot whose clock had run months ahead, and no gate here had ever
+             looked at the scene at anything but real time. Test hook.
+             */
+            guard let i = CommandLine.arguments.firstIndex(of: "-rate"),
+                  i + 1 < CommandLine.arguments.count,
+                  let index = Int(CommandLine.arguments[i + 1]) else { return }
+            clock.rateIndex = max(0, min(Clock.presets.count - 1, index))
+        }
         .onReceive(tick) { now in
             let delta = now.timeIntervalSince(lastTick)
             lastTick = now

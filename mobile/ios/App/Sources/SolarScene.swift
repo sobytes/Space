@@ -580,7 +580,11 @@ final class SolarScene {
         guard frameCounter % 6 == 0 else { return }
         var next: [BodyId: String] = [:]
         for id in bodyIds {
-            if let label = localTimeLabel(id, at: markEpoch) { next[id] = label }
+            // The viewer's own zone, named, because "what time is it on Earth" means the
+            // clock on their wall and a time with no zone on it is just a number.
+            if let label = localTimeLabel(id, at: markEpoch, zone: deviceZone(at: markEpoch)) {
+                next[id] = label
+            }
         }
         localTimes = next
     }
@@ -932,6 +936,23 @@ final class SolarScene {
      then follow a planet that is itself moving under mutual gravity.
      */
     func update(to epoch: JdTdb, gravity: Gravity? = nil) {
+        /**
+         Every position written this frame lands this frame, with no animation.
+
+         SceneKit implicitly animates a node property set outside its own render callbacks,
+         over the current transaction's duration, which is a quarter of a second. At real time
+         that is invisible. At a year a second it is three months of orbital motion, so the
+         drawn planets trailed about ninety degrees behind the model while the labels, which
+         read the model directly, sat where each body already was. Reported twice as labels
+         being detached from their planets, and it was the planets that were late.
+
+         The labels were never wrong. Nothing in a screenshot distinguishes those two
+         explanations, which is why this took a reproduction at speed rather than an argument.
+         */
+        SCNTransaction.begin()
+        SCNTransaction.animationDuration = 0
+        defer { SCNTransaction.commit() }
+
         frameCounter &+= 1
         for id in bodyIds {
             positions[id] = gravity?.heliocentricPosition(of: id)
@@ -1069,7 +1090,20 @@ final class SolarScene {
      needs to know in order to point the right way.
      */
     func labelInputs(aspect: Double) -> [LabelInput] {
-        let view = simd_inverse(cameraNode.simdWorldTransform)
+        /**
+         Projected from the presentation tree, which is what is on screen, not the model.
+
+         A node's `position` is what was last assigned; `presentation` is where SceneKit is
+         actually drawing it, and the two are not the same instant. Reading the model put every
+         label where its body was about to be rather than where it was, which at real time is
+         invisible and at a year a second is most of an orbit: Mercury laps four times a second
+         there, so a tenth of a second of difference is half the sky.
+
+         Reported twice as labels being detached from their planets. They were computed
+         correctly from numbers that the renderer had not caught up with, and no gate saw it
+         because every probe ran at real time, where the gap is a fraction of a pixel.
+         */
+        let view = simd_inverse(cameraNode.presentation.simdWorldTransform)
         let fovRadians = (cameraNode.camera?.fieldOfView ?? 55) * Double.pi / 180
         let tanHalf = tan(fovRadians / 2)
         let satellites = Set(childrenOf(focus))
@@ -1079,7 +1113,8 @@ final class SolarScene {
                   let sphere = node.childNodes.first?.geometry as? SCNSphere
             else { return nil }
 
-            let world = SIMD4<Float>(node.position.x, node.position.y, node.position.z, 1)
+            let drawn = node.presentation.simdWorldPosition
+            let world = SIMD4<Float>(drawn.x, drawn.y, drawn.z, 1)
             let eye = view * world
             // SceneKit looks down its own negative z, so a visible body has negative eye z.
             let depth = -Double(eye.z)

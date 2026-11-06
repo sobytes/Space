@@ -457,6 +457,14 @@ domains["solar-time"] = {
             hourInEarthSeconds: round(clock.hourInEarthSeconds),
             sunRisesInTheWest: clock.sunRisesInTheWest,
             localTime: solarTime.localTimeLabel(id, epoch),
+            // Explicit zones, never the generating machine's own, or the expectations would
+            // change with whoever last ran the generator.
+            localTimeNewYork: solarTime.localTimeLabel(id, epoch, {
+              offsetMinutes: -300, label: "EST",
+            }),
+            localTimeIndia: solarTime.localTimeLabel(id, epoch, {
+              offsetMinutes: 330, label: "+05:30",
+            }),
           },
         });
       }

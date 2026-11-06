@@ -298,6 +298,14 @@ final class ConformanceTests: XCTestCase {
                 "sunRisesInTheWest": .bool(clock.sunRisesInTheWest),
                 "localTime": localTimeLabel(clockBody, at: JdTdb(number(input, "epoch")))
                     .map { JSON.string($0) } ?? .null,
+                "localTimeNewYork": localTimeLabel(
+                    clockBody, at: JdTdb(number(input, "epoch")),
+                    zone: EarthZone(offsetMinutes: -300, label: "EST")
+                ).map { JSON.string($0) } ?? .null,
+                "localTimeIndia": localTimeLabel(
+                    clockBody, at: JdTdb(number(input, "epoch")),
+                    zone: EarthZone(offsetMinutes: 330, label: "+05:30")
+                ).map { JSON.string($0) } ?? .null,
             ])
 
         /// Going to a date, and what the tables can honestly say there.

@@ -240,7 +240,27 @@ export function solarClock(body: BodyId, epoch: JdTdb): SolarClock | null {
  *
  * Null for the Sun, which has no sunrise to count from.
  */
-export function localTimeLabel(body: BodyId, epoch: JdTdb): string | null {
+/**
+ * The zone an Earth time is quoted in.
+ *
+ * A time with no zone on it is not a time, it is a number that looks like one. The engine
+ * cannot read a device's clock and must stay a pure function to be gated, so the client passes
+ * the zone in and the arithmetic lives here. `offsetMinutes` is for the instant being shown,
+ * not for now, which is what makes a date in July come out right when it is read in January.
+ */
+export interface EarthZone {
+  readonly offsetMinutes: number;
+  /** As a person writes it: "UTC", "GMT", "EST", "+05:30". */
+  readonly label: string;
+}
+
+export const UTC: EarthZone = { offsetMinutes: 0, label: "UTC" };
+
+export function localTimeLabel(
+  body: BodyId,
+  epoch: JdTdb,
+  zone: EarthZone = UTC,
+): string | null {
   const clock = solarClock(body, epoch);
   if (clock === null) return null;
 
@@ -255,7 +275,10 @@ export function localTimeLabel(body: BodyId, epoch: JdTdb): string | null {
      * same as inventing precision.
      */
     const ms = Math.round(epochMsFromJdUtc(utcFromTdb(epoch)) / 1000) * 1000;
-    return new Date(ms).toISOString().slice(0, 16).replace("T", " ");
+    // Shifted by the offset and then read back as UTC, which is how you format an instant in
+    // another zone without a timezone database: move the instant, not the formatter.
+    const shifted = new Date(ms + zone.offsetMinutes * 60_000);
+    return `${shifted.toISOString().slice(0, 16).replace("T", " ")} ${zone.label}`;
   }
 
   const hhmm = clock.formatted.slice(0, 5);
