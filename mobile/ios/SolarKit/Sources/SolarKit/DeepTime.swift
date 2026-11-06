@@ -298,10 +298,18 @@ public func engulfmentAt(_ body: BodyId, ageGyr: Double) -> Engulfment {
     )
 }
 
-/// Whether a body is gone: swallowed outright, or dragged in by tides.
+/**
+ Whether a body is gone: swallowed outright, dragged in by tides, or lost with its planet.
+
+ The last case was a gap the scene showed before any test did. At 11.9 billion years Earth was
+ destroyed and the Moon was still labelled, orbiting nothing. A moon does not outlive the
+ planet it goes round.
+ */
 public func engulfedAt(_ body: BodyId, ageGyr: Double) -> Bool {
     let e = engulfmentAt(body, ageGyr: ageGyr)
-    return e.insidePhotosphere || e.lostToTides
+    if e.insidePhotosphere || e.lostToTides { return true }
+    guard let parent = bodyContracts[body]!.parent, parent != .sun else { return false }
+    return engulfedAt(parent, ageGyr: ageGyr)
 }
 
 /**
@@ -399,4 +407,21 @@ public func deepTimeEventAt(_ ageGyr: Double) -> DeepTimeEvent {
     var found = deepTimeEvents[0]
     for event in deepTimeEvents where event.ageGyr <= ageGyr + 1e-9 { found = event }
     return found
+}
+
+/**
+ How far out everything has moved by this age, as a multiple of its present orbit.
+
+ One number for the whole solar system, because the adiabatic result scales every orbit by the
+ same factor: a times M is conserved and M is shared, so the system keeps its shape and
+ inflates. Exactly 1 on the main sequence, where nothing has moved anywhere a renderer could
+ show.
+ */
+public func orbitExpansionAt(_ ageGyr: Double) -> Double {
+    1 / solarStateAt(ageGyr).mass
+}
+
+/// The Sun's drawn radius at this age, in metres.
+public func solarRadiusMetresAt(_ ageGyr: Double) -> Double {
+    bodyContracts[.sun]!.equatorialRadiusM * solarStateAt(ageGyr).radius
 }

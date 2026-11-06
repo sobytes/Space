@@ -333,10 +333,18 @@ export function engulfmentAt(body: BodyId, ageGyr: number): Engulfment {
   };
 }
 
-/** Whether a body is gone: swallowed outright, or dragged in by tides. */
+/**
+ * Whether a body is gone: swallowed outright, dragged in by tides, or lost with its planet.
+ *
+ * The last case was a gap the scene showed before any test did. At 11.9 billion years Earth
+ * was destroyed and the Moon was still labelled, orbiting nothing. A moon does not outlive the
+ * planet it goes round: whatever the detail of its end, it is not still there afterwards.
+ */
 export function engulfedAt(body: BodyId, ageGyr: number): boolean {
   const engulfment = engulfmentAt(body, ageGyr);
-  return engulfment.insidePhotosphere || engulfment.lostToTides;
+  if (engulfment.insidePhotosphere || engulfment.lostToTides) return true;
+  const parent = BODY_CONTRACTS[body].parent;
+  return parent !== null && parent !== "sun" && engulfedAt(parent, ageGyr);
 }
 
 /**
@@ -427,3 +435,23 @@ export const DEEP_TIME_EVENTS: readonly DeepTimeEvent[] = [
     source: "Schröder 2008",
   },
 ];
+
+/**
+ * How far out everything has moved by this age, as a multiple of its present orbit.
+ *
+ * One number for the whole solar system, because the adiabatic result scales every orbit by
+ * the same factor: a times M is conserved and M is shared, so the system keeps its shape and
+ * inflates. That is what makes it cheap enough to apply to a live scene, and it is also the
+ * honest picture, which concentric rings would hide.
+ *
+ * Exactly 1 on the main sequence, where the Sun has lost a hundredth of a per cent and nothing
+ * has moved anywhere a renderer could show.
+ */
+export function orbitExpansionAt(ageGyr: number): number {
+  return 1 / solarStateAt(ageGyr).mass;
+}
+
+/** The Sun's drawn radius at this age, in metres. */
+export function solarRadiusMetresAt(ageGyr: number): number {
+  return BODY_CONTRACTS.sun.equatorialRadiusM * solarStateAt(ageGyr).radius;
+}

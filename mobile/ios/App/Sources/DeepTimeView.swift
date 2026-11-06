@@ -15,9 +15,21 @@ import SolarKit
  */
 struct DeepTimeView: View {
     @Environment(\.dismiss) private var dismiss
+    let scene: SolarScene
 
     /// Starts at today, which is the only point on this slider anyone has intuition for.
-    @State private var ageGyr: Double = solarAgeNowGyr
+    /**
+     Starts at today, which is the only point on this slider anyone has intuition for.
+
+     `-deepTimeAge <gyr>` starts it elsewhere, so a screenshot probe can reach the giant
+     without driving the slider. Test hook, not a feature.
+     */
+    @State private var ageGyr: Double = {
+        guard let i = CommandLine.arguments.firstIndex(of: "-deepTimeAge"),
+              i + 1 < CommandLine.arguments.count,
+              let value = Double(CommandLine.arguments[i + 1]) else { return solarAgeNowGyr }
+        return value
+    }()
 
     /// The four whose fate the Sun's evolution actually decides.
     private let inner: [BodyId] = [.mercury, .venus, .embary, .mars]
@@ -47,6 +59,19 @@ struct DeepTimeView: View {
             }
             .navigationTitle("Deep time")
             .navigationBarTitleDisplayMode(.inline)
+            /**
+             The scene behind this sheet is drawn at the chosen age while it is open.
+
+             A medium detent and background interaction, because the scene is now the other
+             half of the panel: the Sun swells, the orbits widen and planets vanish as the
+             slider moves, and a full-height sheet would hide exactly that.
+
+             Cleared on the way out, so closing it puts the solar system back where it is
+             rather than leaving it stranded in the year ten billion.
+             */
+            .onAppear { scene.setDeepTime(ageGyr) }
+            .onChange(of: ageGyr) { _, age in scene.setDeepTime(age) }
+            .onDisappear { scene.setDeepTime(nil) }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }

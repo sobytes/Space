@@ -228,6 +228,14 @@ describe("what is actually destroyed", () => {
     expect(mars.orbitAu / mars.photosphereAu).toBeGreaterThan(1.8);
   });
 
+  it("takes the Moon with Earth, rather than leaving it orbiting nothing", () => {
+    expect(engulfedAt("embary", RED_GIANT_TIP_GYR)).toBe(true);
+    expect(engulfedAt("moon", RED_GIANT_TIP_GYR)).toBe(true);
+    // And the Galilean moons go when Jupiter does, which is to say not at all.
+    expect(engulfedAt("jupiter", RED_GIANT_TIP_GYR)).toBe(false);
+    expect(engulfedAt("io", RED_GIANT_TIP_GYR)).toBe(false);
+  });
+
   it("destroys nothing at all today", () => {
     for (const body of ["mercury", "venus", "embary", "mars"] as const) {
       expect(engulfedAt(body, SOLAR_AGE_NOW_GYR)).toBe(false);

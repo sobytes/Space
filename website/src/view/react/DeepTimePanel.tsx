@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useViewport } from "./ViewportContext";
 import {
   DEEP_TIME_EVENTS, MAIN_SEQUENCE_END_GYR, RED_GIANT_TIP_GYR, SOLAR_AGE_NOW_GYR,
   bodyFateAt, engulfedAt, habitableZoneAt, orbitalPeriodAt, runawayGreenhouseCrossing,
@@ -102,6 +103,18 @@ function SolarSlice({ ageGyr }: { ageGyr: number }) {
 
 export function DeepTimePanel({ onClose }: { onClose: () => void }) {
   const [ageGyr, setAgeGyr] = useState(SOLAR_AGE_NOW_GYR);
+  const viewport = useViewport();
+
+  /**
+   * The scene behind this panel is drawn at the chosen age for as long as it is open.
+   *
+   * Cleared on the way out rather than left set, so closing the panel puts the solar system
+   * back where it is rather than leaving it stranded in the year ten billion.
+   */
+  useEffect(() => {
+    viewport.setDeepTime(ageGyr);
+    return () => viewport.setDeepTime(null);
+  }, [viewport, ageGyr]);
 
   useEffect(() => {
     const escape = (e: KeyboardEvent) => {
@@ -122,8 +135,11 @@ export function DeepTimePanel({ onClose }: { onClose: () => void }) {
   }, [ageGyr]);
 
   return (
-    <div className="pointer-events-auto absolute inset-0 z-20 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-      <div className="max-h-full w-[42rem] max-w-full overflow-y-auto rounded-xl border border-white/10 bg-black/90 p-5">
+    // Anchored left and not a full-screen modal, because the scene behind it is now the
+    // other half of the panel: the Sun swells, the orbits widen and planets vanish as the
+    // slider moves, and a dialog over the middle of the screen would hide exactly that.
+    <div className="pointer-events-none absolute inset-0 z-20 flex items-start p-4">
+      <div className="pointer-events-auto max-h-full w-[28rem] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border border-white/10 bg-black/85 p-5 backdrop-blur-md">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="text-lg font-semibold text-zinc-50">Deep time</h2>

@@ -65,6 +65,29 @@ final class SolarScene {
      */
     private(set) var localTimes: [BodyId: String] = [:]
 
+    /**
+     The Sun's age the scene is drawn at, or nil for the present.
+
+     Nil rather than 4.57, so "is deep time on" is a question about the mode and not a float
+     comparison, and the ordinary path does no arithmetic at all.
+     */
+    private(set) var deepTimeAgeGyr: Double?
+
+    func setDeepTime(_ ageGyr: Double?) {
+        deepTimeAgeGyr = ageGyr
+        // The Sun's drawn radius is set where every body's is, on a focus change, so that has
+        // to be redone when the age moves it by a factor of 256.
+        rescaleBodies()
+    }
+
+    /// Everything pushed outwards by the Sun's mass loss, in Double, before anything is drawn.
+    private func expanded(_ position: Vec3) -> Vec3 {
+        guard let age = deepTimeAgeGyr else { return position }
+        let scale = orbitExpansionAt(age)
+        if scale == 1 { return position }
+        return Vec3(position.x * scale, position.y * scale, position.z * scale)
+    }
+
     private(set) var focus: BodyId = .embary
     private var nodes: [BodyId: SCNNode] = [:]
     private var orbitNodes: [BodyId: SCNNode] = [:]
@@ -178,7 +201,22 @@ final class SolarScene {
              This is the second time that has happened here; the first was a shared
              exaggeration constant, this time a shared compression curve.
              */
-            if isStar { return 0.16 }
+            if isStar {
+                /**
+                 Except in deep time, where it really does swallow the inner solar system.
+
+                 The fixed size exists because the Sun's true radius at this scale, 0.0047
+                 units against Mercury's 0.387 orbit, is a dot, and a dot in the middle of the
+                 system view reads as a missing Sun. Once it is a giant that reasoning inverts:
+                 1.14 units at the red giant tip is the fact, not an artefact, and compressing
+                 it would hide the one thing the mode exists to show.
+
+                 The larger of the two, so the present day keeps the familiar disc and the
+                 swelling takes over exactly when it becomes real.
+                 */
+                guard deepTimeAgeGyr != nil else { return 0.16 }
+                return max(0.16, CGFloat(metres / metresPerUnit))
+            }
             /**
              System view. True radii are hopeless here, Earth being 4.2e-5 units, so sizes are
              compressed by a square root of the body's size relative to Earth. That keeps them
@@ -846,21 +884,32 @@ final class SolarScene {
         focus = body
         metresPerUnit = Self.unitFor(body)
 
+        rescaleBodies()
+        clearTiles()
+        rebuildOrbits()
+        frameFocus(at: epoch)
+    }
+
+    /**
+     Every body's drawn radius, for the current focus scale and the current age.
+
+     Lifted out of `setFocus` because the age moves one of them. The Sun is 256 times its
+     present radius at the red giant tip, and that has to be reapplied when the deep-time
+     slider moves rather than only when the focus changes.
+     */
+    private func rescaleBodies() {
         for id in bodyIds {
             let contract = bodyContracts[id]!
             guard let node = nodes[id], let sphere = node.childNodes.first?.geometry as? SCNSphere
             else { continue }
-            let radius = renderRadius(
-                contract.equatorialRadiusM, isStar: contract.kind == .star
-            )
+            let metres = (id == .sun && deepTimeAgeGyr != nil)
+                ? solarRadiusMetresAt(deepTimeAgeGyr!)
+                : contract.equatorialRadiusM
+            let radius = renderRadius(metres, isStar: contract.kind == .star)
             sphere.radius = radius
             // The rings are built in planet radii, so they scale with the body.
             rescaleRings(id, to: radius)
         }
-
-        clearTiles()
-        rebuildOrbits()
-        frameFocus(at: epoch)
     }
 
     /**
@@ -955,8 +1004,11 @@ final class SolarScene {
 
         frameCounter &+= 1
         for id in bodyIds {
-            positions[id] = gravity?.heliocentricPosition(of: id)
-                ?? heliocentricPositionOf(id, at: epoch)
+            // Expanded in Double, before the single conversion to Float: this is a
+            // multiplication on a true heliocentric metre, and scaling a render-space delta
+            // would scale the floating origin with it and move the camera off its body.
+            positions[id] = expanded(gravity?.heliocentricPosition(of: id)
+                ?? heliocentricPositionOf(id, at: epoch))
         }
         // The floating origin sits on the focused body. Everything downstream draws relative
         // to it, which is what keeps the numbers reaching Float small at any scale.
@@ -973,6 +1025,15 @@ final class SolarScene {
          wrong, so nothing looked broken, there was just nothing there.
          */
         heliocentricRoot.position = renderPosition(.zero)
+        /**
+         The drawn orbits expand with the planets on them.
+
+         Scaling the group rather than rebuilding 256 vertices per planet on every move of the
+         slider. It composes correctly because the origin this group carries is already the
+         expanded one, so a vertex at a true heliocentric metre lands at scale × v − origin.
+         */
+        let orbitScale = Float(deepTimeAgeGyr.map { orbitExpansionAt($0) } ?? 1)
+        heliocentricRoot.scale = SCNVector3(orbitScale, orbitScale, orbitScale)
 
         // Moon orbits carry vertices relative to their planet, so each one rides its planet.
         for (moon, parent) in orbitAnchors {
@@ -986,6 +1047,14 @@ final class SolarScene {
 
         for id in bodyIds {
             guard let node = nodes[id], let position = positions[id] else { continue }
+            /**
+             What the star has swallowed stops being drawn.
+
+             Hidden rather than removed, so nothing is rebuilt as the slider moves and a planet
+             comes back if you drag back before the giant phase.
+             */
+            node.isHidden = deepTimeAgeGyr.map { engulfedAt(id, ageGyr: $0) } ?? false
+            if node.isHidden { continue }
             node.position = renderPosition(position)
 
             /**
@@ -1109,6 +1178,9 @@ final class SolarScene {
         let satellites = Set(childrenOf(focus))
 
         return bodyIds.compactMap { id -> LabelInput? in
+            // A body the star has swallowed is not labelled either, or the scene shows Earth
+            // destroyed and its name still floating where it used to be.
+            if let age = deepTimeAgeGyr, engulfedAt(id, ageGyr: age) { return nil }
             guard let node = nodes[id],
                   let sphere = node.childNodes.first?.geometry as? SCNSphere
             else { return nil }

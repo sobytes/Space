@@ -17,6 +17,7 @@
 
 import type { BufferAttribute, Camera, Object3D, PerspectiveCamera, Points } from "three";
 import { heliocentricPositionOf } from "@solar/engine/bodies/position";
+import { engulfedAt, orbitExpansionAt, solarRadiusMetresAt } from "@solar/engine/deep-time";
 import { createNBodyTracker, type NBodyTracker } from "@solar/engine/nbody-tracker";
 import type { MassiveBody } from "@solar/engine/nbody";
 import { BODY_CONTRACTS, BODY_IDS, type BodyId } from "@solar/engine/bodies/registry";
@@ -56,6 +57,8 @@ export interface ViewportSnapshot {
    */
   readonly sunDirection: { readonly x: number; readonly y: number; readonly z: number };
   readonly gravity: GravitySnapshot;
+  /** The Sun's age the scene is drawn at, or null for the present. */
+  readonly deepTimeAgeGyr: number | null;
 }
 
 /**
@@ -95,6 +98,8 @@ export interface Viewport {
    * planet. Only the position is written, so the ring never inherits a planet's spin.
    */
   attachOrbitAnchor(parent: BodyId, node: Object3D): () => void;
+  /** Draw the scene at a given age of the Sun, or null for the present. */
+  setDeepTime(ageGyr: number | null): void;
   /**
    * Registers the Points object that marks bodies too small to see as geometry. The Viewport
    * writes its position buffer, so the single-writer rule over scale-critical data still holds.
@@ -181,6 +186,13 @@ export function createViewport(init: ViewportInit = {}): Viewport {
   const nodes = new Map<BodyId, Object3D>();
   /** Keyed by node rather than by body: one planet can carry several moons' rings. */
   const orbitAnchors = new Map<Object3D, BodyId>();
+  /**
+   * The Sun's age the scene is drawn at, or null for the present.
+   *
+   * Null rather than 4.57, so "is deep time on" is a question about the mode and not a float
+   * comparison against the present age, and so the ordinary path does no arithmetic at all.
+   */
+  let deepTimeAgeGyr: number | null = null;
   let heliocentricRoot: Object3D | null = null;
   let markers: Points | null = null;
   const positions = new Map<BodyId, Vec3>();
@@ -213,6 +225,7 @@ export function createViewport(init: ViewportInit = {}): Viewport {
       distanceToFocus: distanceToSurface,
       sunDirection: sunDirectionFromFocus(),
       gravity,
+      deepTimeAgeGyr,
     };
   }
 
@@ -279,10 +292,29 @@ export function createViewport(init: ViewportInit = {}): Viewport {
    * The moons then follow a planet that is itself moving under mutual gravity, which is the
    * right compromise and is stated in the UI rather than left to be discovered.
    */
+  /**
+   * Everything pushed outwards by the Sun's mass loss, in float64, before anything is drawn.
+   *
+   * Applied here rather than at the GPU on purpose. This is a multiplication on a true
+   * heliocentric metre, which is exactly the kind of arithmetic that must happen before the
+   * single float64-to-float32 boundary; scaling a render-space delta instead would scale the
+   * floating origin along with it and move the camera off the body it is tracking.
+   *
+   * One factor for the whole system, because the adiabatic result scales every orbit equally.
+   */
+  function expanded(position: Vec3): Vec3 {
+    if (deepTimeAgeGyr === null) return position;
+    const scale = orbitExpansionAt(deepTimeAgeGyr);
+    if (scale === 1) return position;
+    return { x: position.x * scale, y: position.y * scale, z: position.z * scale };
+  }
+
   function resolvePositions(): void {
     const active = tracker;
     if (!active) {
-      for (const id of BODY_IDS) positions.set(id, heliocentricPositionOf(id, clock.epoch));
+      for (const id of BODY_IDS) {
+        positions.set(id, expanded(heliocentricPositionOf(id, clock.epoch)));
+      }
       return;
     }
 
@@ -300,9 +332,9 @@ export function createViewport(init: ViewportInit = {}): Viewport {
     for (const id of BODY_IDS) {
       positions.set(
         id,
-        integrated.has(id)
+        expanded(integrated.has(id)
           ? active.heliocentricPosition(id)
-          : heliocentricPositionOf(id, clock.epoch),
+          : heliocentricPositionOf(id, clock.epoch)),
       );
     }
   }
@@ -327,10 +359,24 @@ export function createViewport(init: ViewportInit = {}): Viewport {
       const contract = BODY_CONTRACTS[id];
       const orientation = orientationOf(id, clock.epoch);
 
+      /**
+       * What the star has swallowed stops being drawn.
+       *
+       * Visibility rather than removal, so nothing is rebuilt as the slider moves and a planet
+       * comes back if you drag back before the giant phase. `visible` is the one property on
+       * an attached node the Viewport writes besides its transform.
+       */
+      node.visible = deepTimeAgeGyr === null || !engulfedAt(id, deepTimeAgeGyr);
+      if (!node.visible) continue;
+
       placeAnchor(node, {
         worldPosition,
         origin,
-        radiusMetres: contract.equatorialRadiusM,
+        // The Sun alone changes size with age, by a factor of 256 at the red giant tip.
+        radiusMetres:
+          id === "sun" && deepTimeAgeGyr !== null
+            ? solarRadiusMetresAt(deepTimeAgeGyr)
+            : contract.equatorialRadiusM,
         spinRadians: orientation.spin,
         tiltRadians: orientation.tilt,
         poleAzimuthRadians: orientation.poleAzimuth,
@@ -344,6 +390,17 @@ export function createViewport(init: ViewportInit = {}): Viewport {
       // distance from which a whole orbit is visible. The invariant that matters is not
       // "never a large float32 number", it is "never a float32 error you can resolve".
       heliocentricRoot.position.set(-origin.x, -origin.y, -origin.z);
+      /**
+       * The drawn orbits expand with the planets on them.
+       *
+       * Scaling the group rather than rebuilding every vertex, and it composes correctly
+       * because the origin this group carries is already the expanded one: a child vertex at
+       * a true heliocentric metre renders at scale * v - origin, which is the expanded orbit
+       * seen from the expanded camera position. Rebuilding 512 vertices per planet on every
+       * drag of the slider would be the obvious alternative and the wrong one.
+       */
+      const scale = deepTimeAgeGyr === null ? 1 : orbitExpansionAt(deepTimeAgeGyr);
+      heliocentricRoot.scale.setScalar(scale);
       heliocentricRoot.updateMatrix();
       heliocentricRoot.matrixWorldNeedsUpdate = true;
     }
@@ -363,6 +420,9 @@ export function createViewport(init: ViewportInit = {}): Viewport {
     for (const id of BODY_IDS) {
       const worldPosition = positions.get(id);
       if (!worldPosition) continue;
+      // A body the star has swallowed is not labelled either. Without this the scene showed
+      // Earth destroyed and its name still floating where it used to be.
+      if (deepTimeAgeGyr !== null && engulfedAt(id, deepTimeAgeGyr)) continue;
       const delta = relativeTo(worldPosition, origin);
       screen.push({
         id,
@@ -438,6 +498,19 @@ export function createViewport(init: ViewportInit = {}): Viewport {
       return () => {
         heliocentricRoot = null;
       };
+    },
+
+    /**
+     * Draw the scene as it stands at a given age of the Sun, or null for the present.
+     *
+     * Three things change and nothing else: every orbit expands by the mass-loss factor, the
+     * Sun is drawn at its radius for that age, and a body the star has swallowed stops being
+     * drawn. The clock keeps running, so the planets still go round; what moves is the scale
+     * of the system and the size of the star at the middle of it.
+     */
+    setDeepTime(ageGyr) {
+      deepTimeAgeGyr = ageGyr;
+      publish(true);
     },
 
     attachOrbitAnchor(parent, node) {

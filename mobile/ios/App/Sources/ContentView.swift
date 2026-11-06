@@ -155,7 +155,10 @@ struct ContentView: View {
 
              Nothing is lost, because a sheet covers the scene and the labels with it.
              */
-            if showLabels && !anySheetPresented {
+            // Deep time is excluded from the suspension below: it is a half-height sheet
+            // whose whole point is the scene above it, and the labels are how you tell which
+            // planet has just been swallowed.
+            if showLabels && (!anySheetPresented || showingDeepTime) {
                 LabelLayer(scene: scene)
                     .ignoresSafeArea()
             }
@@ -263,7 +266,19 @@ struct ContentView: View {
         .sheet(isPresented: $showingHabitability) { HabitabilityView(body_: focus) }
         .sheet(isPresented: $showingSurface) { SurfacePhotographsView(body_: focus) }
         // No body argument: this panel is about the Sun and everything orbiting it.
-        .sheet(isPresented: $showingDeepTime) { DeepTimeView() }
+        .sheet(isPresented: $showingDeepTime) {
+            DeepTimeView(scene: scene)
+                /**
+                 Two fifths, not a half.
+
+                 The system view puts the Sun at the centre of the screen and a medium sheet's
+                 top edge lands almost exactly there, so the one thing this panel changes was
+                 behind it. Two fifths leaves the Sun and the inner orbits in view, which is
+                 the whole reason the sheet is not full height.
+                 */
+                .presentationDetents([.fraction(0.4), .large])
+                .presentationBackgroundInteraction(.enabled(upThrough: .fraction(0.4)))
+        }
         .task {
             /**
              `-focusAfter <id>` switches focus a moment after launch, so a probe can exercise
