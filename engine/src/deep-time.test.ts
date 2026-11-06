@@ -9,8 +9,9 @@
 import { describe, expect, it } from "vitest";
 import {
   DEEP_TIME_EVENTS, MAIN_SEQUENCE_END_GYR, RED_GIANT_TIP_GYR, SOLAR_AGE_NOW_GYR,
-  engulfedAt, habitableZoneAt, insideHabitableZoneAt, mainSequenceLuminosity,
-  runawayGreenhouseCrossing, solarStateAt,
+  engulfedAt, engulfmentAt, equilibriumTemperatureAt, habitableZoneAt, insideHabitableZoneAt,
+  mainSequenceLuminosity, orbitalPeriodAt, runawayGreenhouseCrossing, semiMajorAxisAt,
+  solarStateAt,
 } from "./deep-time";
 
 describe("the Sun on the main sequence", () => {
@@ -134,6 +135,103 @@ describe("the giant phases", () => {
     // About Earth's radius: 0.0084 solar radii is 5,800 km.
     expect(end.radius * 695_700).toBeGreaterThan(4_000);
     expect(end.radius * 695_700).toBeLessThan(8_000);
+  });
+});
+
+/**
+ * What the Sun's mass loss does to everything else, which is the half of its evolution that
+ * reaches the planets mechanically rather than through light.
+ */
+describe("orbits, as the Sun sheds mass", () => {
+  it("leaves orbits alone while no mass is lost", () => {
+    // The main sequence loses about a hundredth of a per cent, which moves nothing.
+    expect(semiMajorAxisAt("embary", SOLAR_AGE_NOW_GYR)).toBeCloseTo(1.0, 2);
+    expect(semiMajorAxisAt("embary", MAIN_SEQUENCE_END_GYR)).toBeCloseTo(1.0, 2);
+  });
+
+  /**
+   * The adiabatic result: a times M is conserved, so losing a third of the Sun pushes every
+   * orbit out by half. This is checked as the invariant rather than against one number, so a
+   * wrong exponent cannot pass by matching Earth and missing Jupiter.
+   */
+  it("conserves a times M for every body", () => {
+    for (const body of ["mercury", "venus", "embary", "mars", "jupiter"] as const) {
+      const now = semiMajorAxisAt(body, SOLAR_AGE_NOW_GYR) * solarStateAt(SOLAR_AGE_NOW_GYR).mass;
+      const tip = semiMajorAxisAt(body, RED_GIANT_TIP_GYR) * solarStateAt(RED_GIANT_TIP_GYR).mass;
+      expect(tip).toBeCloseTo(now, 9);
+    }
+  });
+
+  it("puts Earth at 1.50 au by the red giant tip", () => {
+    expect(semiMajorAxisAt("embary", RED_GIANT_TIP_GYR)).toBeCloseTo(1.497, 2);
+  });
+
+  /** P goes as M^-2, not M^-1: the orbit widens and the pull weakens at the same time. */
+  it("stretches Earth's year to 2.24 of today's", () => {
+    expect(orbitalPeriodAt("embary", RED_GIANT_TIP_GYR)).toBeCloseTo(2.241, 2);
+  });
+
+  it("keeps the solar system's shape, inflating it rather than reordering it", () => {
+    const order = ["mercury", "venus", "embary", "mars", "jupiter"] as const;
+    const ratio = order.map((b) => semiMajorAxisAt(b, RED_GIANT_TIP_GYR)
+      / semiMajorAxisAt(b, SOLAR_AGE_NOW_GYR));
+    for (const r of ratio) expect(r).toBeCloseTo(ratio[0], 9);
+  });
+});
+
+describe("equilibrium temperature, against the published figures", () => {
+  it.each([
+    ["mercury", 440, 8],
+    ["venus", 227, 3],
+    ["embary", 255, 3],
+    ["mars", 210, 4],
+  ] as const)("puts %s at about %s K today", (body, expected, tolerance) => {
+    expect(Math.abs(equilibriumTemperatureAt(body, SOLAR_AGE_NOW_GYR) - expected))
+      .toBeLessThan(tolerance);
+  });
+
+  it("warms every body as the Sun brightens", () => {
+    for (const body of ["venus", "embary", "mars"] as const) {
+      expect(equilibriumTemperatureAt(body, MAIN_SEQUENCE_END_GYR))
+        .toBeGreaterThan(equilibriumTemperatureAt(body, SOLAR_AGE_NOW_GYR));
+    }
+  });
+});
+
+describe("what is actually destroyed", () => {
+  /**
+   * Schröder 2008's headline, and the part my first version got right for the wrong reason.
+   *
+   * Comparing the giant's radius against each planet's *present* orbit swallows Earth. Doing
+   * it properly, against the orbit after mass loss, Earth is at 1.50 au and the photosphere
+   * only reaches 1.19, so expansion very nearly saves it. The published model loses it anyway,
+   * to tidal drag on the envelope, and that is carried here as a citation rather than computed.
+   */
+  it("finds Earth outside the photosphere and loses it to tides regardless", () => {
+    const earth = engulfmentAt("embary", RED_GIANT_TIP_GYR);
+    expect(earth.orbitAu).toBeGreaterThan(earth.photosphereAu);
+    expect(earth.insidePhotosphere).toBe(false);
+    expect(earth.lostToTides).toBe(true);
+    expect(engulfedAt("embary", RED_GIANT_TIP_GYR)).toBe(true);
+  });
+
+  it("swallows Mercury and Venus outright, orbit expansion and all", () => {
+    for (const body of ["mercury", "venus"] as const) {
+      expect(engulfmentAt(body, RED_GIANT_TIP_GYR).insidePhotosphere).toBe(true);
+    }
+  });
+
+  it("spares Mars by a clear margin", () => {
+    const mars = engulfmentAt("mars", RED_GIANT_TIP_GYR);
+    expect(mars.insidePhotosphere).toBe(false);
+    expect(mars.lostToTides).toBe(false);
+    expect(mars.orbitAu / mars.photosphereAu).toBeGreaterThan(1.8);
+  });
+
+  it("destroys nothing at all today", () => {
+    for (const body of ["mercury", "venus", "embary", "mars"] as const) {
+      expect(engulfedAt(body, SOLAR_AGE_NOW_GYR)).toBe(false);
+    }
   });
 });
 

@@ -18,7 +18,38 @@
         "confidence": "modelled",
         "innerAu": 0.8032711545198,
         "outerAu": 1.41648174917518,
-        "engulfed": []
+        "engulfed": [],
+        "fates": {
+          "mercury": "too-hot",
+          "venus": "too-hot",
+          "embary": "habitable-zone",
+          "mars": "too-cold"
+        },
+        "orbits": {
+          "mercury": 0.38709927,
+          "venus": 0.72333566,
+          "embary": 1.00000261,
+          "mars": 1.52371034,
+          "jupiter": 5.202887
+        },
+        "periods": {
+          "mercury": 0.24084272284622,
+          "venus": 0.615190774526358,
+          "embary": 1.00000391500255,
+          "mars": 1.88084766408323,
+          "jupiter": 11.8677008509003
+        },
+        "temperatures": {
+          "mercury": 401.897590770992,
+          "venus": 208.348265980864,
+          "embary": 233.543169671298,
+          "mars": 192.904330777247,
+          "jupiter": 94.1878253178273
+        },
+        "photosphereAu": 0.00393036219207784,
+        "earthLostToTides": false,
+        "event": "The Sun forms, at 71 per cent of today's brightness",
+        "eventDetail": "Faint enough that Earth should have been frozen solid for its first two billion years. It was not: there is liquid water in the rock record from 4.4 billion years ago. Reconciling the two is the faint young Sun problem and it is still open."
       }
     },
     {
@@ -35,7 +66,38 @@
         "confidence": "modelled",
         "innerAu": 0.829623525709937,
         "outerAu": 1.4629513038558,
-        "engulfed": []
+        "engulfed": [],
+        "fates": {
+          "mercury": "too-hot",
+          "venus": "too-hot",
+          "embary": "habitable-zone",
+          "mars": "too-cold"
+        },
+        "orbits": {
+          "mercury": 0.38709927,
+          "venus": 0.72333566,
+          "embary": 1.00000261,
+          "mars": 1.52371034,
+          "jupiter": 5.202887
+        },
+        "periods": {
+          "mercury": 0.24084272284622,
+          "venus": 0.615190774526358,
+          "embary": 1.00000391500255,
+          "mars": 1.88084766408323,
+          "jupiter": 11.8677008509003
+        },
+        "temperatures": {
+          "mercury": 408.436782506886,
+          "venus": 211.738257088987,
+          "embary": 237.343101793706,
+          "mars": 196.043036842185,
+          "jupiter": 95.720335746065
+        },
+        "photosphereAu": 0.00405930291503861,
+        "earthLostToTides": false,
+        "event": "The Sun forms, at 71 per cent of today's brightness",
+        "eventDetail": "Faint enough that Earth should have been frozen solid for its first two billion years. It was not: there is liquid water in the rock record from 4.4 billion years ago. Reconciling the two is the faint young Sun problem and it is still open."
       }
     },
     {
@@ -52,7 +114,38 @@
         "confidence": "modelled",
         "innerAu": 0.874516180861746,
         "outerAu": 1.54211464283137,
-        "engulfed": []
+        "engulfed": [],
+        "fates": {
+          "mercury": "too-hot",
+          "venus": "too-hot",
+          "embary": "habitable-zone",
+          "mars": "habitable-zone"
+        },
+        "orbits": {
+          "mercury": 0.38709927,
+          "venus": 0.72333566,
+          "embary": 1.00000261,
+          "mars": 1.52371034,
+          "jupiter": 5.202887
+        },
+        "periods": {
+          "mercury": 0.24084272284622,
+          "venus": 0.615190774526358,
+          "embary": 1.00000391500255,
+          "mars": 1.88084766408323,
+          "jupiter": 11.8677008509003
+        },
+        "temperatures": {
+          "mercury": 419.34188361862,
+          "venus": 217.391585098785,
+          "embary": 243.680069065231,
+          "mars": 201.277308657504,
+          "jupiter": 98.2760309832892
+        },
+        "photosphereAu": 0.00427896024185515,
+        "earthLostToTides": false,
+        "event": "The Sun forms, at 71 per cent of today's brightness",
+        "eventDetail": "Faint enough that Earth should have been frozen solid for its first two billion years. It was not: there is liquid water in the rock record from 4.4 billion years ago. Reconciling the two is the faint young Sun problem and it is still open."
       }
     },
     {
@@ -69,7 +162,38 @@
         "confidence": "modelled",
         "innerAu": 0.950443247520335,
         "outerAu": 1.67600380788498,
-        "engulfed": []
+        "engulfed": [],
+        "fates": {
+          "mercury": "too-hot",
+          "venus": "too-hot",
+          "embary": "habitable-zone",
+          "mars": "habitable-zone"
+        },
+        "orbits": {
+          "mercury": 0.38709927,
+          "venus": 0.72333566,
+          "embary": 1.00000261,
+          "mars": 1.52371034,
+          "jupiter": 5.202887
+        },
+        "periods": {
+          "mercury": 0.24084272284622,
+          "venus": 0.615190774526358,
+          "embary": 1.00000391500255,
+          "mars": 1.88084766408323,
+          "jupiter": 11.8677008509003
+        },
+        "temperatures": {
+          "mercury": 437.167040599736,
+          "venus": 226.632348500048,
+          "embary": 254.038289061704,
+          "mars": 209.833095149892,
+          "jupiter": 102.453495119811
+        },
+        "photosphereAu": 0.00465046726096216,
+        "earthLostToTides": false,
+        "event": "Now",
+        "eventDetail": "The Sun has brightened by about 40 per cent since it formed and is still rising."
       }
     },
     {
@@ -86,7 +210,38 @@
         "confidence": "modelled",
         "innerAu": 1.01616187022202,
         "outerAu": 1.79189148680147,
-        "engulfed": []
+        "engulfed": [],
+        "fates": {
+          "mercury": "too-hot",
+          "venus": "too-hot",
+          "embary": "too-hot",
+          "mars": "habitable-zone"
+        },
+        "orbits": {
+          "mercury": 0.38709927,
+          "venus": 0.72333566,
+          "embary": 1.00000261,
+          "mars": 1.52371034,
+          "jupiter": 5.202887
+        },
+        "periods": {
+          "mercury": 0.24084272284622,
+          "venus": 0.615190774526358,
+          "embary": 1.00000391500255,
+          "mars": 1.88084766408323,
+          "jupiter": 11.8677008509003
+        },
+        "temperatures": {
+          "mercury": 452.028444517788,
+          "venus": 234.336668723583,
+          "embary": 262.674268615921,
+          "mars": 216.966328199939,
+          "jupiter": 105.936380681592
+        },
+        "photosphereAu": 0.00497202491746304,
+        "earthLostToTides": false,
+        "event": "Earth leaves the habitable zone",
+        "eventDetail": "The inner edge sweeps past 1 au and Earth goes into a moist greenhouse: water reaches the stratosphere, is broken up by ultraviolet and the hydrogen escapes. The oceans are lost long before the Sun becomes a giant, and nothing about the planet causes it."
       }
     },
     {
@@ -103,7 +258,38 @@
         "confidence": "modelled",
         "innerAu": 1.1361745576344,
         "outerAu": 2.00352087300883,
-        "engulfed": []
+        "engulfed": [],
+        "fates": {
+          "mercury": "too-hot",
+          "venus": "too-hot",
+          "embary": "too-hot",
+          "mars": "habitable-zone"
+        },
+        "orbits": {
+          "mercury": 0.38709927,
+          "venus": 0.72333566,
+          "embary": 1.00000261,
+          "mars": 1.52371034,
+          "jupiter": 5.202887
+        },
+        "periods": {
+          "mercury": 0.24084272284622,
+          "venus": 0.615190774526358,
+          "embary": 1.00000391500255,
+          "mars": 1.88084766408323,
+          "jupiter": 11.8677008509003
+        },
+        "temperatures": {
+          "mercury": 477.976832439897,
+          "venus": 247.788607109676,
+          "embary": 277.752907807473,
+          "mars": 229.42113390619,
+          "jupiter": 112.017587150629
+        },
+        "photosphereAu": 0.00555924048784817,
+        "earthLostToTides": false,
+        "event": "Earth leaves the habitable zone",
+        "eventDetail": "The inner edge sweeps past 1 au and Earth goes into a moist greenhouse: water reaches the stratosphere, is broken up by ultraviolet and the hydrogen escapes. The oceans are lost long before the Sun becomes a giant, and nothing about the planet causes it."
       }
     },
     {
@@ -120,7 +306,38 @@
         "confidence": "modelled",
         "innerAu": 1.31207814080289,
         "outerAu": 2.31370780524298,
-        "engulfed": []
+        "engulfed": [],
+        "fates": {
+          "mercury": "too-hot",
+          "venus": "too-hot",
+          "embary": "too-hot",
+          "mars": "habitable-zone"
+        },
+        "orbits": {
+          "mercury": 0.38709927,
+          "venus": 0.72333566,
+          "embary": 1.00000261,
+          "mars": 1.52371034,
+          "jupiter": 5.202887
+        },
+        "periods": {
+          "mercury": 0.24084272284622,
+          "venus": 0.615190774526358,
+          "embary": 1.00000391500255,
+          "mars": 1.88084766408323,
+          "jupiter": 11.8677008509003
+        },
+        "temperatures": {
+          "mercury": 513.646303483428,
+          "venus": 266.280065160264,
+          "embary": 298.480480003225,
+          "mars": 246.541901979546,
+          "jupiter": 120.377005034629
+        },
+        "photosphereAu": 0.00641992717981552,
+        "earthLostToTides": false,
+        "event": "The main sequence ends",
+        "eventDetail": "Hydrogen in the core runs out after about ten billion years. The Sun leaves the main sequence and starts to swell, and the modelling here stops and the interpolation between published points begins."
       }
     },
     {
@@ -137,7 +354,38 @@
         "confidence": "interpolated",
         "innerAu": 2.21251260241569,
         "outerAu": 3.90152653124389,
-        "engulfed": []
+        "engulfed": [],
+        "fates": {
+          "mercury": "too-hot",
+          "venus": "too-hot",
+          "embary": "too-hot",
+          "mars": "too-hot"
+        },
+        "orbits": {
+          "mercury": 0.387220276336355,
+          "venus": 0.723561773054079,
+          "embary": 1.00031520850266,
+          "mars": 1.5241866483276,
+          "jupiter": 5.20451341044076
+        },
+        "periods": {
+          "mercury": 0.240993320136801,
+          "venus": 0.615575449067235,
+          "embary": 1.00062921054145,
+          "mars": 1.88202374513256,
+          "jupiter": 11.8751216422468
+        },
+        "temperatures": {
+          "mercury": 666.897860797593,
+          "venus": 345.727409355635,
+          "embary": 387.535142867843,
+          "mars": 320.100166032702,
+          "jupiter": 156.292699085695
+        },
+        "photosphereAu": 0.0122771815291725,
+        "earthLostToTides": false,
+        "event": "The main sequence ends",
+        "eventDetail": "Hydrogen in the core runs out after about ten billion years. The Sun leaves the main sequence and starts to swell, and the modelling here stops and the interpolation between published points begins."
       }
     },
     {
@@ -154,7 +402,38 @@
         "confidence": "interpolated",
         "innerAu": 6.98430295769578,
         "outerAu": 12.3160624088394,
-        "engulfed": []
+        "engulfed": [],
+        "fates": {
+          "mercury": "too-hot",
+          "venus": "too-hot",
+          "embary": "too-hot",
+          "mars": "too-hot"
+        },
+        "orbits": {
+          "mercury": 0.387486756756757,
+          "venus": 0.72405971971972,
+          "embary": 1.00100361361361,
+          "mars": 1.52523557557558,
+          "jupiter": 5.20809509509509
+        },
+        "periods": {
+          "mercury": 0.241325131784657,
+          "venus": 0.616423004111577,
+          "embary": 1.00200692684933,
+          "mars": 1.8846150094872,
+          "jupiter": 11.8914719032348
+        },
+        "temperatures": {
+          "mercury": 1184.48235566513,
+          "venus": 614.049077563099,
+          "embary": 688.304110584701,
+          "mars": 568.532336057815,
+          "jupiter": 277.592649892264
+        },
+        "photosphereAu": 0.0511551398705837,
+        "earthLostToTides": false,
+        "event": "The main sequence ends",
+        "eventDetail": "Hydrogen in the core runs out after about ten billion years. The Sun leaves the main sequence and starts to swell, and the modelling here stops and the interpolation between published points begins."
       }
     },
     {
@@ -175,7 +454,38 @@
           "mercury",
           "venus",
           "embary"
-        ]
+        ],
+        "fates": {
+          "mercury": "engulfed",
+          "venus": "engulfed",
+          "embary": "engulfed",
+          "mars": "too-hot"
+        },
+        "orbits": {
+          "mercury": 0.579489925149701,
+          "venus": 1.08283781437126,
+          "embary": 1.49700989520958,
+          "mars": 2.28100350299401,
+          "jupiter": 7.78875299401197
+        },
+        "periods": {
+          "mercury": 0.539735027354467,
+          "venus": 1.37865909168121,
+          "embary": 2.24103570180572,
+          "mars": 4.21503026301416,
+          "jupiter": 26.5958371824471
+        },
+        "temperatures": {
+          "mercury": 2582.71392849811,
+          "venus": 1338.90817184278,
+          "embary": 1500.81814638038,
+          "mars": 1239.66083252759,
+          "jupiter": 605.279090816728
+        },
+        "photosphereAu": 1.19051961880631,
+        "earthLostToTides": true,
+        "event": "The red giant tip: 256 times its radius, 2730 times its light",
+        "eventDetail": "The photosphere reaches past Venus. Mercury and Venus are destroyed. Earth's orbit is lifted outwards by the Sun's mass loss and that still does not save it: tidal drag on the giant pulls the planet in faster than the orbit widens."
       }
     },
     {
@@ -192,7 +502,40 @@
         "confidence": "end state",
         "innerAu": 0.0300556544889144,
         "outerAu": 0.052999894000318,
-        "engulfed": []
+        "engulfed": [
+          "embary"
+        ],
+        "fates": {
+          "mercury": "too-cold",
+          "venus": "too-cold",
+          "embary": "engulfed",
+          "mars": "too-cold"
+        },
+        "orbits": {
+          "mercury": 0.7168505,
+          "venus": 1.33951048148148,
+          "embary": 1.85185668518518,
+          "mars": 2.82168581481481,
+          "jupiter": 9.63497592592593
+        },
+        "periods": {
+          "mercury": 0.825935263532989,
+          "venus": 2.10970773157187,
+          "embary": 3.42936870714182,
+          "mars": 6.45009486996993,
+          "jupiter": 40.6985625888212
+        },
+        "temperatures": {
+          "mercury": 57.1273780102926,
+          "venus": 29.6154802163519,
+          "embary": 33.1967875446571,
+          "mars": 27.4202156897571,
+          "jupiter": 13.3882452257967
+        },
+        "photosphereAu": 0.0000390639249920821,
+        "earthLostToTides": true,
+        "event": "A white dwarf, half a Sun in an Earth-sized sphere",
+        "eventDetail": "The envelope is thrown off and what is left is the burnt-out core, about 0.54 solar masses, cooling for the rest of time. Whatever is left of the outer planets orbits it in the dark."
       }
     },
     {
@@ -209,7 +552,40 @@
         "confidence": "end state",
         "innerAu": 0.0300556544889144,
         "outerAu": 0.052999894000318,
-        "engulfed": []
+        "engulfed": [
+          "embary"
+        ],
+        "fates": {
+          "mercury": "too-cold",
+          "venus": "too-cold",
+          "embary": "engulfed",
+          "mars": "too-cold"
+        },
+        "orbits": {
+          "mercury": 0.7168505,
+          "venus": 1.33951048148148,
+          "embary": 1.85185668518518,
+          "mars": 2.82168581481481,
+          "jupiter": 9.63497592592593
+        },
+        "periods": {
+          "mercury": 0.825935263532989,
+          "venus": 2.10970773157187,
+          "embary": 3.42936870714182,
+          "mars": 6.45009486996993,
+          "jupiter": 40.6985625888212
+        },
+        "temperatures": {
+          "mercury": 57.1273780102926,
+          "venus": 29.6154802163519,
+          "embary": 33.1967875446571,
+          "mars": 27.4202156897571,
+          "jupiter": 13.3882452257967
+        },
+        "photosphereAu": 0.0000390639249920821,
+        "earthLostToTides": true,
+        "event": "A white dwarf, half a Sun in an Earth-sized sphere",
+        "eventDetail": "The envelope is thrown off and what is left is the burnt-out core, about 0.54 solar masses, cooling for the rest of time. Whatever is left of the outer planets orbits it in the dark."
       }
     },
     {

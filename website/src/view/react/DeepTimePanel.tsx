@@ -3,10 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   DEEP_TIME_EVENTS, MAIN_SEQUENCE_END_GYR, RED_GIANT_TIP_GYR, SOLAR_AGE_NOW_GYR,
-  engulfedAt, habitableZoneAt, insideHabitableZoneAt, runawayGreenhouseCrossing, solarStateAt,
+  bodyFateAt, engulfedAt, habitableZoneAt, orbitalPeriodAt, runawayGreenhouseCrossing,
+  semiMajorAxisAt, solarStateAt,
 } from "@solar/engine/deep-time";
 import { BODY_CONTRACTS, type BodyId } from "@solar/engine/bodies/registry";
-import { heliocentricDistanceM } from "@solar/engine/habitability";
 import { AU_IN_METRES } from "@solar/engine/units";
 
 /** The four that the Sun's evolution actually decides the fate of. */
@@ -41,6 +41,65 @@ function formatAge(ageGyr: number): string {
  * forty per cent since Earth formed and has not stopped, so the habitable zone is sweeping
  * outwards, and Earth's deadline is set by that rather than by anything Earth does.
  */
+/** The widest the slice shows, in au. Past this a body is drawn pinned to the right edge. */
+const SLICE_AU = 3;
+
+function SolarSlice({ ageGyr }: { ageGyr: number }) {
+  const sun = solarStateAt(ageGyr);
+  const zone = habitableZoneAt(ageGyr);
+  const photosphereAu = (696_340_000 * sun.radius) / AU_IN_METRES;
+
+  const width = 620;
+  const height = 92;
+  const x = (au: number) => Math.min(au, SLICE_AU) / SLICE_AU * width;
+  const axis = height - 26;
+
+  const zoneLeft = x(zone.innerAu);
+  const zoneRight = x(zone.outerAu);
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img"
+      aria-label="The inner solar system to scale at this age">
+      {/* The habitable zone, behind everything, clipped at the edge of the slice. */}
+      {zone.innerAu < SLICE_AU ? (
+        <rect x={zoneLeft} y={axis - 20} width={Math.max(2, zoneRight - zoneLeft)} height={40}
+          fill="rgb(16 185 129 / 0.16)" />
+      ) : null}
+
+      <line x1={0} y1={axis} x2={width} y2={axis} stroke="rgb(255 255 255 / 0.15)" />
+
+      {/* The Sun, drawn at its real radius on the same scale as the orbits. */}
+      <rect x={0} y={axis - 14} width={Math.max(3, x(photosphereAu))} height={28} rx={3}
+        fill="rgb(251 191 36 / 0.85)" />
+
+      {INNER.map((id) => {
+        const au = semiMajorAxisAt(id, ageGyr);
+        const gone = engulfedAt(id, ageGyr);
+        const at = x(au);
+        return (
+          <g key={id}>
+            <circle cx={at} cy={axis} r={4}
+              fill={gone ? "rgb(244 63 94 / 0.55)" : "rgb(228 228 231)"} />
+            <text x={at} y={axis - 20} textAnchor="middle" fontSize={9}
+              fill={gone ? "rgb(253 164 175)" : "rgb(161 161 170)"}>
+              {BODY_CONTRACTS[id].displayName}
+            </text>
+            <text x={at} y={axis + 26} textAnchor="middle" fontSize={8} fill="rgb(113 113 122)">
+              {au.toFixed(2)}
+            </text>
+          </g>
+        );
+      })}
+
+      <text x={width} y={12} textAnchor="end" fontSize={9} fill="rgb(113 113 122)">
+        {zone.innerAu >= SLICE_AU
+          ? `habitable zone now ${zone.innerAu.toFixed(0)} to ${zone.outerAu.toFixed(0)} au, off this scale`
+          : `0 to ${SLICE_AU} au`}
+      </text>
+    </svg>
+  );
+}
+
 export function DeepTimePanel({ onClose }: { onClose: () => void }) {
   const [ageGyr, setAgeGyr] = useState(SOLAR_AGE_NOW_GYR);
 
@@ -117,6 +176,22 @@ export function DeepTimePanel({ onClose }: { onClose: () => void }) {
           </span>
         </label>
 
+        {/*
+          A slice of the inner solar system, to scale, at this age.
+
+          A horizontal slice rather than concentric rings, because the thing to watch is a
+          distance changing and rings hide that: every orbit expands by the same factor under
+          mass loss, so on rings the picture merely zooms, while on a ruler you can see the
+          Sun's edge cross each planet in turn.
+
+          Three au wide and fixed. That holds the photosphere at its largest, 1.19 au, and Mars
+          at 2.28, which is the whole of the action. The habitable zone runs to 85 au by then
+          and simply leaves, which is said in words rather than squeezed onto the scale.
+        */}
+        <div className="mt-6">
+          <SolarSlice ageGyr={ageGyr} />
+        </div>
+
         <dl className="mt-6 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-[13px] tabular-nums">
           <dt className="text-zinc-500">The Sun</dt>
           <dd className="text-zinc-200">
@@ -148,20 +223,24 @@ export function DeepTimePanel({ onClose }: { onClose: () => void }) {
 
         <div className="mt-5 space-y-1.5">
           {INNER.map((id) => {
-            const au = heliocentricDistanceM(id) / AU_IN_METRES;
-            const gone = engulfedAt(id, ageGyr);
-            const inside = insideHabitableZoneAt(id, ageGyr);
+            const fate = bodyFateAt(id, ageGyr);
+            const label = {
+              engulfed: "inside the Sun",
+              "habitable-zone": "in the habitable zone",
+              "too-hot": "too hot, inside the zone's inner edge",
+              "too-cold": "too cold, beyond the outer edge",
+            }[fate];
             return (
               <div key={id} className="flex items-center justify-between rounded-md bg-white/5 px-2.5 py-1.5 text-[12px]">
                 <span className="text-zinc-300">{BODY_CONTRACTS[id].displayName}</span>
-                <span className={gone ? "text-rose-300" : inside ? "text-emerald-300" : "text-zinc-500"}>
-                  {gone
-                    ? "inside the Sun"
-                    : inside
-                      ? "in the habitable zone"
-                      : au < zone.innerAu
-                        ? "too hot, inside the zone's inner edge"
-                        : "too cold, beyond the outer edge"}
+                <span className="flex items-center gap-3">
+                  <span className="text-zinc-600 tabular-nums">
+                    {semiMajorAxisAt(id, ageGyr).toFixed(2)} au &middot;{" "}
+                    {orbitalPeriodAt(id, ageGyr).toFixed(2)} yr
+                  </span>
+                  <span className={fate === "engulfed" ? "text-rose-300" : fate === "habitable-zone" ? "text-emerald-300" : "text-zinc-500"}>
+                    {label}
+                  </span>
                 </span>
               </div>
             );

@@ -43,7 +43,8 @@ import type { Vec3 } from "@solar/engine/vec";
 import { markIntervalFor, orbitTimeMarks } from "@solar/engine/orbit-time";
 import { localTimeLabel, solarClock } from "@solar/engine/solar-time";
 import {
-  engulfedAt, habitableZoneAt, runawayGreenhouseCrossing, solarStateAt,
+  DEEP_TIME_EVENTS, bodyFateAt, engulfedAt, engulfmentAt, equilibriumTemperatureAt,
+  habitableZoneAt, orbitalPeriodAt, runawayGreenhouseCrossing, semiMajorAxisAt, solarStateAt,
 } from "@solar/engine/deep-time";
 import { timeBadge, timeBadgeShort, timeHeadline, timeSense } from "@solar/engine/time-sense";
 import {
@@ -278,6 +279,32 @@ function compute(domain: string, testCase: Case): unknown {
         engulfed: ["mercury", "venus", "embary", "mars"].filter((id) =>
           engulfedAt(id as BodyId, input.ageGyr),
         ),
+        fates: Object.fromEntries(
+          ["mercury", "venus", "embary", "mars"].map((id) => [
+            id, bodyFateAt(id as BodyId, input.ageGyr),
+          ]),
+        ),
+        orbits: Object.fromEntries(
+          ["mercury", "venus", "embary", "mars", "jupiter"].map((id) => [
+            id, semiMajorAxisAt(id as BodyId, input.ageGyr),
+          ]),
+        ),
+        periods: Object.fromEntries(
+          ["mercury", "venus", "embary", "mars", "jupiter"].map((id) => [
+            id, orbitalPeriodAt(id as BodyId, input.ageGyr),
+          ]),
+        ),
+        temperatures: Object.fromEntries(
+          ["mercury", "venus", "embary", "mars", "jupiter"].map((id) => [
+            id, equilibriumTemperatureAt(id as BodyId, input.ageGyr),
+          ]),
+        ),
+        photosphereAu: engulfmentAt("embary", input.ageGyr).photosphereAu,
+        earthLostToTides: engulfmentAt("embary", input.ageGyr).lostToTides,
+        event: DEEP_TIME_EVENTS.filter((e) => e.ageGyr <= input.ageGyr + 1e-9).at(-1)?.title
+          ?? null,
+        eventDetail: DEEP_TIME_EVENTS.filter((e) => e.ageGyr <= input.ageGyr + 1e-9).at(-1)
+          ?.detail ?? null,
       };
     }
 

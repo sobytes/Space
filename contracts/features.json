@@ -837,7 +837,11 @@
         ]
       },
       "ios": {
-        "status": "planned"
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/SolarKit/Sources/SolarKit/DeepTime.swift",
+          "mobile/ios/App/Sources/DeepTimeView.swift"
+        ]
       },
       "android": {
         "status": "planned"

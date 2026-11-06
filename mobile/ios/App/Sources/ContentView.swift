@@ -80,6 +80,8 @@ struct ContentView: View {
     /// without driving a tap. The same reason `-focus` exists.
     @State private var showingHabitability = CommandLine.arguments.contains("-showHabitability")
     @State private var showingSurface = CommandLine.arguments.contains("-showSurface")
+    /// `-showDeepTime` opens the panel at launch, for a screenshot probe. Test hook.
+    @State private var showingDeepTime = CommandLine.arguments.contains("-showDeepTime")
     /**
      Labels on by default.
 
@@ -92,6 +94,7 @@ struct ContentView: View {
 
     private var anySheetPresented: Bool {
         showingDemonstrations || showingAsk || showingHabitability || showingSurface
+            || showingDeepTime
     }
     @State private var overlayHidden = CommandLine.arguments.contains("-startHidden")
 
@@ -241,6 +244,11 @@ struct ContentView: View {
                     }
                     .tint(.green)
                     .accessibilityIdentifier("tool.habitability")
+                    Button { showingDeepTime = true } label: {
+                        Image(systemName: "hourglass")
+                    }
+                    .tint(.orange)
+                    .accessibilityIdentifier("tool.deepTime")
                 }
             }
             .buttonStyle(.bordered)
@@ -254,6 +262,8 @@ struct ContentView: View {
         // not move with time, so the sheet is rebuilt only when the focus changes.
         .sheet(isPresented: $showingHabitability) { HabitabilityView(body_: focus) }
         .sheet(isPresented: $showingSurface) { SurfacePhotographsView(body_: focus) }
+        // No body argument: this panel is about the Sun and everything orbiting it.
+        .sheet(isPresented: $showingDeepTime) { DeepTimeView() }
         .task {
             /**
              `-focusAfter <id>` switches focus a moment after launch, so a probe can exercise

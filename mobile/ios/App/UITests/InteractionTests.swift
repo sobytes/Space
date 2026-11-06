@@ -164,6 +164,36 @@ final class InteractionTests: XCTestCase {
     }
 
     /**
+     Deep time opens, and moving to the giant changes what it says.
+
+     The panel's whole point is that the figures move with the slider, so a test that only
+     opened it would pass against a panel showing four and a half billion years of nothing. The
+     assertion is on Earth's verdict flipping from habitable to destroyed, which is the single
+     fact the model exists to deliver and cannot be produced by a static label.
+     */
+    func testDeepTimePanelRespondsToTheSlider() {
+        app.buttons["tool.deepTime"].tap()
+
+        let earthHabitable = app.staticTexts["in the habitable zone"]
+        XCTAssertTrue(earthHabitable.waitForExistence(timeout: 20), "deep time did not open")
+
+        // Jump to the red giant tip rather than dragging: a slider over thirteen billion years
+        // is not something a synthesized drag lands precisely on.
+        app.buttons["giant"].tap()
+
+        XCTAssertTrue(
+            settles(timeout: 10) { app.staticTexts["inside the Sun"].exists },
+            "moved to the red giant and nothing was engulfed"
+        )
+        // The phase and its confidence are one label, "Red giant · interpolated between
+        // published points", so this matches the start of it rather than the whole string.
+        let phase = app.staticTexts.matching(
+            NSPredicate(format: "label BEGINSWITH %@", "Red giant")
+        ).firstMatch
+        XCTAssertTrue(phase.exists, "the Sun is not called a red giant")
+    }
+
+    /**
      Tapping a planet in the top picker focuses it.
 
      The other reported interaction failure, and the same cause. Focus is observable from the

@@ -313,6 +313,30 @@ final class ConformanceTests: XCTestCase {
                         .filter { engulfedAt($0, ageGyr: age) }
                         .map { JSON.string($0.rawValue) }
                 ),
+                "fates": .object(Dictionary(uniqueKeysWithValues:
+                    [BodyId.mercury, .venus, .embary, .mars].map {
+                        ($0.rawValue, JSON.string(bodyFateAt($0, ageGyr: age).rawValue))
+                    }
+                )),
+                "orbits": .object(Dictionary(uniqueKeysWithValues:
+                    [BodyId.mercury, .venus, .embary, .mars, .jupiter].map {
+                        ($0.rawValue, JSON.number(semiMajorAxisAt($0, ageGyr: age)))
+                    }
+                )),
+                "periods": .object(Dictionary(uniqueKeysWithValues:
+                    [BodyId.mercury, .venus, .embary, .mars, .jupiter].map {
+                        ($0.rawValue, JSON.number(orbitalPeriodAt($0, ageGyr: age)))
+                    }
+                )),
+                "temperatures": .object(Dictionary(uniqueKeysWithValues:
+                    [BodyId.mercury, .venus, .embary, .mars, .jupiter].map {
+                        ($0.rawValue, JSON.number(equilibriumTemperatureAt($0, ageGyr: age)))
+                    }
+                )),
+                "photosphereAu": .number(engulfmentAt(.embary, ageGyr: age).photosphereAu),
+                "earthLostToTides": .bool(engulfmentAt(.embary, ageGyr: age).lostToTides),
+                "event": .string(deepTimeEventAt(age).title),
+                "eventDetail": .string(deepTimeEventAt(age).detail),
             ])
 
         /// The time at each body's own Greenwich.

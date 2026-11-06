@@ -28,7 +28,10 @@
  */
 
 import { BODY_CONTRACTS, type BodyId } from "./bodies/registry";
-import { HABITABLE_ZONE_AU, heliocentricDistanceM } from "./habitability";
+import {
+  HABITABLE_ZONE_AU, environmentFor, equilibriumTemperature, heliocentricDistanceM,
+  solarConstantAt,
+} from "./habitability";
 import { AU_IN_METRES } from "./units";
 
 /**
@@ -206,9 +209,7 @@ export function habitableZoneAt(ageGyr: number): HabitableZone {
 
 /** Whether a body is inside the zone at that age, by its present semi-major axis. */
 export function insideHabitableZoneAt(body: BodyId, ageGyr: number): boolean {
-  const au = heliocentricDistanceM(body) / AU_IN_METRES;
-  const zone = habitableZoneAt(ageGyr);
-  return au >= zone.innerAu && au <= zone.outerAu;
+  return bodyFateAt(body, ageGyr) === "habitable-zone";
 }
 
 /**
@@ -240,12 +241,123 @@ export function runawayGreenhouseCrossing(body: BodyId): HabitableZoneCrossing {
   return { kind: "crosses", fromNowGyr: ageGyr - SOLAR_AGE_NOW_GYR, ageGyr };
 }
 
-/** Whether the Sun's photosphere reaches a body's present orbit at that age. */
-export function engulfedAt(body: BodyId, ageGyr: number): boolean {
-  const au = heliocentricDistanceM(body) / AU_IN_METRES;
-  const solarRadiusAu = (BODY_CONTRACTS.sun.equatorialRadiusM * solarStateAt(ageGyr).radius)
+/**
+ * Where a body orbits at a given age, in au, after the Sun has shed mass.
+ *
+ * The Sun's mass falls rather than rises, and this is the part of its evolution that reaches
+ * the rest of the solar system mechanically rather than through light. Fusion alone converts
+ * four million tonnes a second into energy, which over the entire main sequence is about a
+ * hundredth of a per cent and moves nothing. The giant phases are different: by the tip of the
+ * red giant branch the Sun has lost a third of itself to its own wind.
+ *
+ * For mass loss slow compared with an orbit, the orbit's angular momentum is conserved while
+ * the central mass drops, and the standard adiabatic result follows:
+ *
+ *     a × M = constant,  so  a_final = a_now × (M_now / M_final)
+ *
+ * Losing a third of the Sun therefore pushes every orbit out by half: Earth's 1 au becomes
+ * 1.50 au. Everything moves together, so the solar system keeps its shape and simply inflates.
+ */
+export function semiMajorAxisAt(body: BodyId, ageGyr: number): number {
+  const nowAu = heliocentricDistanceM(body) / AU_IN_METRES;
+  return nowAu / solarStateAt(ageGyr).mass;
+}
+
+/**
+ * The body's year at that age, in Earth years as they are now.
+ *
+ * Kepler's third law with both terms moving: P² ∝ a³ / M, and a ∝ 1/M, so P ∝ M^-2. The Sun
+ * losing a third of its mass does not lengthen Earth's year by a half but by a factor of 2.24,
+ * because the orbit grows and the pull weakens at the same time.
+ */
+export function orbitalPeriodAt(body: BodyId, ageGyr: number): number {
+  const nowAu = heliocentricDistanceM(body) / AU_IN_METRES;
+  const nowYears = Math.sqrt(nowAu ** 3);
+  return nowYears / solarStateAt(ageGyr).mass ** 2;
+}
+
+/**
+ * Equilibrium temperature at that age, kelvin, with both the light and the orbit moving.
+ *
+ * T ∝ (L / a²)^(1/4). The two effects fight: brightening raises it, and the orbit expanding
+ * under mass loss lowers it. On the main sequence only the first is happening, so everything
+ * warms. In the giant phases the luminosity wins by three orders of magnitude.
+ */
+export function equilibriumTemperatureAt(body: BodyId, ageGyr: number): number {
+  const state = solarStateAt(ageGyr);
+  const au = semiMajorAxisAt(body, ageGyr);
+  // The Bond albedo, which is the fraction of all incident power reflected, and not the
+  // geometric albedo, which is only how bright the disc looks at full phase. Using the second
+  // here is a common and silent error: Earth's are 0.306 and 0.367, a 7 K difference in the
+  // answer, and Enceladus's differ by a factor of two.
+  const { environment } = environmentFor(body);
+  const solarConstant = solarConstantAt(au * AU_IN_METRES) * state.luminosity;
+  return equilibriumTemperature(solarConstant, environment.bondAlbedo);
+}
+
+export interface Engulfment {
+  /** The Sun's photosphere, in au. */
+  readonly photosphereAu: number;
+  /** The body's orbit at that age, already widened by the Sun's mass loss. */
+  readonly orbitAu: number;
+  /** The mechanical answer: is the orbit inside the star. */
+  readonly insidePhotosphere: boolean;
+  /**
+   * The published answer, which differs for Earth.
+   *
+   * Schröder 2008 is explicit that orbit expansion nearly saves Earth and does not: tidal
+   * interaction with the giant's envelope drains the orbit faster than mass loss widens it,
+   * and the planet spirals in. That is a result this module takes on citation rather than
+   * computes, because a tidal model is a paper of its own and inventing one to reach a known
+   * answer would be the worst of both.
+   */
+  readonly lostToTides: boolean;
+}
+
+/** Bodies the published model loses to tidal drag despite their orbits having widened. */
+const LOST_TO_TIDES: readonly BodyId[] = ["embary"];
+
+export function engulfmentAt(body: BodyId, ageGyr: number): Engulfment {
+  const photosphereAu = (BODY_CONTRACTS.sun.equatorialRadiusM * solarStateAt(ageGyr).radius)
     / AU_IN_METRES;
-  return solarRadiusAu >= au;
+  const orbitAu = semiMajorAxisAt(body, ageGyr);
+  const insidePhotosphere = photosphereAu >= orbitAu;
+  return {
+    photosphereAu,
+    orbitAu,
+    insidePhotosphere,
+    lostToTides:
+      !insidePhotosphere
+      && LOST_TO_TIDES.includes(body)
+      && ageGyr >= RED_GIANT_TIP_GYR - 0.3,
+  };
+}
+
+/** Whether a body is gone: swallowed outright, or dragged in by tides. */
+export function engulfedAt(body: BodyId, ageGyr: number): boolean {
+  const engulfment = engulfmentAt(body, ageGyr);
+  return engulfment.insidePhotosphere || engulfment.lostToTides;
+}
+
+/**
+ * What the Sun's evolution does to a body at a given age.
+ *
+ * Shared rather than decided in each client, because it is a judgement with thresholds in it
+ * and two clients making it separately is how one ends up calling Mars habitable while the
+ * other calls it frozen at the same instant. The words each client prints are its own; which
+ * of the four states it is in, is not.
+ */
+export type BodyFate = "engulfed" | "habitable-zone" | "too-hot" | "too-cold";
+
+export function bodyFateAt(body: BodyId, ageGyr: number): BodyFate {
+  if (engulfedAt(body, ageGyr)) return "engulfed";
+  // The orbit it is on at that age, not the one it is on now: by the giant phases every
+  // planet has been pushed half again as far out by the Sun's mass loss.
+  const au = semiMajorAxisAt(body, ageGyr);
+  const zone = habitableZoneAt(ageGyr);
+  if (au < zone.innerAu) return "too-hot";
+  if (au > zone.outerAu) return "too-cold";
+  return "habitable-zone";
 }
 
 export interface DeepTimeEvent {

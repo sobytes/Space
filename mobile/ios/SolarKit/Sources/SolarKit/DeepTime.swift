@@ -191,9 +191,7 @@ public func habitableZoneAt(_ ageGyr: Double) -> HabitableZoneSpan {
 }
 
 public func insideHabitableZoneAt(_ body: BodyId, ageGyr: Double) -> Bool {
-    let au = heliocentricDistanceMetres(body) / Constants.auInMetres
-    let zone = habitableZoneAt(ageGyr)
-    return au >= zone.innerAu && au <= zone.outerAu
+    bodyFateAt(body, ageGyr: ageGyr) == .habitableZone
 }
 
 /**
@@ -220,10 +218,185 @@ public func runawayGreenhouseCrossing(_ body: BodyId) -> HabitableZoneCrossing {
     return .crosses(fromNowGyr: ageGyr - solarAgeNowGyr, ageGyr: ageGyr)
 }
 
-/// Whether the Sun's photosphere reaches a body's present orbit at that age.
-public func engulfedAt(_ body: BodyId, ageGyr: Double) -> Bool {
-    let au = heliocentricDistanceMetres(body) / Constants.auInMetres
-    let solarRadiusAu = bodyContracts[.sun]!.equatorialRadiusM * solarStateAt(ageGyr).radius
+/**
+ Where a body orbits at a given age, in au, after the Sun has shed mass.
+
+ The Sun's mass falls rather than rises, and this is the part of its evolution that reaches the
+ planets mechanically rather than through light. Fusion alone converts four million tonnes a
+ second, which over the whole main sequence is a hundredth of a per cent and moves nothing. The
+ giant phases are different: by the red giant tip the Sun has lost a third of itself to its own
+ wind.
+
+ For mass loss slow compared with an orbit, angular momentum is conserved while the central
+ mass drops, giving the adiabatic result a × M = constant. Losing a third of the Sun pushes
+ every orbit out by half: Earth's 1 au becomes 1.50 au.
+ */
+public func semiMajorAxisAt(_ body: BodyId, ageGyr: Double) -> Double {
+    let nowAu = heliocentricDistanceMetres(body) / Constants.auInMetres
+    return nowAu / solarStateAt(ageGyr).mass
+}
+
+/**
+ The body's year at that age, in Earth years as they are now.
+
+ Kepler's third law with both terms moving: P² ∝ a³ / M and a ∝ 1/M, so P ∝ M^-2. Losing a
+ third of the Sun stretches Earth's year by 2.24, not by a half.
+ */
+public func orbitalPeriodAt(_ body: BodyId, ageGyr: Double) -> Double {
+    let nowAu = heliocentricDistanceMetres(body) / Constants.auInMetres
+    return pow(nowAu, 1.5) / pow(solarStateAt(ageGyr).mass, 2)
+}
+
+/**
+ Equilibrium temperature at that age, kelvin, with both the light and the orbit moving.
+
+ Uses the Bond albedo, the fraction of all incident power reflected, and not the geometric
+ albedo, which is only how bright the disc looks at full phase. Earth's are 0.306 and 0.367, a
+ 7 K difference in the answer.
+ */
+public func equilibriumTemperatureAt(_ body: BodyId, ageGyr: Double) -> Double {
+    let state = solarStateAt(ageGyr)
+    let au = semiMajorAxisAt(body, ageGyr: ageGyr)
+    // The Bond albedo comes off the habitability assessment, which is generated from the same
+    // sourced table the website reads, so the two cannot quote different albedos.
+    let bondAlbedo = habitabilityFor(body).state.bondAlbedo
+    let solarConstant = solarConstantAt(au * Constants.auInMetres) * state.luminosity
+    return equilibriumTemperature(solarConstantWPerM2: solarConstant, bondAlbedo: bondAlbedo)
+}
+
+public struct Engulfment: Sendable {
+    /// The Sun's photosphere, in au.
+    public let photosphereAu: Double
+    /// The body's orbit at that age, already widened by the Sun's mass loss.
+    public let orbitAu: Double
+    /// The mechanical answer: is the orbit inside the star.
+    public let insidePhotosphere: Bool
+    /**
+     The published answer, which differs for Earth.
+
+     Schröder 2008 is explicit that orbit expansion nearly saves Earth and does not: tidal
+     interaction with the giant's envelope drains the orbit faster than mass loss widens it.
+     Carried on citation rather than computed, because a tidal model is a paper of its own and
+     inventing one to reach a known answer would be the worst of both.
+     */
+    public let lostToTides: Bool
+}
+
+/// Bodies the published model loses to tidal drag despite their orbits having widened.
+private let lostToTides: Set<BodyId> = [.embary]
+
+public func engulfmentAt(_ body: BodyId, ageGyr: Double) -> Engulfment {
+    let photosphereAu = bodyContracts[.sun]!.equatorialRadiusM * solarStateAt(ageGyr).radius
         / Constants.auInMetres
-    return solarRadiusAu >= au
+    let orbitAu = semiMajorAxisAt(body, ageGyr: ageGyr)
+    let inside = photosphereAu >= orbitAu
+    return Engulfment(
+        photosphereAu: photosphereAu,
+        orbitAu: orbitAu,
+        insidePhotosphere: inside,
+        lostToTides: !inside && lostToTides.contains(body) && ageGyr >= redGiantTipGyr - 0.3
+    )
+}
+
+/// Whether a body is gone: swallowed outright, or dragged in by tides.
+public func engulfedAt(_ body: BodyId, ageGyr: Double) -> Bool {
+    let e = engulfmentAt(body, ageGyr: ageGyr)
+    return e.insidePhotosphere || e.lostToTides
+}
+
+/**
+ What the Sun's evolution does to a body at a given age.
+
+ Shared rather than decided in each client, because it is a judgement with thresholds in it and
+ two clients making it separately is how one ends up calling Mars habitable while the other
+ calls it frozen at the same instant. The words each client prints are its own; which of the
+ four states it is in, is not.
+ */
+public enum BodyFate: String, Sendable {
+    case engulfed
+    case habitableZone = "habitable-zone"
+    case tooHot = "too-hot"
+    case tooCold = "too-cold"
+}
+
+public func bodyFateAt(_ body: BodyId, ageGyr: Double) -> BodyFate {
+    if engulfedAt(body, ageGyr: ageGyr) { return .engulfed }
+    // The orbit it is on at that age, not the one it is on now.
+    let au = semiMajorAxisAt(body, ageGyr: ageGyr)
+    let zone = habitableZoneAt(ageGyr)
+    if au < zone.innerAu { return .tooHot }
+    if au > zone.outerAu { return .tooCold }
+    return .habitableZone
+}
+
+public struct DeepTimeEvent: Sendable, Identifiable {
+    public let ageGyr: Double
+    public let title: String
+    public let detail: String
+    public let source: String
+    public var id: String { title }
+}
+
+/**
+ The dated events worth marking, each with where the date comes from.
+
+ Ported from `engine/src/deep-time.ts` and gated word for word, because this is the text a
+ person actually reads and two clients telling them different things about the end of the world
+ is worse than either staying quiet. Deliberately short: a timeline of thirteen billion years
+ can carry a hundred captions and say less than six.
+ */
+public let deepTimeEvents: [DeepTimeEvent] = [
+    DeepTimeEvent(
+        ageGyr: 0,
+        title: "The Sun forms, at 71 per cent of today's brightness",
+        detail: "Faint enough that Earth should have been frozen solid for its first two billion years. "
+            + "It was not: there is liquid water in the rock record from 4.4 billion years ago. "
+            + "Reconciling the two is the faint young Sun problem and it is still open.",
+        source: "Gough 1981"
+    ),
+    DeepTimeEvent(
+        ageGyr: solarAgeNowGyr,
+        title: "Now",
+        detail: "The Sun has brightened by about 40 per cent since it formed and is still rising.",
+        source: "Bahcall 2001"
+    ),
+    DeepTimeEvent(
+        ageGyr: solarAgeNowGyr + 1.0,
+        title: "Earth leaves the habitable zone",
+        detail: "The inner edge sweeps past 1 au and Earth goes into a moist greenhouse: water reaches "
+            + "the stratosphere, is broken up by ultraviolet and the hydrogen escapes. The oceans "
+            + "are lost long before the Sun becomes a giant, and nothing about the planet causes it.",
+        source: "Caldeira 1992"
+    ),
+    DeepTimeEvent(
+        ageGyr: mainSequenceEndGyr,
+        title: "The main sequence ends",
+        detail: "Hydrogen in the core runs out after about ten billion years. The Sun leaves the main "
+            + "sequence and starts to swell, and the modelling here stops and the interpolation "
+            + "between published points begins.",
+        source: "Schröder 2008"
+    ),
+    DeepTimeEvent(
+        ageGyr: redGiantTipGyr,
+        title: "The red giant tip: 256 times its radius, 2730 times its light",
+        detail: "The photosphere reaches past Venus. Mercury and Venus are destroyed. Earth's orbit is "
+            + "lifted outwards by the Sun's mass loss and that still does not save it: tidal drag on "
+            + "the giant pulls the planet in faster than the orbit widens.",
+        source: "Schröder 2008"
+    ),
+    DeepTimeEvent(
+        ageGyr: 12.4,
+        title: "A white dwarf, half a Sun in an Earth-sized sphere",
+        detail: "The envelope is thrown off and what is left is the burnt-out core, about 0.54 solar "
+            + "masses, cooling for the rest of time. Whatever is left of the outer planets orbits it "
+            + "in the dark.",
+        source: "Schröder 2008"
+    ),
+]
+
+/// The most recent event at or before this age, which is what a slider is "in".
+public func deepTimeEventAt(_ ageGyr: Double) -> DeepTimeEvent {
+    var found = deepTimeEvents[0]
+    for event in deepTimeEvents where event.ageGyr <= ageGyr + 1e-9 { found = event }
+    return found
 }

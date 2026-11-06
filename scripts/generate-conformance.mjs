@@ -445,6 +445,24 @@ domains["deep-time"] = {
           outerAu: round(zone.outerAu),
           engulfed: ["mercury", "venus", "embary", "mars"]
             .filter((id) => deepTime.engulfedAt(id, ageGyr)),
+          fates: Object.fromEntries(["mercury", "venus", "embary", "mars"]
+            .map((id) => [id, deepTime.bodyFateAt(id, ageGyr)])),
+          // What the Sun's mass loss does to everything else.
+          orbits: Object.fromEntries(["mercury", "venus", "embary", "mars", "jupiter"]
+            .map((id) => [id, round(deepTime.semiMajorAxisAt(id, ageGyr))])),
+          periods: Object.fromEntries(["mercury", "venus", "embary", "mars", "jupiter"]
+            .map((id) => [id, round(deepTime.orbitalPeriodAt(id, ageGyr))])),
+          temperatures: Object.fromEntries(["mercury", "venus", "embary", "mars", "jupiter"]
+            .map((id) => [id, round(deepTime.equilibriumTemperatureAt(id, ageGyr))])),
+          photosphereAu: round(deepTime.engulfmentAt("embary", ageGyr).photosphereAu),
+          earthLostToTides: deepTime.engulfmentAt("embary", ageGyr).lostToTides,
+          // The caption a person reads at this point on the slider, word for word.
+          event: deepTime.DEEP_TIME_EVENTS
+            .filter((e) => e.ageGyr <= ageGyr + 1e-9)
+            .at(-1)?.title ?? null,
+          eventDetail: deepTime.DEEP_TIME_EVENTS
+            .filter((e) => e.ageGyr <= ageGyr + 1e-9)
+            .at(-1)?.detail ?? null,
         },
       });
     }
