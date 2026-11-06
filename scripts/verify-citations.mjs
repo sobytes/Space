@@ -45,11 +45,32 @@ function yearOf(record) {
   return record?.issued?.["date-parts"]?.[0]?.[0] ?? null;
 }
 
+/**
+ * Undo a double encoding, for the records that arrive with one.
+ *
+ * Crossref serves this one mis-encoded: the payload for Schröder 2008 declares UTF-8 and
+ * contains the UTF-8 bytes of "Schröder" encoded as UTF-8 a second time, so decoding it
+ * correctly still yields "SchrÃ¶der". Reading the characters back as Latin-1 and decoding
+ * once more recovers the name.
+ *
+ * Applied as an alternative rather than in place, because the same operation destroys a
+ * correctly encoded name: "Schröder" through it comes out with a replacement character. So
+ * the comparison accepts either form and nothing is rewritten.
+ */
+function undoDoubleEncoding(value) {
+  try {
+    return Buffer.from(value, "latin1").toString("utf8");
+  } catch {
+    return value;
+  }
+}
+
 /** Accent-insensitive, because the registry keys are typed in ASCII and Acuña is not. */
 function sameSurname(a, b) {
-  const fold = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-  return fold(a) === fold(b);
+  const fold = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  return fold(a) === fold(b) || fold(undoDoubleEncoding(a)) === fold(b);
 }
+
 
 const entries = Object.entries(registry.verified);
 console.log(`checking ${entries.length} DOIs against Crossref\n`);

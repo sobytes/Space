@@ -1,0 +1,266 @@
+{
+  "domain": "deep-time",
+  "absoluteTolerance": 1e-9,
+  "description": "Solar evolution, the habitable zone through time, and engulfment.",
+  "tolerance": 1e-9,
+  "cases": [
+    {
+      "id": "state-0",
+      "input": {
+        "ageGyr": 0
+      },
+      "expected": {
+        "phase": "main-sequence",
+        "luminosity": 0.714285714285714,
+        "radius": 0.845154254728517,
+        "mass": 1,
+        "effectiveTemperatureK": 5772,
+        "confidence": "modelled",
+        "innerAu": 0.8032711545198,
+        "outerAu": 1.41648174917518,
+        "engulfed": []
+      }
+    },
+    {
+      "id": "state-1",
+      "input": {
+        "ageGyr": 1
+      },
+      "expected": {
+        "phase": "main-sequence",
+        "luminosity": 0.761920640213405,
+        "radius": 0.87288065634049,
+        "mass": 1,
+        "effectiveTemperatureK": 5772,
+        "confidence": "modelled",
+        "innerAu": 0.829623525709937,
+        "outerAu": 1.4629513038558,
+        "engulfed": []
+      }
+    },
+    {
+      "id": "state-2.5",
+      "input": {
+        "ageGyr": 2.5
+      },
+      "expected": {
+        "phase": "main-sequence",
+        "luminosity": 0.846609855502038,
+        "radius": 0.920114044834681,
+        "mass": 1,
+        "effectiveTemperatureK": 5772,
+        "confidence": "modelled",
+        "innerAu": 0.874516180861746,
+        "outerAu": 1.54211464283137,
+        "engulfed": []
+      }
+    },
+    {
+      "id": "state-4.57",
+      "input": {
+        "ageGyr": 4.57
+      },
+      "expected": {
+        "phase": "main-sequence",
+        "luminosity": 1,
+        "radius": 1,
+        "mass": 1,
+        "effectiveTemperatureK": 5772,
+        "confidence": "modelled",
+        "innerAu": 0.950443247520335,
+        "outerAu": 1.67600380788498,
+        "engulfed": []
+      }
+    },
+    {
+      "id": "state-6",
+      "input": {
+        "ageGyr": 6
+      },
+      "expected": {
+        "phase": "main-sequence",
+        "luminosity": 1.14307153576788,
+        "radius": 1.06914523604975,
+        "mass": 1,
+        "effectiveTemperatureK": 5772,
+        "confidence": "modelled",
+        "innerAu": 1.01616187022202,
+        "outerAu": 1.79189148680147,
+        "engulfed": []
+      }
+    },
+    {
+      "id": "state-8",
+      "input": {
+        "ageGyr": 8
+      },
+      "expected": {
+        "phase": "main-sequence",
+        "luminosity": 1.42901813633521,
+        "radius": 1.19541546599298,
+        "mass": 1,
+        "effectiveTemperatureK": 5772,
+        "confidence": "modelled",
+        "innerAu": 1.1361745576344,
+        "outerAu": 2.00352087300883,
+        "engulfed": []
+      }
+    },
+    {
+      "id": "state-10",
+      "input": {
+        "ageGyr": 10
+      },
+      "expected": {
+        "phase": "main-sequence",
+        "luminosity": 1.90575479566305,
+        "radius": 1.38049078072367,
+        "mass": 1,
+        "effectiveTemperatureK": 5772,
+        "confidence": "modelled",
+        "innerAu": 1.31207814080289,
+        "outerAu": 2.31370780524298,
+        "engulfed": []
+      }
+    },
+    {
+      "id": "state-10.5",
+      "input": {
+        "ageGyr": 10.5
+      },
+      "expected": {
+        "phase": "subgiant",
+        "luminosity": 5.41899970154399,
+        "radius": 2.6399888097766,
+        "mass": 0.9996875,
+        "effectiveTemperatureK": 5420.07206817565,
+        "confidence": "interpolated",
+        "innerAu": 2.21251260241569,
+        "outerAu": 3.90152653124389,
+        "engulfed": []
+      }
+    },
+    {
+      "id": "state-11.6",
+      "input": {
+        "ageGyr": 11.6
+      },
+      "expected": {
+        "phase": "red-giant",
+        "luminosity": 54,
+        "radius": 11,
+        "mass": 0.999,
+        "effectiveTemperatureK": 4717.67935281923,
+        "confidence": "interpolated",
+        "innerAu": 6.98430295769578,
+        "outerAu": 12.3160624088394,
+        "engulfed": []
+      }
+    },
+    {
+      "id": "state-12.167",
+      "input": {
+        "ageGyr": 12.167
+      },
+      "expected": {
+        "phase": "red-giant",
+        "luminosity": 2730,
+        "radius": 256,
+        "mass": 0.668,
+        "effectiveTemperatureK": 2607.63620064511,
+        "confidence": "interpolated",
+        "innerAu": 49.6600912327657,
+        "outerAu": 87.570196561631,
+        "engulfed": [
+          "mercury",
+          "venus",
+          "embary"
+        ]
+      }
+    },
+    {
+      "id": "state-12.5",
+      "input": {
+        "ageGyr": 12.5
+      },
+      "expected": {
+        "phase": "white-dwarf",
+        "luminosity": 0.001,
+        "radius": 0.0084,
+        "mass": 0.54,
+        "effectiveTemperatureK": 25000,
+        "confidence": "end state",
+        "innerAu": 0.0300556544889144,
+        "outerAu": 0.052999894000318,
+        "engulfed": []
+      }
+    },
+    {
+      "id": "state-13",
+      "input": {
+        "ageGyr": 13
+      },
+      "expected": {
+        "phase": "white-dwarf",
+        "luminosity": 0.001,
+        "radius": 0.0084,
+        "mass": 0.54,
+        "effectiveTemperatureK": 25000,
+        "confidence": "end state",
+        "innerAu": 0.0300556544889144,
+        "outerAu": 0.052999894000318,
+        "engulfed": []
+      }
+    },
+    {
+      "id": "crossing-mercury",
+      "input": {
+        "body": "mercury"
+      },
+      "expected": {
+        "kind": "already-inside",
+        "fromNowGyr": null
+      }
+    },
+    {
+      "id": "crossing-venus",
+      "input": {
+        "body": "venus"
+      },
+      "expected": {
+        "kind": "already-inside",
+        "fromNowGyr": null
+      }
+    },
+    {
+      "id": "crossing-embary",
+      "input": {
+        "body": "embary"
+      },
+      "expected": {
+        "kind": "crosses",
+        "fromNowGyr": 1.10436733357409
+      }
+    },
+    {
+      "id": "crossing-mars",
+      "input": {
+        "body": "mars"
+      },
+      "expected": {
+        "kind": "not-before-the-end",
+        "fromNowGyr": null
+      }
+    },
+    {
+      "id": "crossing-jupiter",
+      "input": {
+        "body": "jupiter"
+      },
+      "expected": {
+        "kind": "not-before-the-end",
+        "fromNowGyr": null
+      }
+    }
+  ]
+}

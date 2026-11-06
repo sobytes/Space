@@ -42,6 +42,9 @@ import { SECONDS_PER_JULIAN_YEAR } from "@solar/engine/units";
 import type { Vec3 } from "@solar/engine/vec";
 import { markIntervalFor, orbitTimeMarks } from "@solar/engine/orbit-time";
 import { localTimeLabel, solarClock } from "@solar/engine/solar-time";
+import {
+  engulfedAt, habitableZoneAt, runawayGreenhouseCrossing, solarStateAt,
+} from "@solar/engine/deep-time";
 import { timeBadge, timeBadgeShort, timeHeadline, timeSense } from "@solar/engine/time-sense";
 import {
   ephemerisStandingAt, epochFromUnixTimestamp, unixSecondsFromEpoch,
@@ -250,6 +253,32 @@ function compute(domain: string, testCase: Case): unknown {
       }
 
       throw new Error(`unhandled propagate case ${testCase.id}`);
+    }
+
+    /** The Sun's whole life, and what it does to the habitable zone. */
+    case "deep-time": {
+      if (testCase.id.startsWith("crossing")) {
+        const crossing = runawayGreenhouseCrossing(input.body as BodyId);
+        return {
+          kind: crossing.kind,
+          fromNowGyr: crossing.kind === "crosses" ? crossing.fromNowGyr : null,
+        };
+      }
+      const state = solarStateAt(input.ageGyr);
+      const zone = habitableZoneAt(input.ageGyr);
+      return {
+        phase: state.phase,
+        luminosity: state.luminosity,
+        radius: state.radius,
+        mass: state.mass,
+        effectiveTemperatureK: state.effectiveTemperatureK,
+        confidence: state.confidence,
+        innerAu: zone.innerAu,
+        outerAu: zone.outerAu,
+        engulfed: ["mercury", "venus", "embary", "mars"].filter((id) =>
+          engulfedAt(id as BodyId, input.ageGyr),
+        ),
+      };
     }
 
     /** The time at each body's own Greenwich. */

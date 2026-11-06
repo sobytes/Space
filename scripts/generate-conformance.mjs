@@ -42,6 +42,7 @@ const orbitTime = await import(`${ROOT}engine/src/orbit-time.ts`);
 const timeSense = await import(`${ROOT}engine/src/time-sense.ts`);
 const when = await import(`${ROOT}engine/src/when.ts`);
 const solarTime = await import(`${ROOT}engine/src/solar-time.ts`);
+const deepTime = await import(`${ROOT}engine/src/deep-time.ts`);
 
 /** Epochs chosen to exercise the element drift, the leap table and the model seam. */
 const EPOCHS = [
@@ -407,6 +408,57 @@ domains.propagate = {
       }
     }
 
+    return out;
+  })(),
+};
+
+/**
+ * The Sun's whole life, and what it does to the habitable zone.
+ *
+ * Gated because the two clients draw the same timeline and must agree about where on it a
+ * planet stops being habitable. A closed-form luminosity, a geometric interpolation between
+ * published waypoints and an inverted relation for the crossing are each easy to port with a
+ * sign or an exponent out of place, and each wrong version still produces a smooth curve that
+ * looks entirely reasonable on a slider.
+ */
+domains["deep-time"] = {
+  absoluteTolerance: 1e-9,
+  description: "Solar evolution, the habitable zone through time, and engulfment.",
+  tolerance: 1e-9,
+  cases: (() => {
+    const out = [];
+    const ages = [0, 1, 2.5, 4.57, 6, 8, 10, 10.5, 11.6, 12.167, 12.5, 13];
+    for (const ageGyr of ages) {
+      const state = deepTime.solarStateAt(ageGyr);
+      const zone = deepTime.habitableZoneAt(ageGyr);
+      out.push({
+        id: `state-${ageGyr}`,
+        input: { ageGyr },
+        expected: {
+          phase: state.phase,
+          luminosity: round(state.luminosity),
+          radius: round(state.radius),
+          mass: round(state.mass),
+          effectiveTemperatureK: round(state.effectiveTemperatureK),
+          confidence: state.confidence,
+          innerAu: round(zone.innerAu),
+          outerAu: round(zone.outerAu),
+          engulfed: ["mercury", "venus", "embary", "mars"]
+            .filter((id) => deepTime.engulfedAt(id, ageGyr)),
+        },
+      });
+    }
+    for (const id of ["mercury", "venus", "embary", "mars", "jupiter"]) {
+      const crossing = deepTime.runawayGreenhouseCrossing(id);
+      out.push({
+        id: `crossing-${id}`,
+        input: { body: id },
+        expected: {
+          kind: crossing.kind,
+          fromNowGyr: crossing.kind === "crosses" ? round(crossing.fromNowGyr) : null,
+        },
+      });
+    }
     return out;
   })(),
 };

@@ -39,7 +39,13 @@ function citationCorpus(): string[] {
    * the panel says "inside the conservative habitable zone" and names nobody, and the only
    * place that claim is sourced is a comment.
    */
-  for (const file of ["engine/src/habitability.ts", "engine/src/data/habitability-environment.ts"]) {
+  // deep-time.ts joined this list when it started citing Gough, Schröder and Caldeira. The
+  // registry gate caught the omission on the first run, which is what it is for.
+  for (const file of [
+    "engine/src/habitability.ts",
+    "engine/src/data/habitability-environment.ts",
+    "engine/src/deep-time.ts",
+  ]) {
     all.add(readFileSync(join(ROOT, file), "utf8"));
   }
   for (const id of BODY_IDS) {

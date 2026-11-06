@@ -281,6 +281,40 @@ final class ConformanceTests: XCTestCase {
             XCTFail("no runner for propagate case \"\(c.id)\"")
             return .null
 
+        /// The Sun's whole life, and what it does to the habitable zone.
+        case "deep-time":
+            if c.id.hasPrefix("crossing") {
+                let crossing = runawayGreenhouseCrossing(BodyId(rawValue: text(input, "body"))!)
+                switch crossing {
+                case .alreadyInside:
+                    return .object(["kind": .string("already-inside"), "fromNowGyr": .null])
+                case .notBeforeTheEnd:
+                    return .object(["kind": .string("not-before-the-end"), "fromNowGyr": .null])
+                case let .crosses(fromNowGyr, _):
+                    return .object([
+                        "kind": .string("crosses"), "fromNowGyr": .number(fromNowGyr),
+                    ])
+                }
+            }
+            let age = number(input, "ageGyr")
+            let state = solarStateAt(age)
+            let zone = habitableZoneAt(age)
+            return .object([
+                "phase": .string(state.phase.rawValue),
+                "luminosity": .number(state.luminosity),
+                "radius": .number(state.radius),
+                "mass": .number(state.mass),
+                "effectiveTemperatureK": .number(state.effectiveTemperatureK),
+                "confidence": .string(state.confidence.rawValue),
+                "innerAu": .number(zone.innerAu),
+                "outerAu": .number(zone.outerAu),
+                "engulfed": .array(
+                    [BodyId.mercury, .venus, .embary, .mars]
+                        .filter { engulfedAt($0, ageGyr: age) }
+                        .map { JSON.string($0.rawValue) }
+                ),
+            ])
+
         /// The time at each body's own Greenwich.
         case "solar-time":
             let clockBody = BodyId(rawValue: text(input, "body"))!

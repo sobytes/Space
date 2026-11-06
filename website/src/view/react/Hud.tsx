@@ -20,6 +20,7 @@ import type { ViewportSnapshot } from "../core/viewport";
 import { useViewport, useViewportValue } from "./ViewportContext";
 import { ALL_MOONS, PLANETARY_SET } from "@solar/engine/nbody-tracker";
 import { HabitabilityPanel } from "./HabitabilityPanel";
+import { DeepTimePanel } from "./DeepTimePanel";
 import { LabelLayer } from "./LabelLayer";
 import { SurfacePanel } from "./SurfacePanel";
 
@@ -783,6 +784,7 @@ export function Hud() {
   const focus = useViewportValue(selectFocus);
   const [hidden, setHidden] = useHiddenOverlay();
   const [habitability, setHabitability] = useState(false);
+  const [deepTime, setDeepTime] = useState(false);
   /**
    * Labels on by default.
    *
@@ -855,6 +857,14 @@ export function Hud() {
             </button>
             <button
               type="button"
+              onClick={() => setDeepTime(true)}
+              title="The Sun's whole life, and what it does to the planets"
+              className="rounded-lg border border-amber-400/30 bg-amber-400/10 px-2.5 py-1.5 text-xs text-amber-200 backdrop-blur-md transition hover:bg-amber-400/20"
+            >
+              Deep time
+            </button>
+            <button
+              type="button"
               aria-label="Hide the information overlay"
               title="Hide the overlay (h)"
               onClick={() => setHidden(true)}
@@ -873,6 +883,7 @@ export function Hud() {
         <HabitabilityPanel focus={focus} onClose={() => setHabitability(false)} />
       ) : null}
       {surface ? <SurfacePanel focus={focus} onClose={() => setSurface(false)} /> : null}
+      {deepTime ? <DeepTimePanel onClose={() => setDeepTime(false)} /> : null}
     </div>
   );
 }

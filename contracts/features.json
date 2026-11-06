@@ -824,6 +824,30 @@
       "androidtv": {
         "status": "planned"
       }
+    },
+    {
+      "id": "deep-time",
+      "title": "Deep time: the Sun's whole life, and what it does to the planets",
+      "why": "A separate mode because it is a separate scale. The rest of the app runs on element tables fitted for a few thousand years either side of now; here positions are irrelevant and the star is the variable, and driving it from the ordinary clock would mean extrapolating those tables ten billion years. The point it makes is that the Sun is not a fixed lamp: it shone at 71 per cent of today's brightness when Earth formed, has brightened about forty per cent since, and the habitable zone has been sweeping outwards the whole time. Earth's deadline is set by that drift, roughly a billion years, and not by the red giant five billion years later. Luminosity is a closed form from Gough 1981, the giant branch is interpolated between published waypoints from Schröder and Connon Smith 2008 and says so, and the phases after the helium flash are reported as an end state rather than invented.",
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "engine/src/deep-time.ts",
+          "website/src/view/react/DeepTimePanel.tsx"
+        ]
+      },
+      "ios": {
+        "status": "planned"
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
     }
   ]
 }

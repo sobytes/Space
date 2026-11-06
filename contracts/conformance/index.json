@@ -11,6 +11,7 @@
     "nbody",
     "secular",
     "propagate",
+    "deep-time",
     "solar-time",
     "when",
     "time-sense",
@@ -21,5 +22,5 @@
     "nbody-evolution",
     "tiles"
   ],
-  "totalCases": 751
+  "totalCases": 768
 }
