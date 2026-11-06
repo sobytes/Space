@@ -418,6 +418,7 @@ private struct BodyPanel: View {
                 row("Rotation", rotationText,
                     simulated: abs(contract.siderealRotationDays) * Constants.secondsPerDay,
                     label: "one turn")
+                row("Clock there", sunClock.formatted, note: clockNote)
                 row("A day here", dayText)
                 row("A year here", yearText)
                 if let monthText { row("A month here", monthText) }
@@ -581,6 +582,22 @@ private struct BodyPanel: View {
 
     private var time: TimeSense { timeSense(id) }
 
+    /**
+     The body's own Greenwich clock.
+
+     There is no universal civil time and there cannot be one, but the construction behind GMT
+     generalises: the IAU fixes a prime meridian for every body here, so the Sun's hour angle
+     from it is a real local time. Read from the throttled epoch like everything else on this
+     panel; a sundial does not need sixty readings a second.
+     */
+    private var sunClock: SolarClock { solarClock(id, at: clock.displayEpoch) }
+
+    private var clockNote: String {
+        let ratio = sunClock.hourInEarthSeconds / 3600
+        return "sundial time at its prime meridian, day \(sunClock.dayNumber.formatted()) since "
+            + String(format: "J2000. One of its hours is %.3f of ours.", ratio)
+    }
+
     private var dayText: String {
         let base = formatDuration(days: time.dayInEarthDays) + ", sunrise to sunrise"
         return time.spinsBackwards ? base + ", Sun rises in the west" : base
@@ -627,12 +644,18 @@ private struct BodyPanel: View {
     @ViewBuilder
     private func row(
         _ name: String, _ value: String, simulated: Double? = nil, label: String = "",
-        marksForPeriodDays: Double? = nil
+        marksForPeriodDays: Double? = nil, note: String? = nil
     ) -> some View {
         GridRow {
             Text(name).font(.caption).foregroundStyle(.secondary)
             VStack(alignment: .leading, spacing: 1) {
                 Text(value).font(.caption.monospacedDigit())
+                if let note {
+                    Text(note)
+                        .font(.system(size: 10))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 if let simulated {
                     Text(onScreen(simulated, label))
                         .font(.system(size: 10))

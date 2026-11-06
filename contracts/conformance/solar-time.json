@@ -1,0 +1,2488 @@
+{
+  "domain": "solar-time",
+  "absoluteTolerance": 1e-7,
+  "description": "Sub-solar point and the apparent solar clock at the IAU prime meridian.",
+  "tolerance": 1e-9,
+  "cases": [
+    {
+      "id": "mercury-2451545",
+      "input": {
+        "body": "mercury",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": 94.440355431773,
+        "latitudeDeg": -0.0243667088263204,
+        "hours": 5.70397630454847,
+        "formatted": "05:42:14",
+        "dayNumber": 0,
+        "hourInEarthSeconds": 633379.587236905,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "mercury-2451636.5",
+      "input": {
+        "body": "mercury",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": -97.4977128117636,
+        "latitudeDeg": -0.0280311563747386,
+        "hours": 18.4998475207842,
+        "formatted": "18:29:59",
+        "dayNumber": 0,
+        "hourInEarthSeconds": 633379.587236905,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "mercury-2451728",
+      "input": {
+        "body": "mercury",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": 70.6578225918038,
+        "latitudeDeg": -0.0309114871576369,
+        "hours": 7.28947849387975,
+        "formatted": "07:17:22",
+        "dayNumber": 1,
+        "hourInEarthSeconds": 633379.587236905,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "mercury-2451819.5",
+      "input": {
+        "body": "mercury",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": -120.941816482528,
+        "latitudeDeg": -0.032921302045346,
+        "hours": 20.0627877655019,
+        "formatted": "20:03:46",
+        "dayNumber": 1,
+        "hourInEarthSeconds": 633379.587236905,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "mercury-2460800.25",
+      "input": {
+        "body": "mercury",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": -145.102989420594,
+        "latitudeDeg": -0.0335537981441611,
+        "hours": 21.6735326280396,
+        "formatted": "21:40:24",
+        "dayNumber": 52,
+        "hourInEarthSeconds": 633379.587236905,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "venus-2451545",
+      "input": {
+        "body": "venus",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": -160.103859323738,
+        "latitudeDeg": -2.16628449372797,
+        "hours": 1.32640937841747,
+        "formatted": "01:19:35",
+        "dayNumber": 0,
+        "hourInEarthSeconds": 420301.302795179,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "venus-2451636.5",
+      "input": {
+        "body": "venus",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": 121.182214867594,
+        "latitudeDeg": 2.63748307482377,
+        "hours": 20.0788143245062,
+        "formatted": "20:04:43",
+        "dayNumber": 0,
+        "hourInEarthSeconds": 420301.302795179,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "venus-2451728",
+      "input": {
+        "body": "venus",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": 43.2975034449013,
+        "latitudeDeg": -2.2154345455954,
+        "hours": 14.8865002296601,
+        "formatted": "14:53:11",
+        "dayNumber": 1,
+        "hourInEarthSeconds": 420301.302795179,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "venus-2451819.5",
+      "input": {
+        "body": "venus",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": -33.7458877727924,
+        "latitudeDeg": 1.09559568433651,
+        "hours": 9.75027414848051,
+        "formatted": "09:45:00",
+        "dayNumber": 2,
+        "hourInEarthSeconds": 420301.302795179,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "venus-2460800.25",
+      "input": {
+        "body": "venus",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": -61.5117400546822,
+        "latitudeDeg": 0.595928851329899,
+        "hours": 7.89921732968786,
+        "formatted": "07:53:57",
+        "dayNumber": 79,
+        "hourInEarthSeconds": 420301.302795179,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "embary-2451545",
+      "input": {
+        "body": "embary",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": 1.14373683852637,
+        "latitudeDeg": -23.0333372518149,
+        "hours": 11.9237508774316,
+        "formatted": "11:55:25",
+        "dayNumber": 0,
+        "hourInEarthSeconds": 3600.00118713258,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "embary-2451636.5",
+      "input": {
+        "body": "embary",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": -178.774999201897,
+        "latitudeDeg": 4.96468247317796,
+        "hours": 23.9183332801265,
+        "formatted": "23:55:05",
+        "dayNumber": 91,
+        "hourInEarthSeconds": 3600.00118713258,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "embary-2451728",
+      "input": {
+        "body": "embary",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": 1.34201065640962,
+        "latitudeDeg": 22.9912178387988,
+        "hours": 11.910532622906,
+        "formatted": "11:54:37",
+        "dayNumber": 183,
+        "hourInEarthSeconds": 3600.00118713258,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "embary-2451819.5",
+      "input": {
+        "body": "embary",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": 177.666331952656,
+        "latitudeDeg": -3.61191321430327,
+        "hours": 0.155577869822956,
+        "formatted": "00:09:20",
+        "dayNumber": 274,
+        "hourInEarthSeconds": 3600.00118713258,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "embary-2460800.25",
+      "input": {
+        "body": "embary",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": -90.4370126252768,
+        "latitudeDeg": 16.1945302499308,
+        "hours": 18.0291341750185,
+        "formatted": "18:01:44",
+        "dayNumber": 9254,
+        "hourInEarthSeconds": 3600.00118713258,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "mars-2451545",
+      "input": {
+        "body": "mars",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": -38.0845078973976,
+        "latitudeDeg": -23.897596875179,
+        "hours": 14.5389671931598,
+        "formatted": "14:32:20",
+        "dayNumber": -1,
+        "hourInEarthSeconds": 3698.96935643406,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "mars-2451636.5",
+      "input": {
+        "body": "mars",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": -48.3342164165771,
+        "latitudeDeg": -12.9501716169731,
+        "hours": 15.2222810944385,
+        "formatted": "15:13:20",
+        "dayNumber": 88,
+        "hourInEarthSeconds": 3698.96935643406,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "mars-2451728",
+      "input": {
+        "body": "mars",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": -71.5393451889289,
+        "latitudeDeg": 5.34476314435835,
+        "hours": 16.7692896792619,
+        "formatted": "16:46:09",
+        "dayNumber": 177,
+        "hourInEarthSeconds": 3698.96935643406,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "mars-2451819.5",
+      "input": {
+        "body": "mars",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": -97.9598525291177,
+        "latitudeDeg": 19.3535160670681,
+        "hours": 18.5306568352745,
+        "formatted": "18:31:50",
+        "dayNumber": 266,
+        "hourInEarthSeconds": 3698.96935643406,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "mars-2460800.25",
+      "input": {
+        "body": "mars",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": 92.0353296647363,
+        "latitudeDeg": 23.244382586501,
+        "hours": 5.86431135568425,
+        "formatted": "05:51:51",
+        "dayNumber": 9007,
+        "hourInEarthSeconds": 3698.96935643406,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "jupiter-2451545",
+      "input": {
+        "body": "jupiter",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": -66.843219397528,
+        "latitudeDeg": 3.06413727541371,
+        "hours": 16.4562146265019,
+        "formatted": "16:27:22",
+        "dayNumber": -1,
+        "hourInEarthSeconds": 1488.88610476502,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "jupiter-2451636.5",
+      "input": {
+        "body": "jupiter",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": -152.567539207986,
+        "latitudeDeg": 3.11686421759577,
+        "hours": 22.1711692805324,
+        "formatted": "22:10:16",
+        "dayNumber": 220,
+        "hourInEarthSeconds": 1488.88610476502,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "jupiter-2451728",
+      "input": {
+        "body": "jupiter",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": 121.652991985177,
+        "latitudeDeg": 3.10441625422443,
+        "hours": 3.8898005343215,
+        "formatted": "03:53:23",
+        "dayNumber": 442,
+        "hourInEarthSeconds": 1488.88610476502,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "jupiter-2451819.5",
+      "input": {
+        "body": "jupiter",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": 35.8048986504713,
+        "latitudeDeg": 3.02851009825206,
+        "hours": 9.61300675663524,
+        "formatted": "09:36:46",
+        "dayNumber": 663,
+        "hourInEarthSeconds": 1488.88610476502,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "jupiter-2460800.25",
+      "input": {
+        "body": "jupiter",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": 117.181012660446,
+        "latitudeDeg": 2.33905151182897,
+        "hours": 4.1879324893036,
+        "formatted": "04:11:16",
+        "dayNumber": 22378,
+        "hourInEarthSeconds": 1488.88610476502,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "saturn-2451545",
+      "input": {
+        "body": "saturn",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": 54.4314201692393,
+        "latitudeDeg": -20.749102936178,
+        "hours": 8.37123865538405,
+        "formatted": "08:22:16",
+        "dayNumber": 0,
+        "hourInEarthSeconds": 1598.50198721641,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "saturn-2451636.5",
+      "input": {
+        "body": "saturn",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": 30.1951815008656,
+        "latitudeDeg": -21.697142820242,
+        "hours": 9.98698789994229,
+        "formatted": "09:59:13",
+        "dayNumber": 206,
+        "hourInEarthSeconds": 1598.50198721641,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "saturn-2451728",
+      "input": {
+        "body": "saturn",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": 6.01680785331672,
+        "latitudeDeg": -22.5782584934122,
+        "hours": 11.5988794764456,
+        "formatted": "11:35:55",
+        "dayNumber": 412,
+        "hourInEarthSeconds": 1598.50198721641,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "saturn-2451819.5",
+      "input": {
+        "body": "saturn",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": -18.1051435000157,
+        "latitudeDeg": -23.3872318849926,
+        "hours": 13.2070095666677,
+        "formatted": "13:12:25",
+        "dayNumber": 618,
+        "hourInEarthSeconds": 1598.50198721641,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "saturn-2460800.25",
+      "input": {
+        "body": "saturn",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": 105.403018529694,
+        "latitudeDeg": -0.00691508302907373,
+        "hours": 4.97313209802043,
+        "formatted": "04:58:23",
+        "dayNumber": 20844,
+        "hourInEarthSeconds": 1598.50198721641,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "uranus-2451545",
+      "input": {
+        "body": "uranus",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": -34.3167777859947,
+        "latitudeDeg": -30.8232962250287,
+        "hours": 9.71221481426701,
+        "formatted": "09:42:43",
+        "dayNumber": 0,
+        "hourInEarthSeconds": 2585.92746866821,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "uranus-2451636.5",
+      "input": {
+        "body": "uranus",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": 102.012193909094,
+        "latitudeDeg": -29.8411763692213,
+        "hours": 18.8008129272729,
+        "formatted": "18:48:02",
+        "dayNumber": 127,
+        "hourInEarthSeconds": 2585.92746866821,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "uranus-2451728",
+      "input": {
+        "body": "uranus",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": -121.662514842761,
+        "latitudeDeg": -28.8597402050791,
+        "hours": 3.88916567714928,
+        "formatted": "03:53:20",
+        "dayNumber": 255,
+        "hourInEarthSeconds": 2585.92746866821,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "uranus-2451819.5",
+      "input": {
+        "body": "uranus",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": 14.6593115373588,
+        "latitudeDeg": -27.8789766872167,
+        "hours": 12.9772874358239,
+        "formatted": "12:58:38",
+        "dayNumber": 382,
+        "hourInEarthSeconds": 2585.92746866821,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "uranus-2460800.25",
+      "input": {
+        "body": "uranus",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": 111.954282921442,
+        "latitudeDeg": 67.9162569393461,
+        "hours": 19.4636188614295,
+        "formatted": "19:27:49",
+        "dayNumber": 12884,
+        "hourInEarthSeconds": 2585.92746866821,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "neptune-2451545",
+      "input": {
+        "body": "neptune",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": -152.732378403349,
+        "latitudeDeg": -27.1881636340379,
+        "hours": 22.1821585602233,
+        "formatted": "22:10:55",
+        "dayNumber": -1,
+        "hourInEarthSeconds": 2416.52694970767,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "neptune-2451636.5",
+      "input": {
+        "body": "neptune",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": 13.588120976802,
+        "latitudeDeg": -27.2464139833672,
+        "hours": 11.0941252682132,
+        "formatted": "11:05:38",
+        "dayNumber": 136,
+        "hourInEarthSeconds": 2416.52694970767,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "neptune-2451728",
+      "input": {
+        "body": "neptune",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": 179.909343521401,
+        "latitudeDeg": -27.3020272306322,
+        "hours": 0.00604376523990524,
+        "formatted": "00:00:21",
+        "dayNumber": 273,
+        "hourInEarthSeconds": 2416.52694970767,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "neptune-2451819.5",
+      "input": {
+        "body": "neptune",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": -13.7687373443653,
+        "latitudeDeg": -27.3549931370752,
+        "hours": 12.9179158229577,
+        "formatted": "12:55:04",
+        "dayNumber": 408,
+        "hourInEarthSeconds": 2416.52694970767,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "neptune-2460800.25",
+      "input": {
+        "body": "neptune",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": -155.974975486643,
+        "latitudeDeg": -19.7633901018644,
+        "hours": 22.3983316991095,
+        "formatted": "22:23:53",
+        "dayNumber": 13787,
+        "hourInEarthSeconds": 2416.52694970767,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "moon-2451545",
+      "input": {
+        "body": "moon",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": -117.805208769951,
+        "latitudeDeg": 0.00689430699779697,
+        "hours": 19.8536805846634,
+        "formatted": "19:51:13",
+        "dayNumber": -1,
+        "hourInEarthSeconds": 106309.785227367,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "moon-2451636.5",
+      "input": {
+        "body": "moon",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": -151.305986097958,
+        "latitudeDeg": 0.000595759814654233,
+        "hours": 22.0870657398638,
+        "formatted": "22:05:13",
+        "dayNumber": 2,
+        "hourInEarthSeconds": 106309.785227367,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "moon-2451728",
+      "input": {
+        "body": "moon",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": 171.281282561967,
+        "latitudeDeg": -0.0181274631611544,
+        "hours": 0.581247829202177,
+        "formatted": "00:34:52",
+        "dayNumber": 6,
+        "hourInEarthSeconds": 106309.785227367,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "moon-2451819.5",
+      "input": {
+        "body": "moon",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": 133.758499415836,
+        "latitudeDeg": -0.007432449245807,
+        "hours": 3.08276670561093,
+        "formatted": "03:04:57",
+        "dayNumber": 9,
+        "hourInEarthSeconds": 106309.785227367,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "moon-2460800.25",
+      "input": {
+        "body": "moon",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": 95.22483192509,
+        "latitudeDeg": -0.0181922861211648,
+        "hours": 5.65167787166067,
+        "formatted": "05:39:06",
+        "dayNumber": 313,
+        "hourInEarthSeconds": 106309.785227367,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "phobos-2451545",
+      "input": {
+        "body": "phobos",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": 102.904284949572,
+        "latitudeDeg": -25.107987010029,
+        "hours": 5.1397143366952,
+        "formatted": "05:08:22",
+        "dayNumber": 0,
+        "hourInEarthSeconds": 1148.60956815073,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "phobos-2451636.5",
+      "input": {
+        "body": "phobos",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": -170.116926721642,
+        "latitudeDeg": -12.7966247096193,
+        "hours": 23.3411284481095,
+        "formatted": "23:20:28",
+        "dayNumber": 286,
+        "hourInEarthSeconds": 1148.60956815073,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "phobos-2451728",
+      "input": {
+        "body": "phobos",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": -96.4642375416081,
+        "latitudeDeg": 6.52197287105566,
+        "hours": 18.4309491694405,
+        "formatted": "18:25:51",
+        "dayNumber": 573,
+        "hourInEarthSeconds": 1148.60956815073,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "phobos-2451819.5",
+      "input": {
+        "body": "phobos",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": -25.4687408808102,
+        "latitudeDeg": 20.9169234196594,
+        "hours": 13.6979160587207,
+        "formatted": "13:41:52",
+        "dayNumber": 860,
+        "hourInEarthSeconds": 1148.60956815073,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "phobos-2460800.25",
+      "input": {
+        "body": "phobos",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": 85.39887187823,
+        "latitudeDeg": 24.6916565532426,
+        "hours": 6.30674187478466,
+        "formatted": "06:18:24",
+        "dayNumber": 29008,
+        "hourInEarthSeconds": 1148.60956815073,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "deimos-2451545",
+      "input": {
+        "body": "deimos",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": 59.4777467142664,
+        "latitudeDeg": -24.2376141379383,
+        "hours": 8.03481688571557,
+        "formatted": "08:02:05",
+        "dayNumber": 0,
+        "hourInEarthSeconds": 4553.15403026054,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "deimos-2451636.5",
+      "input": {
+        "body": "deimos",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": -56.7092439918271,
+        "latitudeDeg": -12.3725732198359,
+        "hours": 15.7806162661218,
+        "formatted": "15:46:50",
+        "dayNumber": 72,
+        "hourInEarthSeconds": 4553.15403026054,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "deimos-2451728",
+      "input": {
+        "body": "deimos",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": 174.197062288365,
+        "latitudeDeg": 6.32148606087403,
+        "hours": 0.386862514109009,
+        "formatted": "00:23:12",
+        "dayNumber": 145,
+        "hourInEarthSeconds": 4553.15403026054,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "deimos-2451819.5",
+      "input": {
+        "body": "deimos",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": 42.273147199495,
+        "latitudeDeg": 20.2127946558874,
+        "hours": 9.18179018670033,
+        "formatted": "09:10:54",
+        "dayNumber": 217,
+        "hourInEarthSeconds": 4553.15403026054,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "deimos-2460800.25",
+      "input": {
+        "body": "deimos",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": 137.977026628778,
+        "latitudeDeg": 23.844297110862,
+        "hours": 2.80153155808145,
+        "formatted": "02:48:05",
+        "dayNumber": 7318,
+        "hourInEarthSeconds": 4553.15403026054,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "io-2451545",
+      "input": {
+        "body": "io",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": 17.6977295809279,
+        "latitudeDeg": 3.06295614415214,
+        "hours": 10.8201513612715,
+        "formatted": "10:49:12",
+        "dayNumber": 0,
+        "hourInEarthSeconds": 6371.49763390246,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "io-2451636.5",
+      "input": {
+        "body": "io",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": 126.831000424954,
+        "latitudeDeg": 3.11740192070483,
+        "hours": 3.54459997166974,
+        "formatted": "03:32:40",
+        "dayNumber": 52,
+        "hourInEarthSeconds": 6371.49763390246,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "io-2451728",
+      "input": {
+        "body": "io",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": -124.163629251068,
+        "latitudeDeg": 3.1017468223543,
+        "hours": 20.2775752834045,
+        "formatted": "20:16:39",
+        "dayNumber": 103,
+        "hourInEarthSeconds": 6371.49763390246,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "io-2451819.5",
+      "input": {
+        "body": "io",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": -15.2466279623852,
+        "latitudeDeg": 3.02431238620691,
+        "hours": 13.016441864159,
+        "formatted": "13:00:59",
+        "dayNumber": 155,
+        "hourInEarthSeconds": 6371.49763390246,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "io-2460800.25",
+      "input": {
+        "body": "io",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": -111.077726786008,
+        "latitudeDeg": 2.33447523902728,
+        "hours": 19.4051817857339,
+        "formatted": "19:24:18",
+        "dayNumber": 5229,
+        "hourInEarthSeconds": 6371.49763390246,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "europa-2451545",
+      "input": {
+        "body": "europa",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": -177.889337569366,
+        "latitudeDeg": 3.04853178791401,
+        "hours": 23.8592891712911,
+        "formatted": "23:51:33",
+        "dayNumber": -1,
+        "hourInEarthSeconds": 12794.7384679395,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "europa-2451636.5",
+      "input": {
+        "body": "europa",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": -85.4276906582373,
+        "latitudeDeg": 3.09686918347987,
+        "hours": 17.6951793772158,
+        "formatted": "17:41:42",
+        "dayNumber": 25,
+        "hourInEarthSeconds": 12794.7384679395,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "europa-2451728",
+      "input": {
+        "body": "europa",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": 7.02811587956751,
+        "latitudeDeg": 3.08543170855111,
+        "hours": 11.5314589413622,
+        "formatted": "11:31:53",
+        "dayNumber": 51,
+        "hourInEarthSeconds": 12794.7384679395,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "europa-2451819.5",
+      "input": {
+        "body": "europa",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": 99.5081041276253,
+        "latitudeDeg": 3.01249478548429,
+        "hours": 5.36612639149165,
+        "formatted": "05:21:58",
+        "dayNumber": 77,
+        "hourInEarthSeconds": 12794.7384679395,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "europa-2460800.25",
+      "input": {
+        "body": "europa",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": 146.041216586817,
+        "latitudeDeg": 2.32489820395858,
+        "hours": 2.26391889421217,
+        "formatted": "02:15:50",
+        "dayNumber": 2604,
+        "hourInEarthSeconds": 12794.7384679395,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "ganymede-2451545",
+      "input": {
+        "body": "ganymede",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": 173.89023740242,
+        "latitudeDeg": 2.96943602351248,
+        "hours": 0.407317506505322,
+        "formatted": "00:24:26",
+        "dayNumber": 0,
+        "hourInEarthSeconds": 25798.9917506672,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "ganymede-2451636.5",
+      "input": {
+        "body": "ganymede",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": -101.908575281469,
+        "latitudeDeg": 3.01728266297086,
+        "hours": 18.7939050187646,
+        "formatted": "18:47:38",
+        "dayNumber": 12,
+        "hourInEarthSeconds": 25798.9917506672,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "ganymede-2451728",
+      "input": {
+        "body": "ganymede",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": -17.6173663539592,
+        "latitudeDeg": 3.00628634792962,
+        "hours": 13.1744910902639,
+        "formatted": "13:10:28",
+        "dayNumber": 25,
+        "hourInEarthSeconds": 25798.9917506672,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "ganymede-2451819.5",
+      "input": {
+        "body": "ganymede",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": 66.5906659889151,
+        "latitudeDeg": 2.9348878612018,
+        "hours": 7.56062226740566,
+        "formatted": "07:33:38",
+        "dayNumber": 38,
+        "hourInEarthSeconds": 25798.9917506672,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "ganymede-2460800.25",
+      "input": {
+        "body": "ganymede",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": 4.24393572738202,
+        "latitudeDeg": 2.26134206939704,
+        "hours": 11.7170709515079,
+        "formatted": "11:43:01",
+        "dayNumber": 1291,
+        "hourInEarthSeconds": 25798.9917506672,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "callisto-2451545",
+      "input": {
+        "body": "callisto",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": -42.0540451199461,
+        "latitudeDeg": 2.63168633965585,
+        "hours": 14.8036030079964,
+        "formatted": "14:48:12",
+        "dayNumber": -1,
+        "hourInEarthSeconds": 60312.7756729163,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "callisto-2451636.5",
+      "input": {
+        "body": "callisto",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": 152.581260210793,
+        "latitudeDeg": 2.68096025793138,
+        "hours": 1.82791598594713,
+        "formatted": "01:49:40",
+        "dayNumber": 5,
+        "hourInEarthSeconds": 60312.7756729163,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "callisto-2451728",
+      "input": {
+        "body": "callisto",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": -12.9099854812696,
+        "latitudeDeg": 2.66507806109519,
+        "hours": 12.8606656987513,
+        "formatted": "12:51:38",
+        "dayNumber": 10,
+        "hourInEarthSeconds": 60312.7756729163,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "callisto-2451819.5",
+      "input": {
+        "body": "callisto",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": -178.541631710863,
+        "latitudeDeg": 2.60272390437965,
+        "hours": 23.9027754473909,
+        "formatted": "23:54:09",
+        "dayNumber": 15,
+        "hourInEarthSeconds": 60312.7756729163,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "callisto-2460800.25",
+      "input": {
+        "body": "callisto",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": 164.651978251664,
+        "latitudeDeg": 2.00854598779004,
+        "hours": 1.02320144988906,
+        "formatted": "01:01:23",
+        "dayNumber": 552,
+        "hourInEarthSeconds": 60312.7756729163,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "amalthea-2451545",
+      "input": {
+        "body": "amalthea",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": -13.5712961706649,
+        "latitudeDeg": 3.06888253815615,
+        "hours": 12.9047530780443,
+        "formatted": "12:54:17",
+        "dayNumber": -1,
+        "hourInEarthSeconds": 1793.65153071504,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "amalthea-2451636.5",
+      "input": {
+        "body": "amalthea",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": 113.993564490499,
+        "latitudeDeg": 3.12347619617238,
+        "hours": 4.40042903396673,
+        "formatted": "04:24:01",
+        "dayNumber": 183,
+        "hourInEarthSeconds": 1793.65153071504,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "amalthea-2451728",
+      "input": {
+        "body": "amalthea",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": -118.527034723514,
+        "latitudeDeg": 3.11023163354674,
+        "hours": 19.9018023149009,
+        "formatted": "19:54:06",
+        "dayNumber": 366,
+        "hourInEarthSeconds": 1793.65153071504,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "amalthea-2451819.5",
+      "input": {
+        "body": "amalthea",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": 8.8759675280374,
+        "latitudeDeg": 3.03405007126805,
+        "hours": 11.4082688314642,
+        "formatted": "11:24:29",
+        "dayNumber": 550,
+        "hourInEarthSeconds": 1793.65153071504,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "amalthea-2460800.25",
+      "input": {
+        "body": "amalthea",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": -16.0149980973746,
+        "latitudeDeg": 2.34388364320166,
+        "hours": 13.067666539825,
+        "formatted": "13:04:03",
+        "dayNumber": 18575,
+        "hourInEarthSeconds": 1793.65153071504,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "mimas-2451545",
+      "input": {
+        "body": "mimas",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": 119.797846393174,
+        "latitudeDeg": -20.7687777032509,
+        "hours": 4.01347690712171,
+        "formatted": "04:00:48",
+        "dayNumber": 0,
+        "hourInEarthSeconds": 3393.01580927691,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "mimas-2451636.5",
+      "input": {
+        "body": "mimas",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": 90.6991013711204,
+        "latitudeDeg": -21.7144946428381,
+        "hours": 5.9533932419253,
+        "formatted": "05:57:12",
+        "dayNumber": 97,
+        "hourInEarthSeconds": 3393.01580927691,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "mimas-2451728",
+      "input": {
+        "body": "mimas",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": 61.6590594217991,
+        "latitudeDeg": -22.5934403061297,
+        "hours": 7.88939603854672,
+        "formatted": "07:53:21",
+        "dayNumber": 194,
+        "hourInEarthSeconds": 3393.01580927691,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "mimas-2451819.5",
+      "input": {
+        "body": "mimas",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": 32.6768867947282,
+        "latitudeDeg": -23.4011345073036,
+        "hours": 9.82154088035145,
+        "formatted": "09:49:17",
+        "dayNumber": 291,
+        "hourInEarthSeconds": 3393.01580927691,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "mimas-2460800.25",
+      "input": {
+        "body": "mimas",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": 175.937142872449,
+        "latitudeDeg": -0.0177946483088166,
+        "hours": 0.270857141836725,
+        "formatted": "00:16:15",
+        "dayNumber": 9820,
+        "hourInEarthSeconds": 3393.01580927691,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "enceladus-2451545",
+      "input": {
+        "body": "enceladus",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": 86.9329530147783,
+        "latitudeDeg": -20.7649944968891,
+        "hours": 6.20446979901478,
+        "formatted": "06:12:16",
+        "dayNumber": 0,
+        "hourInEarthSeconds": 4933.41356746808,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "enceladus-2451636.5",
+      "input": {
+        "body": "enceladus",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": 170.38151000984,
+        "latitudeDeg": -21.7210308936624,
+        "hours": 0.641232666010666,
+        "formatted": "00:38:28",
+        "dayNumber": 67,
+        "hourInEarthSeconds": 4933.41356746808,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "enceladus-2451728",
+      "input": {
+        "body": "enceladus",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": -106.12274261916,
+        "latitudeDeg": -22.599464288515,
+        "hours": 19.074849507944,
+        "formatted": "19:04:29",
+        "dayNumber": 133,
+        "hourInEarthSeconds": 4933.41356746808,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "enceladus-2451819.5",
+      "input": {
+        "body": "enceladus",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": -22.5824524941357,
+        "latitudeDeg": -23.4006302554773,
+        "hours": 13.5054968329424,
+        "formatted": "13:30:19",
+        "dayNumber": 200,
+        "hourInEarthSeconds": 4933.41356746808,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "enceladus-2460800.25",
+      "input": {
+        "body": "enceladus",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": -171.229155894616,
+        "latitudeDeg": -0.0188758856189019,
+        "hours": 23.4152770596411,
+        "formatted": "23:24:54",
+        "dayNumber": 6753,
+        "hourInEarthSeconds": 4933.41356746808,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "tethys-2451545",
+      "input": {
+        "body": "tethys",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": 84.2986748406305,
+        "latitudeDeg": -20.7583112615973,
+        "hours": 6.38008834395796,
+        "formatted": "06:22:48",
+        "dayNumber": 0,
+        "hourInEarthSeconds": 6797.28223057648,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "tethys-2451636.5",
+      "input": {
+        "body": "tethys",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": -81.1340095244583,
+        "latitudeDeg": -21.7227355592273,
+        "hours": 17.4089339682972,
+        "formatted": "17:24:32",
+        "dayNumber": 48,
+        "hourInEarthSeconds": 6797.28223057648,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "tethys-2451728",
+      "input": {
+        "body": "tethys",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": 113.450840051142,
+        "latitudeDeg": -22.5895113401952,
+        "hours": 4.43661066325719,
+        "formatted": "04:26:11",
+        "dayNumber": 97,
+        "hourInEarthSeconds": 6797.28223057648,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "tethys-2451819.5",
+      "input": {
+        "body": "tethys",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": -51.867431461482,
+        "latitudeDeg": -23.4113590206205,
+        "hours": 15.4578287640988,
+        "formatted": "15:27:28",
+        "dayNumber": 145,
+        "hourInEarthSeconds": 6797.28223057648,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "tethys-2460800.25",
+      "input": {
+        "body": "tethys",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": 158.72266704758,
+        "latitudeDeg": -0.0138634482086258,
+        "hours": 1.41848886349467,
+        "formatted": "01:25:06",
+        "dayNumber": 4902,
+        "hourInEarthSeconds": 6797.28223057648,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "dione-2451545",
+      "input": {
+        "body": "dione",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": 95.6605733381819,
+        "latitudeDeg": -20.7637075688862,
+        "hours": 5.6226284441212,
+        "formatted": "05:37:21",
+        "dayNumber": 0,
+        "hourInEarthSeconds": 9855.40376150484,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "dione-2451636.5",
+      "input": {
+        "body": "dione",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": -56.3777021931396,
+        "latitudeDeg": -21.721861082851,
+        "hours": 15.7585134795426,
+        "formatted": "15:45:30",
+        "dayNumber": 33,
+        "hourInEarthSeconds": 9855.40376150484,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "dione-2451728",
+      "input": {
+        "body": "dione",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": 151.62592204306,
+        "latitudeDeg": -22.5869522717701,
+        "hours": 1.89160519712934,
+        "formatted": "01:53:29",
+        "dayNumber": 67,
+        "hourInEarthSeconds": 9855.40376150484,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "dione-2451819.5",
+      "input": {
+        "body": "dione",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": -0.2764705712625,
+        "latitudeDeg": -23.4155183723616,
+        "hours": 12.0184313714175,
+        "formatted": "12:01:06",
+        "dayNumber": 100,
+        "hourInEarthSeconds": 9855.40376150484,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "dione-2460800.25",
+      "input": {
+        "body": "dione",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": 178.209930229853,
+        "latitudeDeg": -0.00452233808909195,
+        "hours": 0.119337984676456,
+        "formatted": "00:07:09",
+        "dayNumber": 3381,
+        "hourInEarthSeconds": 9855.40376150484,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "rhea-2451545",
+      "input": {
+        "body": "rhea",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": -141.629855906063,
+        "latitudeDeg": -20.7242725716283,
+        "hours": 21.4419903937375,
+        "formatted": "21:26:31",
+        "dayNumber": -1,
+        "hourInEarthSeconds": 16269.8428131743,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "rhea-2451636.5",
+      "input": {
+        "body": "rhea",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": 130.147622565667,
+        "latitudeDeg": -21.6713933157328,
+        "hours": 3.32349182895552,
+        "formatted": "03:19:24",
+        "dayNumber": 20,
+        "hourInEarthSeconds": 16269.8428131743,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "rhea-2451728",
+      "input": {
+        "body": "rhea",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": 41.9959234768442,
+        "latitudeDeg": -22.5712479630298,
+        "hours": 9.20027176821038,
+        "formatted": "09:12:00",
+        "dayNumber": 40,
+        "hourInEarthSeconds": 16269.8428131743,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "rhea-2451819.5",
+      "input": {
+        "body": "rhea",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": -46.1323317644557,
+        "latitudeDeg": -23.3787444282292,
+        "hours": 15.075488784297,
+        "formatted": "15:04:31",
+        "dayNumber": 60,
+        "hourInEarthSeconds": 16269.8428131743,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "rhea-2460800.25",
+      "input": {
+        "body": "rhea",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": -101.711174256884,
+        "latitudeDeg": -0.0169335387741156,
+        "hours": 18.7807449504589,
+        "formatted": "18:46:50",
+        "dayNumber": 2047,
+        "hourInEarthSeconds": 16269.8428131743,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "titan-2451545",
+      "input": {
+        "body": "titan",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": -92.0594300063809,
+        "latitudeDeg": -20.8653882262051,
+        "hours": 18.1372953337587,
+        "formatted": "18:08:14",
+        "dayNumber": -1,
+        "hourInEarthSeconds": 57488.8376830655,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "titan-2451636.5",
+      "input": {
+        "body": "titan",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": 5.51398090552975,
+        "latitudeDeg": -21.8144089515211,
+        "hours": 11.6324012729647,
+        "formatted": "11:37:56",
+        "dayNumber": 5,
+        "hourInEarthSeconds": 57488.8376830655,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "titan-2451728",
+      "input": {
+        "body": "titan",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": 103.135533778473,
+        "latitudeDeg": -22.6420858001084,
+        "hours": 5.12429774810178,
+        "formatted": "05:07:27",
+        "dayNumber": 11,
+        "hourInEarthSeconds": 57488.8376830655,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "titan-2451819.5",
+      "input": {
+        "body": "titan",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": -159.076778809428,
+        "latitudeDeg": -23.4384743182228,
+        "hours": 22.6051185872952,
+        "formatted": "22:36:18",
+        "dayNumber": 16,
+        "hourInEarthSeconds": 57488.8376830655,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "titan-2460800.25",
+      "input": {
+        "body": "titan",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": 63.4888764794706,
+        "latitudeDeg": -0.147475738334928,
+        "hours": 7.76740823470196,
+        "formatted": "07:46:02",
+        "dayNumber": 579,
+        "hourInEarthSeconds": 57488.8376830655,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "iapetus-2451545",
+      "input": {
+        "body": "iapetus",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": -175.625705182662,
+        "latitudeDeg": -14.9314019883303,
+        "hours": 23.7083803455108,
+        "formatted": "23:42:30",
+        "dayNumber": -1,
+        "hourInEarthSeconds": 287713.108542894,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "iapetus-2451636.5",
+      "input": {
+        "body": "iapetus",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": 132.707354935552,
+        "latitudeDeg": -15.0449794750447,
+        "hours": 3.15284300429655,
+        "formatted": "03:09:10",
+        "dayNumber": 1,
+        "hourInEarthSeconds": 287713.108542894,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "iapetus-2451728",
+      "input": {
+        "body": "iapetus",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": 80.9665306464246,
+        "latitudeDeg": -15.0871650998556,
+        "hours": 6.60223129023836,
+        "formatted": "06:36:08",
+        "dayNumber": 2,
+        "hourInEarthSeconds": 287713.108542894,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "iapetus-2451819.5",
+      "input": {
+        "body": "iapetus",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": 29.1303813628896,
+        "latitudeDeg": -15.0627543042181,
+        "hours": 10.0579745758074,
+        "formatted": "10:03:28",
+        "dayNumber": 3,
+        "hourInEarthSeconds": 287713.108542894,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "iapetus-2460800.25",
+      "input": {
+        "body": "iapetus",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": -107.197747665953,
+        "latitudeDeg": -7.49260620052321,
+        "hours": 19.1465165110635,
+        "formatted": "19:08:47",
+        "dayNumber": 115,
+        "hourInEarthSeconds": 287713.108542894,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "phoebe-2451545",
+      "input": {
+        "body": "phoebe",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": -38.9423621932801,
+        "latitudeDeg": -22.3997031120205,
+        "hours": 14.596157479552,
+        "formatted": "14:35:46",
+        "dayNumber": -1,
+        "hourInEarthSeconds": 1391.14675032125,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "phoebe-2451636.5",
+      "input": {
+        "body": "phoebe",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": 39.5282950784327,
+        "latitudeDeg": -22.751801936341,
+        "hours": 9.36478032810449,
+        "formatted": "09:21:53",
+        "dayNumber": 236,
+        "hourInEarthSeconds": 1391.14675032125,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "phoebe-2451728",
+      "input": {
+        "body": "phoebe",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": 118.751679154471,
+        "latitudeDeg": -23.1478362464978,
+        "hours": 4.08322138970194,
+        "formatted": "04:04:59",
+        "dayNumber": 473,
+        "hourInEarthSeconds": 1391.14675032125,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "phoebe-2451819.5",
+      "input": {
+        "body": "phoebe",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": -162.123880279839,
+        "latitudeDeg": -23.4805253631552,
+        "hours": 22.8082586853226,
+        "formatted": "22:48:29",
+        "dayNumber": 709,
+        "hourInEarthSeconds": 1391.14675032125,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "phoebe-2460800.25",
+      "input": {
+        "body": "phoebe",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": 78.0636112755681,
+        "latitudeDeg": -7.91324077192678,
+        "hours": 6.79575924829546,
+        "formatted": "06:47:44",
+        "dayNumber": 23950,
+        "hourInEarthSeconds": 1391.14675032125,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "ariel-2451545",
+      "input": {
+        "body": "ariel",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": 13.2465460834348,
+        "latitudeDeg": -30.919552564049,
+        "hours": 12.883103072229,
+        "formatted": "12:52:59",
+        "dayNumber": -1,
+        "hourInEarthSeconds": 9072.6187911402,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "ariel-2451636.5",
+      "input": {
+        "body": "ariel",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": 122.890671510964,
+        "latitudeDeg": -29.9425770312782,
+        "hours": 20.1927114340643,
+        "formatted": "20:11:33",
+        "dayNumber": 35,
+        "hourInEarthSeconds": 9072.6187911402,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "ariel-2451728",
+      "input": {
+        "body": "ariel",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": -127.459719678886,
+        "latitudeDeg": -28.961367987168,
+        "hours": 3.50268535474094,
+        "formatted": "03:30:09",
+        "dayNumber": 72,
+        "hourInEarthSeconds": 9072.6187911402,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "ariel-2451819.5",
+      "input": {
+        "body": "ariel",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": -17.8227468501401,
+        "latitudeDeg": -27.9759963818419,
+        "hours": 10.8118168766573,
+        "formatted": "10:48:42",
+        "dayNumber": 108,
+        "hourInEarthSeconds": 9072.6187911402,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "ariel-2460800.25",
+      "input": {
+        "body": "ariel",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": 97.5462536204834,
+        "latitudeDeg": 67.788623693882,
+        "hours": 18.5030835746989,
+        "formatted": "18:30:11",
+        "dayNumber": 3672,
+        "hourInEarthSeconds": 9072.6187911402,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "umbriel-2451545",
+      "input": {
+        "body": "umbriel",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": 61.4123622577677,
+        "latitudeDeg": -30.9206625756592,
+        "hours": 16.0941574838512,
+        "formatted": "16:05:38",
+        "dayNumber": -1,
+        "hourInEarthSeconds": 14917.0200329147,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "umbriel-2451636.5",
+      "input": {
+        "body": "umbriel",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": 90.0982762985718,
+        "latitudeDeg": -29.9409464514814,
+        "hours": 18.0065517532381,
+        "formatted": "18:00:23",
+        "dayNumber": 21,
+        "hourInEarthSeconds": 14917.0200329147,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "umbriel-2451728",
+      "input": {
+        "body": "umbriel",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": 118.781874152236,
+        "latitudeDeg": -28.9618924070238,
+        "hours": 19.9187916101491,
+        "formatted": "19:55:07",
+        "dayNumber": 43,
+        "hourInEarthSeconds": 14917.0200329147,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "umbriel-2451819.5",
+      "input": {
+        "body": "umbriel",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": 147.463148057525,
+        "latitudeDeg": -27.9829705142271,
+        "hours": 21.8308765371683,
+        "formatted": "21:49:51",
+        "dayNumber": 65,
+        "hourInEarthSeconds": 14917.0200329147,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "umbriel-2460800.25",
+      "input": {
+        "body": "umbriel",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": -160.777714475183,
+        "latitudeDeg": 67.7848299701001,
+        "hours": 1.2814857016545,
+        "formatted": "01:16:53",
+        "dayNumber": 2234,
+        "hourInEarthSeconds": 14917.0200329147,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "titania-2451545",
+      "input": {
+        "body": "titania",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": 91.7179343932515,
+        "latitudeDeg": -30.9232011142798,
+        "hours": 18.1145289595501,
+        "formatted": "18:06:52",
+        "dayNumber": -1,
+        "hourInEarthSeconds": 31332.2268567291,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "titania-2451636.5",
+      "input": {
+        "body": "titania",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": -84.4238946538562,
+        "latitudeDeg": -29.939648468342,
+        "hours": 6.37174035640959,
+        "formatted": "06:22:18",
+        "dayNumber": 10,
+        "hourInEarthSeconds": 31332.2268567291,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "titania-2451728",
+      "input": {
+        "body": "titania",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": 99.3922237605504,
+        "latitudeDeg": -28.9611797362097,
+        "hours": 18.6261482507034,
+        "formatted": "18:37:34",
+        "dayNumber": 20,
+        "hourInEarthSeconds": 31332.2268567291,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "titania-2451819.5",
+      "input": {
+        "body": "titania",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": -76.7576538268691,
+        "latitudeDeg": -27.9770833536369,
+        "hours": 6.88282307820873,
+        "formatted": "06:52:58",
+        "dayNumber": 31,
+        "hourInEarthSeconds": 31332.2268567291,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "titania-2460800.25",
+      "input": {
+        "body": "titania",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": 154.039729122871,
+        "latitudeDeg": 67.7871366990486,
+        "hours": 22.2693152748581,
+        "formatted": "22:16:09",
+        "dayNumber": 1062,
+        "hourInEarthSeconds": 31332.2268567291,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "oberon-2451545",
+      "input": {
+        "body": "oberon",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": 162.694274945185,
+        "latitudeDeg": -30.9318058937431,
+        "hours": 22.8462849963456,
+        "formatted": "22:50:46",
+        "dayNumber": -1,
+        "hourInEarthSeconds": 48446.3806447095,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "oberon-2451636.5",
+      "input": {
+        "body": "oberon",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": 89.531230095808,
+        "latitudeDeg": -29.9412363760122,
+        "hours": 17.9687486730539,
+        "formatted": "17:58:07",
+        "dayNumber": 6,
+        "hourInEarthSeconds": 48446.3806447095,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "oberon-2451728",
+      "input": {
+        "body": "oberon",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": 16.3829023280087,
+        "latitudeDeg": -28.9504472397509,
+        "hours": 13.0921934885339,
+        "formatted": "13:05:31",
+        "dayNumber": 13,
+        "hourInEarthSeconds": 48446.3806447095,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "oberon-2451819.5",
+      "input": {
+        "body": "oberon",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": -56.763490021709,
+        "latitudeDeg": -27.9733394322781,
+        "hours": 8.21576733188607,
+        "formatted": "08:12:56",
+        "dayNumber": 20,
+        "hourInEarthSeconds": 48446.3806447095,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "oberon-2460800.25",
+      "input": {
+        "body": "oberon",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": -12.102377260171,
+        "latitudeDeg": 67.7877435664548,
+        "hours": 11.1931748493219,
+        "formatted": "11:11:35",
+        "dayNumber": 687,
+        "hourInEarthSeconds": 48446.3806447095,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "miranda-2451545",
+      "input": {
+        "body": "miranda",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": 138.754061257462,
+        "latitudeDeg": -30.9204844048758,
+        "hours": 21.2502707504975,
+        "formatted": "21:15:00",
+        "dayNumber": -1,
+        "hourInEarthSeconds": 5088.29085841815,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "miranda-2451636.5",
+      "input": {
+        "body": "miranda",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": 43.135221188188,
+        "latitudeDeg": -29.9357312123184,
+        "hours": 14.8756814125459,
+        "formatted": "14:52:32",
+        "dayNumber": 64,
+        "hourInEarthSeconds": 5088.29085841815,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "miranda-2451728",
+      "input": {
+        "body": "miranda",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": -52.482936503453,
+        "latitudeDeg": -28.9546980172438,
+        "hours": 8.50113756643647,
+        "formatted": "08:30:04",
+        "dayNumber": 129,
+        "hourInEarthSeconds": 5088.29085841815,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "miranda-2451819.5",
+      "input": {
+        "body": "miranda",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": -148.109529907374,
+        "latitudeDeg": -27.9773334126943,
+        "hours": 2.12603133950837,
+        "formatted": "02:07:33",
+        "dayNumber": 194,
+        "hourInEarthSeconds": 5088.29085841815,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "miranda-2460800.25",
+      "input": {
+        "body": "miranda",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": 109.300371843994,
+        "latitudeDeg": 67.7830370475285,
+        "hours": 19.2866914562663,
+        "formatted": "19:17:12",
+        "dayNumber": 6547,
+        "hourInEarthSeconds": 5088.29085841815,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "triton-2451545",
+      "input": {
+        "body": "triton",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": 160.874807694215,
+        "latitudeDeg": -29.4628874228232,
+        "hours": 22.7249871796143,
+        "formatted": "22:43:29",
+        "dayNumber": -1,
+        "hourInEarthSeconds": 21154.6091745336,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "triton-2451636.5",
+      "input": {
+        "body": "triton",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": 6.53353634364979,
+        "latitudeDeg": -29.5106409723164,
+        "hours": 12.4355690895767,
+        "formatted": "12:26:08",
+        "dayNumber": 15,
+        "hourInEarthSeconds": 21154.6091745336,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "triton-2451728",
+      "input": {
+        "body": "triton",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": -147.796965732953,
+        "latitudeDeg": -29.570050488363,
+        "hours": 2.14686895113647,
+        "formatted": "02:08:48",
+        "dayNumber": 31,
+        "hourInEarthSeconds": 21154.6091745336,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "triton-2451819.5",
+      "input": {
+        "body": "triton",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": 57.8621641898092,
+        "latitudeDeg": -29.6131504424196,
+        "hours": 15.8574776126539,
+        "formatted": "15:51:26",
+        "dayNumber": 46,
+        "hourInEarthSeconds": 21154.6091745336,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "triton-2460800.25",
+      "input": {
+        "body": "triton",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": 173.458157641588,
+        "latitudeDeg": -20.6096806396769,
+        "hours": 23.5638771761059,
+        "formatted": "23:33:49",
+        "dayNumber": 1574,
+        "hourInEarthSeconds": 21154.6091745336,
+        "sunRisesInTheWest": true
+      }
+    },
+    {
+      "id": "proteus-2451545",
+      "input": {
+        "body": "proteus",
+        "epoch": 2451545
+      },
+      "expected": {
+        "longitudeDeg": 3.99633005112855,
+        "latitudeDeg": -27.7245255127496,
+        "hours": 11.7335779965914,
+        "formatted": "11:44:00",
+        "dayNumber": 0,
+        "hourInEarthSeconds": 4040.41106678676,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "proteus-2451636.5",
+      "input": {
+        "body": "proteus",
+        "epoch": 2451636.5
+      },
+      "expected": {
+        "longitudeDeg": 174.575273331398,
+        "latitudeDeg": -27.78285586257,
+        "hours": 0.361648444573436,
+        "formatted": "00:21:41",
+        "dayNumber": 82,
+        "hourInEarthSeconds": 4040.41106678676,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "proteus-2451728",
+      "input": {
+        "body": "proteus",
+        "epoch": 2451728
+      },
+      "expected": {
+        "longitudeDeg": -14.8487278691971,
+        "latitudeDeg": -27.8355551172674,
+        "hours": 12.9899151912798,
+        "formatted": "12:59:23",
+        "dayNumber": 163,
+        "hourInEarthSeconds": 4040.41106678676,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "proteus-2451819.5",
+      "input": {
+        "body": "proteus",
+        "epoch": 2451819.5
+      },
+      "expected": {
+        "longitudeDeg": 155.730932689631,
+        "latitudeDeg": -27.8880894446019,
+        "hours": 1.61793782069128,
+        "formatted": "01:37:04",
+        "dayNumber": 245,
+        "hourInEarthSeconds": 4040.41106678676,
+        "sunRisesInTheWest": false
+      }
+    },
+    {
+      "id": "proteus-2460800.25",
+      "input": {
+        "body": "proteus",
+        "epoch": 2460800.25
+      },
+      "expected": {
+        "longitudeDeg": -139.391255379561,
+        "latitudeDeg": -19.9082289915555,
+        "hours": 21.2927503586374,
+        "formatted": "21:17:33",
+        "dayNumber": 8246,
+        "hourInEarthSeconds": 4040.41106678676,
+        "sunRisesInTheWest": false
+      }
+    }
+  ]
+}

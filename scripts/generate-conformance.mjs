@@ -41,6 +41,7 @@ const labels = await import(`${ROOT}engine/src/labels.ts`);
 const orbitTime = await import(`${ROOT}engine/src/orbit-time.ts`);
 const timeSense = await import(`${ROOT}engine/src/time-sense.ts`);
 const when = await import(`${ROOT}engine/src/when.ts`);
+const solarTime = await import(`${ROOT}engine/src/solar-time.ts`);
 
 /** Epochs chosen to exercise the element drift, the leap table and the model seam. */
 const EPOCHS = [
@@ -406,6 +407,49 @@ domains.propagate = {
       }
     }
 
+    return out;
+  })(),
+};
+
+/**
+ * The time at each body's own Greenwich.
+ *
+ * Gated hard because a sub-solar longitude is four chances to be off by a sign or a quarter
+ * turn, in the ecliptic-to-equatorial rotation, the node's right ascension, the sense of W and
+ * the retrograde flip, and every one of them yields a clock that looks entirely plausible. Two
+ * clients disagreeing here would show different times of day on the same planet at the same
+ * instant, with nothing on either screen to suggest which was lying.
+ *
+ * Epochs are spread across a year so a body is caught at several points in its own day and its
+ * own season rather than at one convenient phase.
+ */
+domains["solar-time"] = {
+  absoluteTolerance: 1e-7,
+  description: "Sub-solar point and the apparent solar clock at the IAU prime meridian.",
+  tolerance: 1e-9,
+  cases: (() => {
+    const out = [];
+    const epochs = [2_451_545, 2_451_636.5, 2_451_728, 2_451_819.5, 2_460_800.25];
+    for (const id of registry.BODY_IDS) {
+      if (id === "sun") continue;
+      for (const jd of epochs) {
+        const epoch = time.jdTdb(jd);
+        const clock = solarTime.solarClock(id, epoch);
+        out.push({
+          id: `${id}-${jd}`,
+          input: { body: id, epoch: jd },
+          expected: {
+            longitudeDeg: round(clock.subSolar.longitudeDeg),
+            latitudeDeg: round(clock.subSolar.latitudeDeg),
+            hours: round(clock.hours),
+            formatted: clock.formatted,
+            dayNumber: clock.dayNumber,
+            hourInEarthSeconds: round(clock.hourInEarthSeconds),
+            sunRisesInTheWest: clock.sunRisesInTheWest,
+          },
+        });
+      }
+    }
     return out;
   })(),
 };

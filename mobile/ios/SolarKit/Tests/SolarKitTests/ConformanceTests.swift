@@ -281,6 +281,20 @@ final class ConformanceTests: XCTestCase {
             XCTFail("no runner for propagate case \"\(c.id)\"")
             return .null
 
+        /// The time at each body's own Greenwich.
+        case "solar-time":
+            let clockBody = BodyId(rawValue: text(input, "body"))!
+            let clock = solarClock(clockBody, at: JdTdb(number(input, "epoch")))
+            return .object([
+                "longitudeDeg": .number(clock.subSolar.longitudeDeg),
+                "latitudeDeg": .number(clock.subSolar.latitudeDeg),
+                "hours": .number(clock.hours),
+                "formatted": .string(clock.formatted),
+                "dayNumber": .number(Double(clock.dayNumber)),
+                "hourInEarthSeconds": .number(clock.hourInEarthSeconds),
+                "sunRisesInTheWest": .bool(clock.sunRisesInTheWest),
+            ])
+
         /// Going to a date, and what the tables can honestly say there.
         case "when":
             if c.id.hasPrefix("stamp") {

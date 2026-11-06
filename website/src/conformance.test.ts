@@ -41,6 +41,7 @@ import { totalAngularMomentum, advance } from "@solar/engine/nbody";
 import { SECONDS_PER_JULIAN_YEAR } from "@solar/engine/units";
 import type { Vec3 } from "@solar/engine/vec";
 import { markIntervalFor, orbitTimeMarks } from "@solar/engine/orbit-time";
+import { solarClock } from "@solar/engine/solar-time";
 import { timeBadge, timeBadgeShort, timeHeadline, timeSense } from "@solar/engine/time-sense";
 import {
   ephemerisStandingAt, epochFromUnixTimestamp, unixSecondsFromEpoch,
@@ -249,6 +250,20 @@ function compute(domain: string, testCase: Case): unknown {
       }
 
       throw new Error(`unhandled propagate case ${testCase.id}`);
+    }
+
+    /** The time at each body's own Greenwich. */
+    case "solar-time": {
+      const clock = solarClock(input.body as BodyId, jdTdb(input.epoch));
+      return {
+        longitudeDeg: clock.subSolar.longitudeDeg,
+        latitudeDeg: clock.subSolar.latitudeDeg,
+        hours: clock.hours,
+        formatted: clock.formatted,
+        dayNumber: clock.dayNumber,
+        hourInEarthSeconds: clock.hourInEarthSeconds,
+        sunRisesInTheWest: clock.sunRisesInTheWest,
+      };
     }
 
     /** Going to a date, and what the tables can honestly say there. */

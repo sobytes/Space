@@ -5,6 +5,7 @@ import {
   ephemerisStandingAt, epochFromIsoUtc, epochFromUnixTimestamp, unixSecondsFromEpoch,
 } from "@solar/engine/when";
 import { markIntervalFor } from "@solar/engine/orbit-time";
+import { solarClock } from "@solar/engine/solar-time";
 import { formatDuration, timeHeadline, timeSense } from "@solar/engine/time-sense";
 import { BODY_CONTRACTS, BODY_IDS, satelliteSystemRadiusM, type BodyId } from "@solar/engine/bodies/registry";
 import { obliquityToOrbitDeg, rotationPeriodDays } from "@solar/engine/rotation";
@@ -186,6 +187,9 @@ function BodyPanel({ epoch }: { epoch: JdTdb }) {
   const contract = BODY_CONTRACTS[focus];
   // Pure in the body id, so it costs one memo rather than a recompute per published epoch.
   const time = useMemo(() => timeSense(focus), [focus]);
+  // Recomputed on the viewport's 10 Hz publish rather than per frame, like every other
+  // figure on this panel. A sundial does not need sixty readings a second.
+  const clock = useMemo(() => solarClock(focus, epoch), [focus, epoch]);
 
   const derived = useMemo(() => {
     const self = heliocentricPositionOf(focus, epoch);
@@ -269,6 +273,19 @@ function BodyPanel({ epoch }: { epoch: JdTdb }) {
             simulatedSeconds={Math.abs(derived.rotationDays) * 86_400}
             rate={rate}
           />
+        </dd>
+        {/*
+          The body's own Greenwich clock. There is no universal civil time and there cannot
+          be one, but the construction behind GMT generalises: the IAU fixes a prime meridian
+          for every body here, so the Sun's hour angle from it is a real local time.
+        */}
+        <dt className="text-zinc-500">Clock there</dt>
+        <dd className="text-zinc-200">
+          <span className="font-mono">{clock.formatted}</span>
+          <span className="mt-0.5 block text-[11px] leading-snug text-zinc-500">
+            sundial time at its prime meridian, day {clock.dayNumber.toLocaleString()} since
+            J2000. One of its hours is {(clock.hourInEarthSeconds / 3600).toFixed(3)} of ours.
+          </span>
         </dd>
         <dt className="text-zinc-500">A day here</dt>
         <dd className="text-zinc-200">
