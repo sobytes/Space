@@ -1,0 +1,210 @@
+{
+  "domain": "orbit-time",
+  "absoluteTolerance": 0.000001,
+  "description": "Mark interval and mark epochs along an orbit.",
+  "tolerance": 1e-12,
+  "cases": [
+    {
+      "id": "interval-phobos",
+      "input": {
+        "periodDays": 0.31891
+      },
+      "expected": {
+        "seconds": 3600,
+        "label": "1 hour",
+        "marksPerOrbit": 7.65384
+      }
+    },
+    {
+      "id": "interval-io",
+      "input": {
+        "periodDays": 1.769138
+      },
+      "expected": {
+        "seconds": 10800,
+        "label": "3 hours",
+        "marksPerOrbit": 14.153104
+      }
+    },
+    {
+      "id": "interval-triton",
+      "input": {
+        "periodDays": 5.876854
+      },
+      "expected": {
+        "seconds": 21600,
+        "label": "6 hours",
+        "marksPerOrbit": 23.507416
+      }
+    },
+    {
+      "id": "interval-moon",
+      "input": {
+        "periodDays": 27.321582
+      },
+      "expected": {
+        "seconds": 172800,
+        "label": "2 days",
+        "marksPerOrbit": 13.660791
+      }
+    },
+    {
+      "id": "interval-mercury",
+      "input": {
+        "periodDays": 87.9691
+      },
+      "expected": {
+        "seconds": 432000,
+        "label": "5 days",
+        "marksPerOrbit": 17.59382
+      }
+    },
+    {
+      "id": "interval-iapetus",
+      "input": {
+        "periodDays": 79.3215
+      },
+      "expected": {
+        "seconds": 432000,
+        "label": "5 days",
+        "marksPerOrbit": 15.8643
+      }
+    },
+    {
+      "id": "interval-earth",
+      "input": {
+        "periodDays": 365.256
+      },
+      "expected": {
+        "seconds": 2592000,
+        "label": "30 days",
+        "marksPerOrbit": 12.1752
+      }
+    },
+    {
+      "id": "interval-mars",
+      "input": {
+        "periodDays": 686.98
+      },
+      "expected": {
+        "seconds": 2592000,
+        "label": "30 days",
+        "marksPerOrbit": 22.8993333333333
+      }
+    },
+    {
+      "id": "interval-jupiter",
+      "input": {
+        "periodDays": 4332.589
+      },
+      "expected": {
+        "seconds": 31557600,
+        "label": "1 year",
+        "marksPerOrbit": 11.8619822039699
+      }
+    },
+    {
+      "id": "interval-neptune",
+      "input": {
+        "periodDays": 60190
+      },
+      "expected": {
+        "seconds": 315576000,
+        "label": "10 years",
+        "marksPerOrbit": 16.4791238877481
+      }
+    },
+    {
+      "id": "interval-absurd",
+      "input": {
+        "periodDays": 400000
+      },
+      "expected": {
+        "seconds": 1577880000,
+        "label": "50 years",
+        "marksPerOrbit": 21.9028062970568
+      }
+    },
+    {
+      "id": "marks-moon",
+      "input": {
+        "periodDays": 27.321582,
+        "now": 2451545
+      },
+      "expected": {
+        "count": 14,
+        "secondsFromNow": [
+          0,
+          172800,
+          345600,
+          518400,
+          691200,
+          864000,
+          1036800,
+          1209600,
+          1382400,
+          1555200,
+          1728000,
+          1900800,
+          2073600,
+          2246400
+        ],
+        "lastEpoch": 2451571
+      }
+    },
+    {
+      "id": "marks-earth",
+      "input": {
+        "periodDays": 365.256,
+        "now": 2451545
+      },
+      "expected": {
+        "count": 13,
+        "secondsFromNow": [
+          0,
+          2592000,
+          5184000,
+          7776000,
+          10368000,
+          12960000,
+          15552000,
+          18144000,
+          20736000,
+          23328000,
+          25920000,
+          28512000,
+          31104000
+        ],
+        "lastEpoch": 2451905
+      }
+    },
+    {
+      "id": "marks-io",
+      "input": {
+        "periodDays": 1.769138,
+        "now": 2451545
+      },
+      "expected": {
+        "count": 15,
+        "secondsFromNow": [
+          0,
+          10800,
+          21600,
+          32400,
+          43200,
+          54000,
+          64800,
+          75600,
+          86400,
+          97200,
+          108000,
+          118800,
+          129600,
+          140400,
+          151200
+        ],
+        "lastEpoch": 2451546.75
+      }
+    }
+  ]
+}

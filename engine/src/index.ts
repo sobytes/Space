@@ -24,6 +24,7 @@ export * from "./nbody-tracker";
 export * from "./secular";
 export * from "./habitability";
 export * from "./labels";
+export * from "./orbit-time";
 export * from "./surface-views";
 export * from "./data/surface-imagery";
 export * from "./data/habitability-environment";

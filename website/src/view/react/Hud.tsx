@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { markIntervalFor } from "@solar/engine/orbit-time";
 import { BODY_CONTRACTS, BODY_IDS, satelliteSystemRadiusM, type BodyId } from "@solar/engine/bodies/registry";
 import { obliquityToOrbitDeg, rotationPeriodDays } from "@solar/engine/rotation";
 import { ACCURACY } from "@solar/engine/data/ephemeris-accuracy";
@@ -229,6 +230,18 @@ function BodyPanel({ epoch }: { epoch: JdTdb }) {
               simulatedSeconds={derived.orbitDays * 86_400}
               rate={rate}
             />
+          ) : null}
+          {/*
+            What the dots on this body's orbit are worth.
+            Without this they are decoration: a mark only means something once you can say how
+            far apart in time two of them are. The marks are drawn whenever that orbit is on
+            screen, which for a moon is while its planet is in view.
+          */}
+          {derived.orbitDays !== null ? (
+            <span className="mt-0.5 block text-[11px] leading-snug text-zinc-500">
+              orbit marks every {markIntervalFor(derived.orbitDays).label}, crowding where it
+              moves fastest
+            </span>
           ) : null}
         </dd>
         <dt className="text-zinc-500">From Earth</dt>

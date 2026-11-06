@@ -58,6 +58,12 @@ final class SolarScene {
     private(set) var focus: BodyId = .embary
     private var nodes: [BodyId: SCNNode] = [:]
     private var orbitNodes: [BodyId: SCNNode] = [:]
+    /// Time marks along each drawn orbit, one node per orbit holding up to 24 points.
+    private var markNodes: [BodyId: SCNNode] = [:]
+    /// Which period each drawn orbit has, so the marks can be replaced without re-deciding it.
+    private var orbitPeriodDays: [BodyId: Double] = [:]
+    /// The epoch the marks were last placed for. Written every frame, read on the refresh.
+    private var markEpoch = JdTdb(Epochs.j2000)
     /// How far each drawn orbit's closest point misses its true perihelion, as a fraction.
     /// See `debug()`; this is the check that the orbits are drawn about the Sun.
     private var orbitPerihelionError: [BodyId: Double] = [:]
@@ -487,6 +493,9 @@ final class SolarScene {
     private func rebuildOrbits() {
         for (_, node) in orbitNodes { node.removeFromParentNode() }
         orbitNodes.removeAll()
+        for (_, node) in markNodes { node.removeFromParentNode() }
+        markNodes.removeAll()
+        orbitPeriodDays.removeAll()
         orbitPerihelionError.removeAll()
 
         orbitAnchors.removeAll()
@@ -509,6 +518,89 @@ final class SolarScene {
                 heliocentricRoot.addChildNode(path)
             }
             orbitNodes[id] = path
+
+            // The marks share the orbit's parent, so they inherit the same origin handling:
+            // the heliocentric root for a planet, the per-planet anchor for a moon.
+            let marks = SCNNode()
+            path.parent?.addChildNode(marks)
+            marks.position = path.position
+            markNodes[id] = marks
+            orbitPeriodDays[id] = periodDaysFor(contract)
+        }
+        refreshTimeMarks(force: true)
+    }
+
+    /// The period the marks are spaced against. Nil for anything that does not orbit.
+    private func periodDaysFor(_ contract: BodyContract) -> Double {
+        switch contract.ephemeris {
+        case .fixedAtBarycentre:
+            return 0
+        case let .standishElements(planet):
+            guard let elements = shortSpan.elements[planet] else { return 0 }
+            return 360 / elements.ratePerCentury.meanLongitudeDeg * Constants.daysPerJulianCentury
+        case let .meanElementsAboutParent(source):
+            return source.periodDays
+        }
+    }
+
+    /**
+     Where each drawn orbit's body will be, at equal intervals of time counted from now.
+
+     An orbit line says where a body goes and nothing about when. These are sampled from the
+     same ephemeris that drew the line, at the epochs `orbitTimeMarks` returns, so a mark is
+     the body's actual future position at a stated time rather than a decoration. Equal spacing
+     in time means unequal spacing along the path, and the crowding near periapsis is Kepler's
+     second law measured rather than illustrated.
+
+     Rebuilt at about ten hertz rather than every frame. Each refresh is one ephemeris
+     evaluation per mark, which is a hundred or so across a satellite system, and at sixty
+     hertz that is six thousand Kepler solves a second to move dots by less than a pixel. The
+     same ten hertz the clock publishes its date on, and for the same reason.
+     */
+    private func refreshTimeMarks(force: Bool = false) {
+        guard force || frameCounter % 6 == 0 else { return }
+
+        for (id, node) in markNodes {
+            guard let periodDays = orbitPeriodDays[id], periodDays > 0 else { continue }
+            let contract = bodyContracts[id]!
+            let parent: BodyId? = {
+                if case .meanElementsAboutParent = contract.ephemeris { return contract.parent }
+                return nil
+            }()
+
+            let timed = orbitTimeMarks(periodDays: periodDays, now: markEpoch)
+            var vertices: [SCNVector3] = []
+            vertices.reserveCapacity(timed.marks.count)
+            for mark in timed.marks {
+                let position = heliocentricPositionOf(id, at: mark.epoch)
+                let relative = parent.map { position - heliocentricPositionOf($0, at: mark.epoch) }
+                    ?? position
+                vertices.append(inHeliocentricUnits(relative))
+            }
+            guard vertices.count > 0 else { continue }
+
+            let source = SCNGeometrySource(vertices: vertices)
+            let element = SCNGeometryElement(
+                indices: Array(Int32(0) ..< Int32(vertices.count)), primitiveType: .point
+            )
+            /**
+             Screen-space sizing, so a mark stays legible whether the orbit is an astronomical
+             unit or four hundred thousand kilometres across. Without this the points are sized
+             in scene units and vanish the moment the scale changes under them.
+             */
+            element.pointSize = 8
+            // Matched to the website's 4.5 px points, measured against a screenshot of each.
+            element.minimumPointScreenSpaceRadius = 3.5
+            element.maximumPointScreenSpaceRadius = 4.5
+
+            let geometry = SCNGeometry(sources: [source], elements: [element])
+            let material = SCNMaterial()
+            material.lightingModel = .constant
+            material.diffuse.contents = Self.colour(contract.appearance.tintHex)
+            material.writesToDepthBuffer = false
+            geometry.materials = [material]
+
+            node.geometry = geometry
         }
     }
 
@@ -835,9 +927,13 @@ final class SolarScene {
 
         // Moon orbits carry vertices relative to their planet, so each one rides its planet.
         for (moon, parent) in orbitAnchors {
-            guard let node = orbitNodes[moon], let at = positions[parent] else { continue }
-            node.position = renderPosition(at)
+            guard let at = positions[parent] else { continue }
+            orbitNodes[moon]?.position = renderPosition(at)
+            markNodes[moon]?.position = renderPosition(at)
         }
+
+        markEpoch = epoch
+        refreshTimeMarks()
 
         for id in bodyIds {
             guard let node = nodes[id], let position = positions[id] else { continue }
@@ -1102,6 +1198,12 @@ final class SolarScene {
             "heliocentricRoot": [Double(root.x), Double(root.y), Double(root.z)],
             "sunToRootUnits": gap,
             "orbitNodes": orbitNodes.count,
+            // Time marks, so a probe can tell "the marks are not drawn" from "the marks are
+            // drawn and I cannot see them", which a screenshot cannot.
+            "markNodes": markNodes.count,
+            "markVertices": markNodes.values.reduce(0) { total, node in
+                total + (node.geometry?.sources.first { $0.semantic == .vertex }?.vectorCount ?? 0)
+            },
             "maxPerihelionError": orbitPerihelionError.values.max() ?? 0,
             "saturnRingOuterInPlanetRadii": ringExtentInPlanetRadii(.saturn) ?? 0,
             /**

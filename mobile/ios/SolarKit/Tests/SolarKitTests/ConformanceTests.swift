@@ -281,6 +281,26 @@ final class ConformanceTests: XCTestCase {
             XCTFail("no runner for propagate case \"\(c.id)\"")
             return .null
 
+        /// What a mark on an orbit is worth, and where the marks go.
+        case "orbit-time":
+            if c.id.hasPrefix("interval") {
+                let interval = markIntervalFor(periodDays: number(input, "periodDays"))
+                return .object([
+                    "seconds": .number(interval.seconds),
+                    "label": .string(interval.label),
+                    "marksPerOrbit": .number(interval.marksPerOrbit),
+                ])
+            }
+            let timed = orbitTimeMarks(
+                periodDays: number(input, "periodDays"),
+                now: JdTdb(number(input, "now"))
+            )
+            return .object([
+                "count": .number(Double(timed.marks.count)),
+                "secondsFromNow": .array(timed.marks.map { .number($0.secondsFromNow) }),
+                "lastEpoch": .number(timed.marks[timed.marks.count - 1].epoch.value),
+            ])
+
         /// Where a body's name is drawn, and where an off-screen pointer aims.
         case "labels":
             guard case let .array(rawInputs)? = input?["inputs"] else { return .null }

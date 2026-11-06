@@ -40,6 +40,7 @@ import {
 import { totalAngularMomentum, advance } from "@solar/engine/nbody";
 import { SECONDS_PER_JULIAN_YEAR } from "@solar/engine/units";
 import type { Vec3 } from "@solar/engine/vec";
+import { markIntervalFor, orbitTimeMarks } from "@solar/engine/orbit-time";
 import { placeLabels, type LabelInput } from "@solar/engine/labels";
 import { levelFor, metresPerPixel, tileExtent, visibleCapAngle } from "./view/core/tiles";
 
@@ -244,6 +245,24 @@ function compute(domain: string, testCase: Case): unknown {
       }
 
       throw new Error(`unhandled propagate case ${testCase.id}`);
+    }
+
+    /** What a mark on an orbit is worth, and where the marks go. */
+    case "orbit-time": {
+      if (testCase.id.startsWith("interval")) {
+        const interval = markIntervalFor(input.periodDays);
+        return {
+          seconds: interval.seconds,
+          label: interval.label,
+          marksPerOrbit: interval.marksPerOrbit,
+        };
+      }
+      const { marks } = orbitTimeMarks(input.periodDays, jdTdb(input.now));
+      return {
+        count: marks.length,
+        secondsFromNow: marks.map((m) => m.secondsFromNow),
+        lastEpoch: marks[marks.length - 1].epoch,
+      };
     }
 
     /** Where a body's name is drawn, and where an off-screen pointer aims. */

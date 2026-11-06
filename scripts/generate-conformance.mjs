@@ -38,6 +38,7 @@ const secular = await import(`${ROOT}engine/src/secular.ts`);
 const propagate = await import(`${ROOT}engine/src/propagate.ts`);
 const tiles = await import(`${ROOT}website/src/view/core/tiles.ts`);
 const labels = await import(`${ROOT}engine/src/labels.ts`);
+const orbitTime = await import(`${ROOT}engine/src/orbit-time.ts`);
 
 /** Epochs chosen to exercise the element drift, the leap table and the model seam. */
 const EPOCHS = [
@@ -403,6 +404,60 @@ domains.propagate = {
       }
     }
 
+    return out;
+  })(),
+};
+
+/**
+ * What a mark on an orbit is worth, which both clients must agree on to the second.
+ *
+ * Gated rather than trusted because the rule is a ladder with a budget, and two
+ * implementations of "the finest round interval that still fits" can disagree at every rung
+ * boundary without either looking wrong. A mark meaning two days on one client and one day on
+ * the other is a quiet lie about the thing the marks exist to show.
+ *
+ * Periods span Phobos at 7.65 hours to Neptune at 165 years, so the cases cover every rung the
+ * ladder can reach for a real body.
+ */
+domains["orbit-time"] = {
+  absoluteTolerance: 1e-6,
+  description: "Mark interval and mark epochs along an orbit.",
+  tolerance: 1e-12,
+  cases: (() => {
+    const out = [];
+    const periods = [
+      ["phobos", 0.31891], ["io", 1.769138], ["triton", 5.876854],
+      ["moon", 27.321582], ["mercury", 87.9691], ["iapetus", 79.3215],
+      ["earth", 365.256], ["mars", 686.98], ["jupiter", 4332.589],
+      ["neptune", 60190], ["absurd", 400000],
+    ];
+    for (const [id, periodDays] of periods) {
+      const interval = orbitTime.markIntervalFor(periodDays);
+      out.push({
+        id: `interval-${id}`,
+        input: { periodDays },
+        expected: {
+          seconds: round(interval.seconds),
+          label: interval.label,
+          marksPerOrbit: round(interval.marksPerOrbit),
+        },
+      });
+    }
+    // The epochs themselves, because the interval being right does not make the placement
+    // right: an off-by-one in the loop bound puts the last mark on top of the first.
+    for (const [id, periodDays] of [["moon", 27.321582], ["earth", 365.256], ["io", 1.769138]]) {
+      const now = time.jdTdb(time.J2000_JD);
+      const { marks } = orbitTime.orbitTimeMarks(periodDays, now);
+      out.push({
+        id: `marks-${id}`,
+        input: { periodDays, now },
+        expected: {
+          count: marks.length,
+          secondsFromNow: marks.map((m) => round(m.secondsFromNow)),
+          lastEpoch: round(marks[marks.length - 1].epoch),
+        },
+      });
+    }
     return out;
   })(),
 };

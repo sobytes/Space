@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useMemo, useRef } from "react";
 import {
-  BufferAttribute, BufferGeometry, Group, LineBasicMaterial, LineLoop,
+  BufferAttribute, BufferGeometry, Group, LineBasicMaterial, LineLoop, Points, PointsMaterial,
 } from "three";
 import { BODY_CONTRACTS, BODY_IDS, type BodyId } from "@solar/engine/bodies/registry";
 import { heliocentricPositionOf } from "@solar/engine/bodies/position";
 import { SHORT_SPAN, type PlanetId } from "@solar/engine/data/planets";
+import { MAX_MARKS, orbitTimeMarks } from "@solar/engine/orbit-time";
 import { J2000_JD, jdTdb } from "@solar/engine/time";
 import type { ViewportSnapshot } from "../core/viewport";
 import { useViewport, useViewportValue } from "./ViewportContext";
@@ -75,7 +76,72 @@ function buildOrbit(id: BodyId, periodDays: number, parent: BodyId | null, colou
 interface Orbit {
   readonly id: BodyId;
   readonly parent: BodyId | null;
+  readonly periodDays: number;
   readonly line: LineLoop;
+}
+
+/**
+ * Where the body will be, at equal intervals of time, counted from now.
+ *
+ * An orbit line says where a body goes and nothing about when, which is half of what there is
+ * to watch. These are sampled from the same ephemeris that drew the line and positioned at the
+ * epochs `orbitTimeMarks` returns, so a mark is not a decoration: it is the body's actual
+ * future position at a stated time. Because they are equally spaced in time they are unequally
+ * spaced along the path, and the crowding near periapsis is Kepler's second law measured
+ * rather than illustrated.
+ *
+ * A `Points` object rather than meshes. There are at most 24 of them per orbit and they are
+ * rewritten whenever the clock publishes, so one buffer and one draw call is the right shape;
+ * two dozen sprites would be two dozen objects to keep in step with the group they hang in.
+ */
+function TimeMarks({ orbit, colour }: { orbit: Orbit; colour: string }) {
+  const epoch = useViewportValue(selectEpoch);
+
+  const points = useMemo(() => {
+    const geometry = new BufferGeometry();
+    geometry.setAttribute("position", new BufferAttribute(new Float32Array(MAX_MARKS * 3), 3));
+    const material = new PointsMaterial({
+      color: colour,
+      // Screen-space pixels, so a mark stays legible whether the orbit is an astronomical
+      // unit or four hundred thousand kilometres across.
+      size: 4.5,
+      sizeAttenuation: false,
+      transparent: true,
+      opacity: 0.9,
+      depthWrite: false,
+    });
+    const object = new Points(geometry, material);
+    object.frustumCulled = false;
+    return object;
+  }, [colour]);
+
+  useEffect(() => () => {
+    points.geometry.dispose();
+    (points.material as PointsMaterial).dispose();
+  }, [points]);
+
+  useEffect(() => {
+    const { marks } = orbitTimeMarks(orbit.periodDays, jdTdb(epoch));
+    const attribute = points.geometry.getAttribute("position") as BufferAttribute;
+    const array = attribute.array as Float32Array;
+
+    for (let i = 0; i < marks.length; i++) {
+      const at = marks[i].epoch;
+      const p = heliocentricPositionOf(orbit.id, at);
+      const origin = orbit.parent ? heliocentricPositionOf(orbit.parent, at) : null;
+      array[i * 3] = origin ? p.x - origin.x : p.x;
+      array[i * 3 + 1] = origin ? p.y - origin.y : p.y;
+      array[i * 3 + 2] = origin ? p.z - origin.z : p.z;
+    }
+
+    // Drawing only what was written. The buffer is allocated for the worst case and a stale
+    // tail would leave marks from a previous body sitting at the origin.
+    points.geometry.setDrawRange(0, marks.length);
+    attribute.needsUpdate = true;
+    points.geometry.computeBoundingSphere();
+  }, [points, orbit, epoch]);
+
+  return <primitive object={points} />;
 }
 
 /**
@@ -107,11 +173,17 @@ function buildAll(): Orbit[] {
     const { ephemeris, appearance } = contract;
     if (ephemeris.kind === "standish-elements") {
       const period = orbitalPeriodDays(ephemeris.planet);
-      built.push({ id, parent: null, line: buildOrbit(id, period, null, appearance.tint) });
+      built.push({
+        id,
+        parent: null,
+        periodDays: period,
+        line: buildOrbit(id, period, null, appearance.tint),
+      });
     } else if (ephemeris.kind === "mean-elements-about-parent" && contract.parent) {
       built.push({
         id,
         parent: contract.parent,
+        periodDays: ephemeris.periodDays,
         line: buildOrbit(id, ephemeris.periodDays, contract.parent, appearance.tint),
       });
     }
@@ -132,11 +204,13 @@ function MoonOrbit({ orbit }: { orbit: Orbit }) {
   return (
     <group ref={group}>
       <primitive object={orbit.line} material-opacity={0.5} />
+      <TimeMarks orbit={orbit} colour={BODY_CONTRACTS[orbit.id].appearance.tint} />
     </group>
   );
 }
 
 const selectFocus = (s: ViewportSnapshot) => s.focus;
+const selectEpoch = (s: ViewportSnapshot) => s.epoch;
 
 /**
  * Built once for the lifetime of the page, not once per component.
@@ -168,10 +242,13 @@ export function OrbitPaths() {
     <>
       {orbits
         .filter((o) => o.parent === null && orbitIsVisible(o, focus))
-        .map(({ id, line }) => (
-          // r3f's piercing props set the material declaratively, so nothing mutates an object
-          // a hook owns.
-          <primitive key={id} object={line} material-opacity={id === focus ? 0.95 : 0.4} />
+        .map((orbit) => (
+          <Fragment key={orbit.id}>
+            {/* r3f's piercing props set the material declaratively, so nothing mutates an
+                object a hook owns. */}
+            <primitive object={orbit.line} material-opacity={orbit.id === focus ? 0.95 : 0.4} />
+            <TimeMarks orbit={orbit} colour={BODY_CONTRACTS[orbit.id].appearance.tint} />
+          </Fragment>
         ))}
     </>
   );

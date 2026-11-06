@@ -228,6 +228,34 @@
       }
     },
     {
+      "id": "orbit-time-marks",
+      "title": "Time marks along an orbit, so a path says when and not only where",
+      "why": "Asked for directly: an orbit view with no concept of time in it. Marks at equal intervals of time counted from now, sampled from the same ephemeris that drew the line, so a mark is the body's real future position at a stated time. Equal in time means unequal along the path, which makes Kepler's second law something you can see rather than be told. The interval choice is shared and gated by the orbit-time conformance domain, since a mark meaning two days on one client and one day on the other is a quiet lie.",
+      "web": {
+        "status": "shipped",
+        "paths": [
+          "engine/src/orbit-time.ts",
+          "website/src/view/react/OrbitPaths.tsx"
+        ]
+      },
+      "ios": {
+        "status": "shipped",
+        "paths": [
+          "mobile/ios/SolarKit/Sources/SolarKit/OrbitTime.swift",
+          "mobile/ios/App/Sources/SolarScene.swift"
+        ]
+      },
+      "android": {
+        "status": "planned"
+      },
+      "tvos": {
+        "status": "planned"
+      },
+      "androidtv": {
+        "status": "planned"
+      }
+    },
+    {
       "id": "textures",
       "title": "Real NASA and USGS surface imagery",
       "why": "A flat tint is a placeholder. The imagery is data too.",

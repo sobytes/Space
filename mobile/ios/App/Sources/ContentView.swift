@@ -411,7 +411,8 @@ private struct BodyPanel: View {
              */
             Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 4) {
                 row("From the Sun", distance(fromSun),
-                    simulated: orbitDays.map { $0 * Constants.secondsPerDay }, label: "one orbit")
+                    simulated: orbitDays.map { $0 * Constants.secondsPerDay }, label: "one orbit",
+                    marksForPeriodDays: orbitDays)
                 row("Equatorial radius", "\(Int(contract.equatorialRadiusM / 1_000).formatted()) km")
                 row("Rotation", rotationText,
                     simulated: abs(contract.siderealRotationDays) * Constants.secondsPerDay,
@@ -577,7 +578,8 @@ private struct BodyPanel: View {
 
     @ViewBuilder
     private func row(
-        _ name: String, _ value: String, simulated: Double? = nil, label: String = ""
+        _ name: String, _ value: String, simulated: Double? = nil, label: String = "",
+        marksForPeriodDays: Double? = nil
     ) -> some View {
         GridRow {
             Text(name).font(.caption).foregroundStyle(.secondary)
@@ -585,6 +587,18 @@ private struct BodyPanel: View {
                 Text(value).font(.caption.monospacedDigit())
                 if let simulated {
                     Text(onScreen(simulated, label))
+                        .font(.system(size: 10))
+                        .foregroundStyle(.secondary)
+                }
+                /**
+                 What the dots on this body's orbit are worth.
+
+                 Without this they are decoration: a mark only means something once you can
+                 say how far apart in time two of them are.
+                 */
+                if let marksForPeriodDays {
+                    let interval = markIntervalFor(periodDays: marksForPeriodDays)
+                    Text("orbit marks every \(interval.label), crowding where it moves fastest")
                         .font(.system(size: 10))
                         .foregroundStyle(.secondary)
                 }
