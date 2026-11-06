@@ -25,16 +25,16 @@ describe("the Sun's declination, against seasons nobody has to take on trust", (
    * two swap; get the node wrong and both land near zero.
    */
   it("puts the Sun over the Tropic of Cancer at the June solstice", () => {
-    expect(subSolarPoint("embary", at("2025-06-21T03:00:00Z")).latitudeDeg).toBeCloseTo(23.44, 1);
+    expect(subSolarPoint("embary", at("2025-06-21T03:00:00Z"))!.latitudeDeg).toBeCloseTo(23.44, 1);
   });
 
   it("puts it over the Tropic of Capricorn at the December solstice", () => {
-    expect(subSolarPoint("embary", at("2025-12-21T15:00:00Z")).latitudeDeg).toBeCloseTo(-23.44, 1);
+    expect(subSolarPoint("embary", at("2025-12-21T15:00:00Z"))!.latitudeDeg).toBeCloseTo(-23.44, 1);
   });
 
   it("puts it on the equator at the equinoxes", () => {
-    expect(subSolarPoint("embary", at("2025-03-20T09:00:00Z")).latitudeDeg).toBeCloseTo(0, 0);
-    expect(subSolarPoint("embary", at("2025-09-22T18:00:00Z")).latitudeDeg).toBeCloseTo(0, 0);
+    expect(subSolarPoint("embary", at("2025-03-20T09:00:00Z"))!.latitudeDeg).toBeCloseTo(0, 0);
+    expect(subSolarPoint("embary", at("2025-09-22T18:00:00Z"))!.latitudeDeg).toBeCloseTo(0, 0);
   });
 
   it("never sends the Sun to a latitude the body's tilt cannot reach", () => {
@@ -43,7 +43,7 @@ describe("the Sun's declination, against seasons nobody has to take on trust", (
       let extreme = 0;
       // A year of samples, so a body with any tilt reaches its own tropic.
       for (let i = 0; i < 400; i++) {
-        const point = subSolarPoint(id, jdTdb(2_451_545 + i * 0.97 * 365));
+        const point = subSolarPoint(id, jdTdb(2_451_545 + i * 0.97 * 365))!;
         extreme = Math.max(extreme, Math.abs(point.latitudeDeg));
       }
       expect(extreme, `${id} sub-solar latitude`).toBeLessThanOrEqual(90.001);
@@ -58,13 +58,13 @@ describe("the clock at the prime meridian", () => {
     let epoch = jdTdb(2_451_545);
     for (let i = 0; i < 2000; i++) {
       const next = jdTdb(2_451_545 + i * 0.0005);
-      if (Math.abs(subSolarPoint("embary", next).longitudeDeg) < 0.1) {
+      if (Math.abs(subSolarPoint("embary", next)!.longitudeDeg) < 0.1) {
         epoch = next;
         break;
       }
     }
-    expect(Math.abs(subSolarPoint("embary", epoch).longitudeDeg)).toBeLessThan(0.2);
-    expect(solarClock("embary", epoch).hours).toBeCloseTo(12, 1);
+    expect(Math.abs(subSolarPoint("embary", epoch)!.longitudeDeg)).toBeLessThan(0.2);
+    expect(solarClock("embary", epoch)!.hours).toBeCloseTo(12, 1);
   });
 
   /**
@@ -81,10 +81,10 @@ describe("the clock at the prime meridian", () => {
     const start = jdTdb(2_451_545);
     const steps = 48;
 
-    let previous = solarClock(id, start).hours;
+    let previous = solarClock(id, start)!.hours;
     let wraps = 0;
     for (let i = 1; i <= steps; i++) {
-      const hours = solarClock(id, jdTdb(start + (sol * i) / steps)).hours;
+      const hours = solarClock(id, jdTdb(start + (sol * i) / steps))!.hours;
       // Forwards, allowing exactly one wrap through midnight over the whole sol.
       if (hours < previous) {
         wraps += 1;
@@ -118,7 +118,7 @@ describe("the clock at the prime meridian", () => {
       const fraction = i / samples;
       readings.push({
         at: fraction,
-        hours: solarClock("mercury", jdTdb(start + sol * fraction)).hours,
+        hours: solarClock("mercury", jdTdb(start + sol * fraction))!.hours,
       });
     }
 
@@ -164,8 +164,8 @@ describe("the clock at the prime meridian", () => {
   it("returns to the same reading one sol later", () => {
     for (const id of ["embary", "mars", "venus", "jupiter", "moon"] as const) {
       const sol = timeSense(id).dayInEarthDays;
-      const a = solarClock(id, jdTdb(2_451_545));
-      const b = solarClock(id, jdTdb(2_451_545 + sol));
+      const a = solarClock(id, jdTdb(2_451_545))!;
+      const b = solarClock(id, jdTdb(2_451_545 + sol))!;
       // Within a couple of minutes of the body's own clock: a mean sol against a true one.
       expect(Math.abs(b.hours - a.hours), id).toBeLessThan(0.25);
     }
@@ -173,8 +173,8 @@ describe("the clock at the prime meridian", () => {
 
   it("counts a new solar day each time the clock wraps", () => {
     const sol = timeSense("mars").dayInEarthDays;
-    const a = solarClock("mars", jdTdb(2_451_545));
-    const b = solarClock("mars", jdTdb(2_451_545 + sol));
+    const a = solarClock("mars", jdTdb(2_451_545))!;
+    const b = solarClock("mars", jdTdb(2_451_545 + sol))!;
     expect(b.dayNumber - a.dayNumber).toBe(1);
   });
 });
@@ -205,7 +205,7 @@ describe("Earth's sundial against the clock", () => {
 
   const offsetMinutes = (iso: string) => {
     const utcHours = (Date.parse(iso) % 86_400_000) / 3_600_000;
-    let diff = solarClock("embary", at(iso)).hours - utcHours;
+    let diff = solarClock("embary", at(iso))!.hours - utcHours;
     if (diff > 12) diff -= 24;
     if (diff < -12) diff += 24;
     return diff * 60;
@@ -244,7 +244,7 @@ describe("Earth's sundial against the clock", () => {
     for (let day = 0; day < 365; day++) {
       const epoch = jdTdb(2_461_041.5 + day);
       const utcHours = ((epoch - Math.floor(epoch) + 0.5) % 1) * 24;
-      let diff = solarClock("embary", epoch).hours - utcHours;
+      let diff = solarClock("embary", epoch)!.hours - utcHours;
       if (diff > 12) diff -= 24;
       if (diff < -12) diff += 24;
       expect(Math.abs(diff * 60), `day ${day}`).toBeLessThan(19);
@@ -254,24 +254,24 @@ describe("Earth's sundial against the clock", () => {
 
 describe("what a body's hour is worth", () => {
   it("gives Earth an hour of exactly 3600 seconds, by construction", () => {
-    expect(solarClock("embary", jdTdb(2_451_545)).hourInEarthSeconds).toBeCloseTo(3600, 0);
+    expect(solarClock("embary", jdTdb(2_451_545))!.hourInEarthSeconds).toBeCloseTo(3600, 0);
   });
 
   /** A Mars sol is 24h 39m 35s, so a Mars hour divided out is 2.75 per cent longer. */
   it("gives Mars an hour 2.7 per cent longer than ours", () => {
-    const hour = solarClock("mars", jdTdb(2_451_545)).hourInEarthSeconds;
+    const hour = solarClock("mars", jdTdb(2_451_545))!.hourInEarthSeconds;
     expect(hour / 3600).toBeCloseTo(1.0275, 3);
   });
 
   it("knows which bodies see the Sun rise in the west", () => {
-    expect(solarClock("venus", jdTdb(2_451_545)).sunRisesInTheWest).toBe(true);
-    expect(solarClock("embary", jdTdb(2_451_545)).sunRisesInTheWest).toBe(false);
+    expect(solarClock("venus", jdTdb(2_451_545))!.sunRisesInTheWest).toBe(true);
+    expect(solarClock("embary", jdTdb(2_451_545))!.sunRisesInTheWest).toBe(false);
   });
 
   it("formats a readable clock for every body", () => {
     for (const id of BODY_IDS) {
       if (id === "sun") continue;
-      expect(solarClock(id, jdTdb(2_451_545)).formatted, id).toMatch(/^\d\d:\d\d:\d\d$/);
+      expect(solarClock(id, jdTdb(2_451_545))!.formatted, id).toMatch(/^\d\d:\d\d:\d\d$/);
     }
   });
 });

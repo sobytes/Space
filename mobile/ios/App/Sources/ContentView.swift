@@ -210,6 +210,7 @@ struct ContentView: View {
                             .font(.system(size: 11))
                     }
                     .tint(focus == .sun ? .orange : .secondary)
+                    .accessibilityIdentifier("tool.systemView")
 
                     Button { showingDemonstrations = true } label: {
                         Image(systemName: "function")
@@ -418,7 +419,8 @@ private struct BodyPanel: View {
                 row("Rotation", rotationText,
                     simulated: abs(contract.siderealRotationDays) * Constants.secondsPerDay,
                     label: "one turn")
-                row("Clock there", sunClock.formatted, note: clockNote)
+                // Nil on the Sun, which has no sub-solar point and so no clock.
+                if let sunClock { row("Clock there", sunClock.formatted, note: clockNote(sunClock)) }
                 row("A day here", dayText)
                 row("A year here", yearText)
                 if let monthText { row("A month here", monthText) }
@@ -590,9 +592,9 @@ private struct BodyPanel: View {
      from it is a real local time. Read from the throttled epoch like everything else on this
      panel; a sundial does not need sixty readings a second.
      */
-    private var sunClock: SolarClock { solarClock(id, at: clock.displayEpoch) }
+    private var sunClock: SolarClock? { solarClock(id, at: clock.displayEpoch) }
 
-    private var clockNote: String {
+    private func clockNote(_ sunClock: SolarClock) -> String {
         let ratio = sunClock.hourInEarthSeconds / 3600
         return "sundial time at its prime meridian, day \(sunClock.dayNumber.formatted()) since "
             + String(format: "J2000. One of its hours is %.3f of ours.", ratio)

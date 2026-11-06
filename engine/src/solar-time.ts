@@ -118,17 +118,27 @@ export interface SubSolarPoint {
   readonly latitudeDeg: number;
 }
 
-/** Where on the body the Sun is directly overhead, right now. */
-export function subSolarPoint(body: BodyId, epoch: JdTdb): SubSolarPoint {
-  // The Sun sits at the heliocentric origin, so the direction to it is just minus the body's
-  // own position. Light time is ignored deliberately: it shifts the sub-solar point by under
-  // an arcsecond of longitude, which is a fraction of a second on any clock here.
-  const toSun = normalise(eclipticToEquatorial(
-    (() => {
-      const p = heliocentricPositionOf(body, epoch);
-      return { x: -p.x, y: -p.y, z: -p.z };
-    })(),
-  ));
+/**
+ * Where on the body the Sun is directly overhead, right now, or null if the question is empty.
+ *
+ * Null for the Sun itself, and that is the honest answer rather than a guard clause. The Sun
+ * sits at the heliocentric origin, so the direction from it to itself is zero over zero: there
+ * is no sub-solar point on the Sun because there is no sunrise there to measure from.
+ *
+ * Returning NaN instead, which is what the arithmetic does unaided, crashed the phone. Swift
+ * traps on converting a non-finite Double to Int, so a NaN clock killed the app the moment
+ * anyone pressed Solar system, while the website carried the same NaN to the screen and merely
+ * printed nonsense. The conformance missed it because the generator skipped the Sun.
+ */
+export function subSolarPoint(body: BodyId, epoch: JdTdb): SubSolarPoint | null {
+  const position = heliocentricPositionOf(body, epoch);
+  if (Math.hypot(position.x, position.y, position.z) === 0) return null;
+
+  // Light time is ignored deliberately: it shifts the sub-solar point by under an arcsecond of
+  // longitude, which is a fraction of a second on any clock here.
+  const toSun = normalise(eclipticToEquatorial({
+    x: -position.x, y: -position.y, z: -position.z,
+  }));
 
   const frame = bodyFrame(body, epoch);
   return {
@@ -165,8 +175,9 @@ export interface SolarClock {
  * the west, so the sub-solar longitude moves the other way, and without the flip the clock
  * would run backwards. A clock that counts down is not a clock.
  */
-export function solarClock(body: BodyId, epoch: JdTdb): SolarClock {
+export function solarClock(body: BodyId, epoch: JdTdb): SolarClock | null {
   const subSolar = subSolarPoint(body, epoch);
+  if (subSolar === null) return null;
   const retrograde = BODY_CONTRACTS[body].rotation.rotationRateDegPerDay < 0;
   const sense = retrograde ? -1 : 1;
 
@@ -186,6 +197,10 @@ export function solarClock(body: BodyId, epoch: JdTdb): SolarClock {
    */
   const elapsedSols = (epoch - J2000_JD) / solLengthDays;
   const dayNumber = Math.round(elapsedSols - hours / 24);
+
+  // Belt and braces after the crash above. Nothing should reach here non-finite now, and a
+  // wrong number on a panel is still better than a trap on a phone.
+  if (!Number.isFinite(hours) || !Number.isFinite(dayNumber)) return null;
 
   const whole = Math.floor(hours);
   const minutes = Math.floor((hours - whole) * 60);

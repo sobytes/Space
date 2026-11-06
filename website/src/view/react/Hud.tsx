@@ -279,14 +279,19 @@ function BodyPanel({ epoch }: { epoch: JdTdb }) {
           be one, but the construction behind GMT generalises: the IAU fixes a prime meridian
           for every body here, so the Sun's hour angle from it is a real local time.
         */}
-        <dt className="text-zinc-500">Clock there</dt>
-        <dd className="text-zinc-200">
-          <span className="font-mono">{clock.formatted}</span>
-          <span className="mt-0.5 block text-[11px] leading-snug text-zinc-500">
-            sundial time at its prime meridian, day {clock.dayNumber.toLocaleString()} since
-            J2000. One of its hours is {(clock.hourInEarthSeconds / 3600).toFixed(3)} of ours.
-          </span>
-        </dd>
+        {/* Null on the Sun, which has no sub-solar point and so no clock. */}
+        {clock !== null ? (
+          <>
+            <dt className="text-zinc-500">Clock there</dt>
+            <dd className="text-zinc-200">
+              <span className="font-mono">{clock.formatted}</span>
+              <span className="mt-0.5 block text-[11px] leading-snug text-zinc-500">
+                sundial time at its prime meridian, day {clock.dayNumber.toLocaleString()} since
+                J2000. One of its hours is {(clock.hourInEarthSeconds / 3600).toFixed(3)} of ours.
+              </span>
+            </dd>
+          </>
+        ) : null}
         <dt className="text-zinc-500">A day here</dt>
         <dd className="text-zinc-200">
           {formatDuration(time.dayInEarthDays)}

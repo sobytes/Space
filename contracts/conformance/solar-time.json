@@ -5,6 +5,46 @@
   "tolerance": 1e-9,
   "cases": [
     {
+      "id": "sun-2451545",
+      "input": {
+        "body": "sun",
+        "epoch": 2451545
+      },
+      "expected": null
+    },
+    {
+      "id": "sun-2451636.5",
+      "input": {
+        "body": "sun",
+        "epoch": 2451636.5
+      },
+      "expected": null
+    },
+    {
+      "id": "sun-2451728",
+      "input": {
+        "body": "sun",
+        "epoch": 2451728
+      },
+      "expected": null
+    },
+    {
+      "id": "sun-2451819.5",
+      "input": {
+        "body": "sun",
+        "epoch": 2451819.5
+      },
+      "expected": null
+    },
+    {
+      "id": "sun-2460800.25",
+      "input": {
+        "body": "sun",
+        "epoch": 2460800.25
+      },
+      "expected": null
+    },
+    {
       "id": "mercury-2451545",
       "input": {
         "body": "mercury",

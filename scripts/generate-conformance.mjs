@@ -430,11 +430,21 @@ domains["solar-time"] = {
   cases: (() => {
     const out = [];
     const epochs = [2_451_545, 2_451_636.5, 2_451_728, 2_451_819.5, 2_460_800.25];
+    /**
+     * The Sun is included on purpose, and skipping it is what let a crash through.
+     *
+     * There is no sub-solar point on the Sun, so the clock is null there. Generating cases for
+     * every body except the awkward one meant the awkward one was the only untested path, and
+     * it was the one that trapped on the phone. The expectation here is the null.
+     */
     for (const id of registry.BODY_IDS) {
-      if (id === "sun") continue;
       for (const jd of epochs) {
         const epoch = time.jdTdb(jd);
         const clock = solarTime.solarClock(id, epoch);
+        if (clock === null) {
+          out.push({ id: `${id}-${jd}`, input: { body: id, epoch: jd }, expected: null });
+          continue;
+        }
         out.push({
           id: `${id}-${jd}`,
           input: { body: id, epoch: jd },

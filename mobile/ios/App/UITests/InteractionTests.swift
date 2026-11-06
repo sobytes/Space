@@ -137,6 +137,33 @@ final class InteractionTests: XCTestCase {
     }
 
     /**
+     Solar system does not kill the app.
+
+     Reported as "i click solar system and it crashes", and it did. Focusing the Sun computed
+     a solar clock for it, and there is no sub-solar point on the Sun: the direction from it to
+     itself is zero over zero, so the clock came out NaN and Swift trapped converting that to
+     an Int. The website printed nonsense instead of dying, and the conformance generator had
+     skipped the Sun, so nothing anywhere caught it.
+
+     Every other gate here watches a control do something. This one only watches the app stay
+     alive through the single most-used button in it, which no other test did.
+     */
+    func testSystemViewDoesNotCrash() {
+        let systemView = app.buttons["tool.systemView"]
+        XCTAssertTrue(systemView.waitForExistence(timeout: 20), "the tool rail never appeared")
+        systemView.tap()
+
+        let title = app.staticTexts["panel.title"]
+        XCTAssertTrue(
+            settles(timeout: 10) { title.exists && title.label == "The Sun" },
+            "tapped Solar system and the panel reads \(title.label)"
+        )
+        // Still responding afterwards, not merely not yet reported dead.
+        XCTAssertEqual(app.state, .runningForeground, "the app is not in the foreground")
+        XCTAssertTrue(app.buttons["tool.systemView"].isHittable, "the app stopped responding")
+    }
+
+    /**
      Tapping a planet in the top picker focuses it.
 
      The other reported interaction failure, and the same cause. Focus is observable from the

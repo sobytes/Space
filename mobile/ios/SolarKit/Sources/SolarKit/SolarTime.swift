@@ -77,11 +77,23 @@ public struct SubSolarPoint: Sendable {
     public let latitudeDeg: Double
 }
 
-/// Where on the body the Sun is directly overhead, right now.
-public func subSolarPoint(_ body: BodyId, at epoch: JdTdb) -> SubSolarPoint {
-    // The Sun sits at the heliocentric origin, so the direction to it is minus the body's own
-    // position. Light time is ignored: it shifts the sub-solar longitude by under an arcsecond.
+/**
+ Where on the body the Sun is directly overhead, right now, or nil if the question is empty.
+
+ Nil for the Sun itself, and that is the honest answer rather than a guard clause. The Sun sits
+ at the heliocentric origin, so the direction from it to itself is zero over zero: there is no
+ sub-solar point on the Sun because there is no sunrise there to measure from.
+
+ Returning NaN instead, which is what the arithmetic does unaided, crashed this app. Swift traps
+ on converting a non-finite Double to Int, so the clock's `Int(hours)` killed it the moment
+ anyone pressed Solar system. The website carried the same NaN to the screen and only printed
+ nonsense, and the conformance missed it entirely because the generator skipped the Sun.
+ */
+public func subSolarPoint(_ body: BodyId, at epoch: JdTdb) -> SubSolarPoint? {
     let p = heliocentricPositionOf(body, at: epoch)
+    guard (p.x * p.x + p.y * p.y + p.z * p.z).squareRoot() != 0 else { return nil }
+
+    // Light time is ignored: it shifts the sub-solar longitude by under an arcsecond.
     let toSun = normalise(eclipticToEquatorial(Vec3(-p.x, -p.y, -p.z)))
     let frame = bodyFrame(body, epoch)
 
@@ -117,8 +129,8 @@ public struct SolarClock: Sendable {
  west, so the sub-solar longitude moves the other way, and without the flip the clock would run
  backwards. A clock that counts down is not a clock.
  */
-public func solarClock(_ body: BodyId, at epoch: JdTdb) -> SolarClock {
-    let subSolar = subSolarPoint(body, at: epoch)
+public func solarClock(_ body: BodyId, at epoch: JdTdb) -> SolarClock? {
+    guard let subSolar = subSolarPoint(body, at: epoch) else { return nil }
     let retrograde = bodyContracts[body]!.rotation.rotationRateDegPerDay < 0
     let sense: Double = retrograde ? -1 : 1
 
@@ -133,8 +145,19 @@ public func solarClock(_ body: BodyId, at epoch: JdTdb) -> SolarClock {
     // elapsed Earth days, which disagrees with the clock by a whole day whenever the two
     // fractional parts straddle midnight, which is exactly when someone would notice.
     let elapsedSols = (epoch.value - Epochs.j2000) / solLengthDays
-    let dayNumber = Int((elapsedSols - hours / 24).rounded())
+    let sols = (elapsedSols - hours / 24).rounded()
 
+    /**
+     Checked before every conversion to Int, because in Swift that is a trap and not a value.
+
+     This is the line that crashed the app. A NaN clock reached `Int(...)` and took the process
+     down, which is a far worse failure than any wrong number could be, so nothing non-finite
+     is converted here even though the guard above should already have made it impossible.
+     `Int.max` is also checked: a date far enough out would overflow before it ever went NaN.
+     */
+    guard hours.isFinite, sols.isFinite, abs(sols) < 9e15 else { return nil }
+
+    let dayNumber = Int(sols)
     let whole = Int(hours.rounded(.down))
     let minutes = Int(((hours - Double(whole)) * 60).rounded(.down))
     let seconds = Int((((hours - Double(whole)) * 60 - Double(minutes)) * 60).rounded(.down))

@@ -284,7 +284,10 @@ final class ConformanceTests: XCTestCase {
         /// The time at each body's own Greenwich.
         case "solar-time":
             let clockBody = BodyId(rawValue: text(input, "body"))!
-            let clock = solarClock(clockBody, at: JdTdb(number(input, "epoch")))
+            // Null for the Sun, which has no sub-solar point and therefore no clock.
+            guard let clock = solarClock(clockBody, at: JdTdb(number(input, "epoch"))) else {
+                return .null
+            }
             return .object([
                 "longitudeDeg": .number(clock.subSolar.longitudeDeg),
                 "latitudeDeg": .number(clock.subSolar.latitudeDeg),

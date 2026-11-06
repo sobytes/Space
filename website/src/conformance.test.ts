@@ -255,6 +255,8 @@ function compute(domain: string, testCase: Case): unknown {
     /** The time at each body's own Greenwich. */
     case "solar-time": {
       const clock = solarClock(input.body as BodyId, jdTdb(input.epoch));
+      // Null for the Sun, which has no sub-solar point and therefore no clock.
+      if (clock === null) return null;
       return {
         longitudeDeg: clock.subSolar.longitudeDeg,
         latitudeDeg: clock.subSolar.latitudeDeg,
