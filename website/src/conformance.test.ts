@@ -51,6 +51,7 @@ import {
   ephemerisStandingAt, epochFromUnixTimestamp, unixSecondsFromEpoch,
 } from "@solar/engine/when";
 import { placeLabels, type LabelInput } from "@solar/engine/labels";
+import { RATE_PRESETS } from "@solar/engine/rates";
 import { levelFor, metresPerPixel, tileExtent, visibleCapAngle } from "./view/core/tiles";
 
 /**
@@ -80,6 +81,7 @@ const CONFORMANCE_TILE_MANIFEST = {
 };
 
 const SUITE = fileURLToPath(new URL("../../contracts/conformance/", import.meta.url));
+const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 
 interface Case {
   readonly id: string;
@@ -382,6 +384,12 @@ function compute(domain: string, testCase: Case): unknown {
       };
     }
 
+    /** Every preset the clock offers, in order, with the words used for it. */
+    case "clock-rates": {
+      const preset = RATE_PRESETS[input.index as number];
+      return { label: preset.label, secondsPerSecond: preset.secondsPerSecond };
+    }
+
     /** Where a body's name is drawn, and where an off-screen pointer aims. */
     case "labels":
       return placeLabels(input.inputs as LabelInput[], {
@@ -392,6 +400,7 @@ function compute(domain: string, testCase: Case): unknown {
         x: placement.x,
         y: placement.y,
         clamped: placement.clamped,
+        detail: placement.detail,
         bearingRadians: placement.bearingRadians,
       }));
 
@@ -518,6 +527,27 @@ describe("the conformance suite is intact", () => {
     expect(counted, "index.totalCases is stale; regenerate the suite").toBe(index.totalCases);
     // A suite that shrank to nothing would pass every assertion it owns.
     expect(index.totalCases).toBeGreaterThan(400);
+  });
+
+  /**
+   * The prose that quotes the size of this suite has to quote the current size.
+   *
+   * Both numbers had gone stale: the README advertised 538 cases across 17 domains and the
+   * skill file 487 across 11, while the suite held 779 across 21. Nobody had lied; the counts
+   * were written once and the suite kept growing. A figure in a readme that nothing checks is
+   * a figure that is eventually wrong, and this one is the first claim a visitor reads.
+   */
+  it("keeps the counts quoted in the documentation current", () => {
+    const quoted = [
+      join(ROOT, "README.md"),
+      join(ROOT, "contracts", "conformance", "SKILL.md"),
+    ];
+    for (const file of quoted) {
+      const prose = readFileSync(file, "utf8").replace(/\s+/g, " ");
+      expect(prose, `${file} quotes a stale case count`).toContain(
+        `${index.totalCases} cases across ${index.domains.length}`,
+      );
+    }
   });
 
   it("gives every domain a description, a tolerance and unique case ids", () => {

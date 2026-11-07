@@ -1,4 +1,5 @@
 import XCTest
+import SolarKit
 
 /**
  Can a person actually operate the controls?
@@ -77,10 +78,13 @@ final class InteractionTests: XCTestCase {
         let label = app.staticTexts["time.rateLabel"]
         XCTAssertEqual(label.label, "real time", "expected the clock to open at real time")
 
+        // Read from the engine's own list, not typed here. Written as "10 years/s" once, and
+        // adding a faster preset turned this red without anything in the app being wrong.
+        let fastest = ratePresets.last!.label
         slider.adjust(toNormalizedSliderPosition: 1.0)
         XCTAssertTrue(
-            settles(timeout: 5) { label.label.hasPrefix("10 years/s") },
-            "dragged the rate to maximum and the label still reads \(label.label)"
+            settles(timeout: 5) { label.label == fastest },
+            "dragged the rate to maximum and the label reads \(label.label), not \(fastest)"
         )
 
         /**

@@ -13,6 +13,9 @@
  */
 
 import { jdTdb, tdbFromUtc, jdUtcFromEpochMs, type JdTdb } from "@solar/engine/time";
+import { clampToSupported } from "@solar/engine/when";
+
+export { RATE_PRESETS, type ClockRate } from "@solar/engine/rates";
 
 export type ClockCommand =
   | { readonly kind: "pause" }
@@ -59,22 +62,16 @@ export function reduceClock(state: ClockState, command: ClockCommand): ClockStat
   }
 }
 
-/** A paused tick returns the state unchanged, so a paused frame is a genuine no-op. */
+/**
+ * A paused tick returns the state unchanged, so a paused frame is a genuine no-op.
+ *
+ * Clamped to the fitted range of the element tables. At a hundred years a second that edge is
+ * about ten real seconds away, and beyond it the planets are drawn by extrapolating a polynomial
+ * outside its fit: still smooth, still confident, and not where anything was. A clock that
+ * halts at 3000 AD is telling the truth about what this simulation knows.
+ */
 export function tickClock(state: ClockState, realDeltaSeconds: number): ClockState {
   if (!state.running || realDeltaSeconds === 0) return state;
   const days = (realDeltaSeconds * state.secondsPerSecond) / SECONDS_PER_DAY;
-  return { ...state, epoch: jdTdb(state.epoch + days) };
+  return { ...state, epoch: clampToSupported(jdTdb(state.epoch + days)) };
 }
-
-/** Preset rates the UI offers, from real time up to a century a second. */
-export const RATE_PRESETS: readonly { readonly label: string; readonly secondsPerSecond: number }[] = [
-  { label: "real time", secondsPerSecond: 1 },
-  { label: "1 min/s", secondsPerSecond: 60 },
-  { label: "1 hour/s", secondsPerSecond: 3_600 },
-  { label: "1 day/s", secondsPerSecond: 86_400 },
-  { label: "1 week/s", secondsPerSecond: 604_800 },
-  { label: "1 month/s", secondsPerSecond: 2_629_800 },
-  { label: "1 year/s", secondsPerSecond: 31_557_600 },
-  { label: "10 years/s", secondsPerSecond: 315_576_000 },
-  { label: "1 century/s", secondsPerSecond: 3_155_760_000 },
-];

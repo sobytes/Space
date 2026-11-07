@@ -93,14 +93,18 @@ export function LabelLayer({ visible }: { visible: boolean }) {
         const contract = BODY_CONTRACTS[placement.id];
         const isFocus = placement.id === focus;
         /**
-         * Satellites of the focus, except in the system view, where every planet is one.
+         * Whether this label carries a clock is `placeLabels`' decision, not this view's.
          *
-         * The first version of this rule said "the focus and its satellites", which in the
-         * system view means the Sun and all eight planets, so nothing was thinned and the
-         * sprawl stayed exactly as reported. Focusing a planet is the case the full badge is
-         * for: two or three labels, and the Moon's month next to Earth's year.
+         * It was this view's, twice, and both rules were wrong because they were guesses about
+         * crowding made without knowing where anything had landed: first "the focus and its
+         * satellites", which in the system view is the Sun and all eight planets and thinned
+         * nothing, then a rank rule that silenced the comparison it existed for. The module
+         * that places the plates is the only thing that knows whether there is room for a
+         * second line.
          */
-        const localTime = localTimeLabel(placement.id, publishedEpoch, zone);
+        const localTime = placement.detail
+          ? localTimeLabel(placement.id, publishedEpoch, zone)
+          : null;
         // The arrow goes on the side the body is on. Always placing it first put a pointer
         // on the left of a name whose body was off to the right.
         const trailing =
@@ -141,8 +145,14 @@ export function LabelLayer({ visible }: { visible: boolean }) {
 
               On clamped labels too, which was not the first instinct. An edge pointer is
               exactly where the Moon's label usually ends up while framed with Earth, so
-              suppressing it there removed the one comparison most worth having. The clamp
-              keeps labels 44 px inside the viewport, which is room enough for a second line.
+              suppressing it there removed the one comparison most worth having.
+
+              Drawn only where `placeLabels` found room for it. A date is three times the width
+              of a name, and five of them will not fit across the inner solar system at any
+              arrangement; the previous answer was to drop whole labels until they did, which
+              left Mercury, Venus, Earth and Mars unnamed in the system view with edge pointers
+              to off-screen giants as the only labels on the screen. Dropping a line keeps the
+              name, and the name is what says which planet that is.
             */}
             {/*
               The date and time where that body is, now, ticking with the clock.

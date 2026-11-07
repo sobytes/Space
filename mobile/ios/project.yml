@@ -94,6 +94,12 @@ targets:
       - path: App/UITests
     dependencies:
       - target: Solar
+      # So the gates can assert against the engine's own lists rather than against labels
+      # typed into the test. A test that hardcoded "10 years/s" as the top of the rate slider
+      # went red the day a faster preset was added, which is drift in the test rather than in
+      # the app, and the next person to see it has to work out which.
+      - package: SolarKit
+        product: SolarKit
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.sobytes.solar.uitests

@@ -79,3 +79,15 @@ public func ephemerisStandingAt(_ epoch: JdTdb) -> EphemerisStanding {
             + "is not where they were."
     )
 }
+
+/// The furthest out a date may be set while still being answered by a fitted table.
+public let supportedYears = (from: longSpan.validFromYear, to: longSpan.validToYear)
+
+/// Clamp into the fitted range, for a control that should not offer a meaningless answer.
+public func clampToSupported(_ epoch: JdTdb) -> JdTdb {
+    let year = julianYearForModelSelection(epoch)
+    if year >= Double(supportedYears.from) && year <= Double(supportedYears.to) { return epoch }
+    // One Julian year is 365.25 days and J2000 is at year 2000.0, which is all the inverse needs.
+    let target = year < Double(supportedYears.from) ? supportedYears.from : supportedYears.to
+    return JdTdb(2_451_545.0 + (Double(target) - 2_000) * 365.25)
+}

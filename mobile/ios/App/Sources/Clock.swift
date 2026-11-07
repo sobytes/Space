@@ -11,22 +11,17 @@ import SolarKit
  */
 @Observable
 final class Clock {
-    struct Rate: Identifiable, Sendable {
-        let label: String
-        let secondsPerSecond: Double
-        var id: String { label }
-    }
+    typealias Rate = ClockRate
 
-    static let presets: [Rate] = [
-        Rate(label: "real time", secondsPerSecond: 1),
-        Rate(label: "1 min/s", secondsPerSecond: 60),
-        Rate(label: "1 hour/s", secondsPerSecond: 3_600),
-        Rate(label: "1 day/s", secondsPerSecond: 86_400),
-        Rate(label: "1 week/s", secondsPerSecond: 604_800),
-        Rate(label: "1 month/s", secondsPerSecond: 2_629_800),
-        Rate(label: "1 year/s", secondsPerSecond: 31_557_600),
-        Rate(label: "10 years/s", secondsPerSecond: 315_576_000),
-    ]
+    /**
+     From SolarKit, not from a list typed here.
+
+     The two clients had drifted: the website offered a century a second and this one stopped
+     at ten years, which is why "can the time go to 100 years" was a question rather than a
+     setting. A list in each client is a divergence nothing can see, so it now lives in the
+     engine with the conformance suite watching it.
+     */
+    static let presets: [Rate] = ratePresets
 
     /**
      The simulation instant, written sixty times a second and deliberately not observed.
@@ -71,7 +66,16 @@ final class Clock {
     func advance(realSeconds: Double) {
         guard running else { return }
         let days = realSeconds * rate.secondsPerSecond * direction / Constants.secondsPerDay
-        epoch = JdTdb(epoch.value + days)
+        /**
+         Stop at the edge of the fitted tables rather than run past them.
+
+         At a hundred years a second the long-span table's range is about ten real seconds
+         away, and beyond it the planets are drawn by extrapolating a polynomial outside its
+         fit: still smooth, still confident, and not where anything was. A clock that halts at
+         3000 AD is telling the truth about what this simulation knows, and the accuracy panel
+         says which table is answering and what its errors are.
+         */
+        epoch = clampToSupported(JdTdb(epoch.value + days))
 
         sincePublish += realSeconds
         if sincePublish >= Self.publishInterval {

@@ -422,6 +422,14 @@ final class ConformanceTests: XCTestCase {
             ])
 
         /// Where a body's name is drawn, and where an off-screen pointer aims.
+        /// Every preset the clock offers, in order, with the words used for it.
+        case "clock-rates":
+            let preset = ratePresets[Int(number(input, "index"))]
+            return .object([
+                "label": .string(preset.label),
+                "secondsPerSecond": .number(preset.secondsPerSecond),
+            ])
+
         case "labels":
             guard case let .array(rawInputs)? = input?["inputs"] else { return .null }
             let labelInputs: [LabelInput] = rawInputs.compactMap { entry in
@@ -452,6 +460,7 @@ final class ConformanceTests: XCTestCase {
                         "x": .number(placement.x),
                         "y": .number(placement.y),
                         "clamped": .bool(placement.clamped),
+                        "detail": .bool(placement.detail),
                         "bearingRadians": placement.bearingRadians.map { JSON.number($0) } ?? .null,
                     ])
                 }

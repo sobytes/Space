@@ -108,6 +108,80 @@ console.log(
 );
 if (!orrery) failures += 1;
 
+/**
+ * In the system view, is every planet you can see actually named, and do any two names overlap?
+ *
+ * Measured off the drawn plates rather than off the placement module's own arithmetic, which
+ * is the only way this question can be answered. `placeLabels` reserves a box per label from
+ * an estimate of how wide the text will render; a reservation that is too small packs two
+ * labels close enough to collide on screen while every number in the module agrees with
+ * itself. Printing the module's output proves nothing about either failure.
+ *
+ * Both failures were real and were reported from the phone as one sentence: "the labels are
+ * nowhere near the planets, look at Mars". In the system view the four inner planets land
+ * inside a hundred points of the Sun, the thinning rule was a circle round each anchor, and
+ * the Sun's label suppressed Mercury, Venus, Earth and Mars outright. What was left were edge
+ * pointers aimed at bodies that were not on screen.
+ */
+const plates = await page.evaluate(() => {
+  const drawn = Array.from(document.querySelectorAll("div"))
+    .filter((d) => d.className.includes("-translate-x-1/2") && d.className.includes("rounded-lg"))
+    .map((d) => {
+      const r = d.getBoundingClientRect();
+      return { text: d.textContent ?? "", x: r.x, y: r.y, w: r.width, h: r.height };
+    });
+  /**
+   * What the viewport says is on screen, which is what the labels are answerable to.
+   *
+   * No threshold on apparent radius, unlike the iOS probe. The browser draws bodies at true
+   * scale with a marker dot under them, so in the system view Mercury's disc is 0.0014 pixels
+   * across and the dot is what a viewer sees and clicks. A radius threshold ported straight
+   * from the phone, where a floor keeps the drawn disc at three pixels, filtered out every
+   * body and left this check passing over an empty list.
+   */
+  const onScreen = (window.__solar?.screen ?? [])
+    .filter((p) => !p.behindCamera && Math.abs(p.ndcX) <= 1 && Math.abs(p.ndcY) <= 1)
+    .map((p) => p.id);
+  return { drawn, onScreen };
+});
+
+const names = new Set(plates.drawn.map((p) => p.text));
+// Moons are named only when the focus is their planet; in the system view a moon sits on its
+// planet to within a pixel and a label there names either of them equally.
+const planets = ["sun", "mercury", "venus", "embary", "mars", "jupiter", "saturn", "uranus", "neptune"];
+const display = {
+  sun: "The Sun", mercury: "Mercury", venus: "Venus", embary: "Earth", mars: "Mars",
+  jupiter: "Jupiter", saturn: "Saturn", uranus: "Uranus", neptune: "Neptune",
+};
+const unnamed = plates.onScreen
+  .filter((id) => planets.includes(id))
+  .filter((id) => ![...names].some((text) => text.startsWith(display[id])));
+console.log(
+  `  ${"labels".padEnd(9)} ${plates.drawn.length} drawn over ${plates.onScreen.length} visible bodies  `
+    + `${unnamed.length === 0 ? "ok" : `${unnamed.join(", ")} UNNAMED`}`,
+);
+if (unnamed.length > 0) failures += 1;
+// A check that found nothing to check is not a check. This passed over an empty list once.
+if (plates.onScreen.length === 0) {
+  fail("labels    nothing was on screen to label, so that check proved nothing");
+}
+
+const collisions = [];
+for (let i = 0; i < plates.drawn.length; i += 1) {
+  for (let j = i + 1; j < plates.drawn.length; j += 1) {
+    const a = plates.drawn[i];
+    const b = plates.drawn[j];
+    if (a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h) {
+      collisions.push(`${a.text.slice(0, 12)} / ${b.text.slice(0, 12)}`);
+    }
+  }
+}
+console.log(
+  `  ${"plates".padEnd(9)} ${collisions.length} overlapping pairs  `
+    + `${collisions.length === 0 ? "ok" : collisions.slice(0, 3).join("; ")}`,
+);
+if (collisions.length > 0) failures += 1;
+
 console.log(`  ${"assets".padEnd(9)} ${notFound.size} requests returned 404  ${notFound.size === 0 ? "ok" : "MISSING"}`);
 if (notFound.size > 0) {
   failures += 1;

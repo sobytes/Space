@@ -1356,7 +1356,20 @@ final class SolarScene {
                     "ndcY": input.ndcY,
                     "radiusPx": input.radiusPx,
                     "behind": input.behindCamera ? 1 : 0,
+                    // The rest of the label input, so a probe can replay `placeLabels` on
+                    // exactly what the app fed it. Reconstructing these from the dump was
+                    // guesswork, and guessed inputs produced a different arrangement from the
+                    // one on screen, which is the opposite of what an instrument is for.
+                    "distance": input.distance,
+                    "relevance": input.relevance == .focus
+                        ? 0 : (input.relevance == .satelliteOfFocus ? 1 : 2),
                 ])
+            }),
+            // The names as drawn, so a probe can size a plate the way `placeLabels` did. "The
+            // Sun" is four characters longer than "sun", which at six points a character is a
+            // box drawn in the wrong place.
+            "displayNames": Dictionary(uniqueKeysWithValues: bodyIds.compactMap { id in
+                bodyContracts[id].map { (id.rawValue, $0.displayName) }
             }),
             "markNodes": markNodes.count,
             "markVertices": markNodes.values.reduce(0) { total, node in
@@ -1399,6 +1412,10 @@ final class SolarScene {
                     "x": placement.x,
                     "y": placement.y,
                     "clamped": placement.clamped,
+                    // Whether the second line was drawn. Left out of the first version of this
+                    // dump, and an overlay probe read the missing field as false and reported
+                    // the two ports disagreeing when they agreed to the last digit.
+                    "detail": placement.detail,
                 ]
                 // Omitted rather than filled with a sentinel. An on-screen label has no
                 // bearing, and a "nan" or a 1000 in that field is a value every reader has

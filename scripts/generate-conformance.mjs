@@ -38,6 +38,7 @@ const secular = await import(`${ROOT}engine/src/secular.ts`);
 const propagate = await import(`${ROOT}engine/src/propagate.ts`);
 const tiles = await import(`${ROOT}website/src/view/core/tiles.ts`);
 const labels = await import(`${ROOT}engine/src/labels.ts`);
+const rates = await import(`${ROOT}engine/src/rates.ts`);
 const orbitTime = await import(`${ROOT}engine/src/orbit-time.ts`);
 const timeSense = await import(`${ROOT}engine/src/time-sense.ts`);
 const when = await import(`${ROOT}engine/src/when.ts`);
@@ -681,6 +682,26 @@ domains["orbit-time"] = {
 };
 
 /**
+ * The rates the clock may be set to.
+ *
+ * A list in each client is a divergence nothing can see, and this one had already happened:
+ * the website offered a century a second and the phone stopped at ten years, so the same
+ * control on the same simulation had different ceilings and the rate a viewer asked for
+ * already existed on the other client. Gated as cases because the labels are part of it;
+ * two clients calling the same number different things is the same defect wearing a hat.
+ */
+domains["clock-rates"] = {
+  absoluteTolerance: 0,
+  description: "Every preset the clock offers, in order, with the words used for it.",
+  tolerance: 0,
+  cases: rates.RATE_PRESETS.map((preset, index) => ({
+    id: `rate-${index}`,
+    input: { index },
+    expected: { label: preset.label, secondsPerSecond: preset.secondsPerSecond },
+  })),
+};
+
+/**
  * Label placement, including the off-screen pointers.
  *
  * Gated because the decisions are judgement calls with numbers in them, and two clients
@@ -727,18 +748,52 @@ domains.labels = {
           { ...base, id: "neptune", ndcX: 9, relevance: "other", distance: 3e9 },
         ],
       },
+      {
+        /**
+         * The default system view on a phone, taken from a real scene dump.
+         *
+         * Four planets inside a hundred points of the Sun and four more off the sides. This
+         * is the case that was reported as "the labels are nowhere near the planets, look at
+         * Mars": a circular keep-out radius around each anchor let the Sun's label suppress
+         * Mercury, Venus, Earth and Mars outright, leaving edge pointers for bodies that
+         * were not on screen as the only labels drawn. Every arrangement decision in the
+         * module shows up in this one case, so a port that disagrees anywhere fails here.
+         */
+        id: "crowded-system-view",
+        inputs: [
+          { ...base, id: "sun", ndcX: 0, ndcY: -0.0, radiusPx: 20.6, relevance: "focus", distance: 1.1e12 },
+          { ...base, id: "mercury", ndcX: -0.0488, ndcY: 0.0275, radiusPx: 3.47, relevance: "satellite-of-focus", distance: 1.2e12 },
+          { ...base, id: "venus", ndcX: 0.149, ndcY: 0.0442, radiusPx: 3.9, relevance: "satellite-of-focus", distance: 1.3e12 },
+          { ...base, id: "embary", ndcX: 0.303, ndcY: 0.0547, radiusPx: 5.29, relevance: "satellite-of-focus", distance: 1.4e12 },
+          { ...base, id: "moon", ndcX: 0.3037, ndcY: 0.0546, radiusPx: 2.76, relevance: "other", distance: 1.4e12 },
+          { ...base, id: "mars", ndcX: -0.226, ndcY: 0.0968, radiusPx: 3.55, relevance: "satellite-of-focus", distance: 1.5e12 },
+          { ...base, id: "jupiter", ndcX: -1.419, ndcY: 0.1712, radiusPx: 13.15, relevance: "satellite-of-focus", distance: 1.9e12 },
+          { ...base, id: "uranus", ndcX: 1.488, ndcY: 0.3987, radiusPx: 5.4, relevance: "satellite-of-focus", distance: 3.2e12 },
+          { ...base, id: "neptune", ndcX: 13.6, ndcY: 0.0901, radiusPx: 5.2, relevance: "satellite-of-focus", distance: 4.6e12 },
+        ],
+      },
+      {
+        // A plate wider than the safe band is centred, not pushed off one side.
+        id: "narrow-viewport",
+        inputs: [{ ...base, id: "neptune", ndcX: 4, relevance: "satellite-of-focus" }],
+        viewport: { viewportWidthPx: 160, viewportHeightPx: 320 },
+      },
     ];
-    return scenarios.map(({ id, inputs }) => ({
-      id,
-      input: { inputs, ...viewport },
-      expected: labels.placeLabels(inputs, viewport).map((p) => ({
-        id: p.id,
-        x: round(p.x),
-        y: round(p.y),
-        clamped: p.clamped,
-        bearingRadians: p.bearingRadians === null ? null : round(p.bearingRadians),
-      })),
-    }));
+    return scenarios.map(({ id, inputs, viewport: override }) => {
+      const frame = override ?? viewport;
+      return {
+        id,
+        input: { inputs, ...frame },
+        expected: labels.placeLabels(inputs, frame).map((p) => ({
+          id: p.id,
+          x: round(p.x),
+          y: round(p.y),
+          clamped: p.clamped,
+          detail: p.detail,
+          bearingRadians: p.bearingRadians === null ? null : round(p.bearingRadians),
+        })),
+      };
+    });
   })(),
 };
 

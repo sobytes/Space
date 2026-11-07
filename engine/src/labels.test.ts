@@ -33,15 +33,27 @@ describe("placing labels", () => {
    * into "it is that way".
    */
   it("clamps an off-screen body to the edge it lies beyond, with a bearing", () => {
+    // The plate width is given here rather than taken from the default, so the arithmetic
+    // below says where the edge should land instead of restating a constant.
     const [label] = placeLabels(
       [input({ id: "moon", ndcX: 4, ndcY: 0, relevance: "satellite-of-focus" })],
-      VIEWPORT,
+      { ...VIEWPORT, detailWidthPx: 124 },
     );
     expect(label.clamped).toBe(true);
-    expect(label.x).toBeGreaterThan(300);
     expect(label.y).toBeCloseTo(400, 0);
     // Due right in screen space, where y runs downwards.
     expect(label.bearingRadians).toBeCloseTo(0, 6);
+    /**
+     * As far right as a plate that size can go, which is not as far as the anchor used to go.
+     *
+     * The anchor was held 44 points from the edge and the plate drawn centred on it, so a
+     * two-line pointer 124 points wide hung 18 points off the screen and its date was sliced
+     * down the middle. Jupiter's pointer in the system view was doing exactly that. The plate
+     * is what has to stay inside, so its right edge lands on the inset and its centre sits
+     * half a plate further in.
+     */
+    expect(label.detail).toBe(true);
+    expect(label.x + 124 / 2).toBeCloseTo(400 - 44, 6);
   });
 
   /**
@@ -172,6 +184,119 @@ describe("placing labels", () => {
       expect(label.x).toBeLessThanOrEqual(400);
       expect(label.y).toBeGreaterThanOrEqual(0);
       expect(label.y).toBeLessThanOrEqual(800);
+    }
+  });
+
+
+  /**
+   * The system view, as reported: "the labels are still nowhere near the planets, look at Mars".
+   *
+   * Four inner planets inside a hundred points of the Sun, with Jupiter and Neptune off
+   * screen. Every label is the same width as a date, and a single circular keep-out radius
+   * around the anchor meant the Sun's label suppressed Mercury, Venus and Earth outright and
+   * took Mars with it on most frames. What was left on screen was three edge pointers aimed
+   * at bodies that were not on it, which is exactly the sentence the report used.
+   *
+   * Everything visible gets named. That is the whole requirement.
+   */
+  it("names every visible planet in a crowded system view", () => {
+    /**
+     * The Sun is the focus in the system view, which makes every planet a satellite of it.
+     * That is what puts the off-screen giants on the screen as edge pointers at all, and it
+     * is why the on-screen tie-break has to exist: without it Jupiter's pointer and Mars's
+     * label are the same rank, and whichever is nearer the camera takes the space.
+     */
+    const place = (id: LabelInput["id"], ndcX: number, ndcY: number, extra?: Partial<LabelInput>) =>
+      input({ id, ndcX, ndcY, radiusPx: 4, relevance: "satellite-of-focus", ...extra });
+    const placed = placeLabels(
+      [
+        place("sun", 0.0, -0.05, { relevance: "focus", radiusPx: 20 }),
+        place("mercury", -0.05, 0.03, { distance: 1e11 }),
+        place("venus", 0.12, 0.01, { distance: 2e11 }),
+        place("embary", 0.3, 0.05, { distance: 3e11 }),
+        place("mars", -0.23, 0.1, { distance: 4e11 }),
+        place("jupiter", -1.42, 0.17, { distance: 8e11 }),
+        place("neptune", 4.0, 0.1, { distance: 4e12 }),
+      ],
+      VIEWPORT,
+    );
+    const ids = placed.map((p) => p.id);
+    for (const visible of ["sun", "mercury", "venus", "embary", "mars"]) {
+      expect(ids).toContain(visible);
+    }
+  });
+
+  /**
+   * A label loses its second line before it loses its place.
+   *
+   * The second line is the body's own date, three times the width of its name, and five of
+   * them will not fit across the inner system at any arrangement. Dropping the line keeps the
+   * name, and a name is what says which planet that is.
+   */
+  it("drops the detail line rather than the label when space runs out", () => {
+    const placed = placeLabels(
+      [
+        input({ id: "sun", ndcX: 0, ndcY: 0, relevance: "focus", radiusPx: 20 }),
+        input({ id: "mercury", ndcX: -0.06, ndcY: 0.02, distance: 1e11 }),
+        input({ id: "venus", ndcX: 0.1, ndcY: 0.0, distance: 2e11 }),
+      ],
+      VIEWPORT,
+    );
+    expect(placed).toHaveLength(3);
+    expect(placed.some((p) => !p.detail)).toBe(true);
+  });
+
+  /**
+   * Plates, not anchors.
+   *
+   * Two labels 70 points apart passed the old separation test and still overlapped, because
+   * the test was a circle around a point and the thing drawn is a box several times wider
+   * than it is tall. Overlapping dates on neighbouring planets read as the time belonging to
+   * the wrong one, which is what was reported about the system view.
+   */
+  it("never overlaps two plates", () => {
+    const placed = placeLabels(
+      [
+        input({ id: "sun", ndcX: 0, ndcY: 0, relevance: "focus", radiusPx: 20 }),
+        input({ id: "mercury", ndcX: -0.04, ndcY: 0.02, distance: 1e11 }),
+        input({ id: "venus", ndcX: 0.1, ndcY: 0.0, distance: 2e11 }),
+        input({ id: "embary", ndcX: 0.26, ndcY: 0.04, distance: 3e11 }),
+        input({ id: "mars", ndcX: -0.2, ndcY: 0.08, distance: 4e11 }),
+      ],
+      VIEWPORT,
+    );
+    for (let i = 0; i < placed.length; i += 1) {
+      for (let j = i + 1; j < placed.length; j += 1) {
+        const a = placed[i];
+        const b = placed[j];
+        const heightA = a.detail ? 36 : 21;
+        const heightB = b.detail ? 36 : 21;
+        const apart = Math.abs(a.x - b.x) * 2 >= 36 || Math.abs(a.y - b.y) * 2 >= heightA + heightB;
+        expect(apart).toBe(true);
+      }
+    }
+  });
+
+  /**
+   * The plate stays on the screen, all of it.
+   *
+   * A clamped pointer used to put its anchor on the inset and let the plate hang off the
+   * side, so the two-line pointer for Jupiter in the system view had its date cut in half by
+   * the left edge of the phone.
+   */
+  it("keeps the whole plate inside the viewport, not just its anchor", () => {
+    const placed = placeLabels(
+      [
+        input({ id: "moon", ndcX: 9, ndcY: 0.4, relevance: "satellite-of-focus" }),
+        input({ id: "jupiter", ndcX: -9, ndcY: -0.4, relevance: "satellite-of-focus", distance: 2e9 }),
+      ],
+      VIEWPORT,
+    );
+    expect(placed).toHaveLength(2);
+    for (const label of placed) {
+      const halfWidth = (label.detail ? 124 : 60) / 2;
+      expect(label.x - halfWidth).toBeGreaterThanOrEqual(0);
+      expect(label.x + halfWidth).toBeLessThanOrEqual(400);
     }
   });
 

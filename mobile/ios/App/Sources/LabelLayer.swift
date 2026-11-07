@@ -91,14 +91,14 @@ struct LabelLayer: View {
              line.
              */
             /**
-             The full two-figure badge only where the comparison is the point: the body in
-             focus and the moons going round it. Everything else gets one figure.
+             Whether this label carries a clock is `placeLabels`' decision, not this view's.
 
-             Both figures on every label made each one several times wider than its name, and
-             in the system view six of them sprawled across each other and across the planets
-             between them, which read as the times belonging to the wrong bodies. The moment
-             the comparison actually matters is Earth against its own Moon, and there are two
-             labels on screen then, not six.
+             It was this view's, twice, and both rules were wrong because they were guesses
+             about crowding made without knowing where anything had landed: first "the focus
+             and its satellites", which in the system view is the Sun and all eight planets,
+             then a rank rule that silenced the comparison it existed for. The module that
+             places the plates is the only thing that knows whether there is room for a
+             second line.
              */
             /**
              The date and time where that body is, now, ticking with the clock.
@@ -111,8 +111,15 @@ struct LabelLayer: View {
 
              Read from the scene's cache rather than computed here, because this view redraws
              every frame and each of these is an ephemeris evaluation.
+
+             Drawn only where `placeLabels` found room for it. A date is three times the width
+             of a name, and five of them will not fit across the inner solar system at any
+             arrangement; the previous answer was to drop whole labels until they did, which
+             left Mercury, Venus, Earth and Mars unnamed in the system view with edge pointers
+             to off-screen giants as the only labels on the screen. Reported as the labels
+             being nowhere near the planets, which is what it looked like.
              */
-            if let local = scene.localTimes[placement.id] {
+            if placement.detail, let local = scene.localTimes[placement.id] {
                 Text(local)
                     .font(.system(size: 9).monospacedDigit())
                     .foregroundStyle(.white.opacity(0.5))

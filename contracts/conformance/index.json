@@ -16,11 +16,12 @@
     "when",
     "time-sense",
     "orbit-time",
+    "clock-rates",
     "labels",
     "sample-cadence",
     "trajectory-interpolation",
     "nbody-evolution",
     "tiles"
   ],
-  "totalCases": 768
+  "totalCases": 779
 }

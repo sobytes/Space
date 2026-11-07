@@ -24,9 +24,10 @@
       "expected": [
         {
           "id": "mars",
-          "x": 229,
-          "y": 409,
+          "x": 247.284271247462,
+          "y": 390.715728752538,
           "clamped": false,
+          "detail": true,
           "bearingRadians": null
         }
       ]
@@ -51,9 +52,10 @@
       "expected": [
         {
           "id": "moon",
-          "x": 358,
+          "x": 290,
           "y": 437,
           "clamped": true,
+          "detail": true,
           "bearingRadians": 0
         }
       ]
@@ -78,9 +80,10 @@
       "expected": [
         {
           "id": "io",
-          "x": 358,
-          "y": 266.330845771144,
+          "x": 290,
+          "y": 340.251243781095,
           "clamped": true,
+          "detail": true,
           "bearingRadians": -0.827090318620135
         }
       ]
@@ -105,9 +108,10 @@
       "expected": [
         {
           "id": "moon",
-          "x": 44,
+          "x": 112,
           "y": 437,
           "clamped": true,
+          "detail": true,
           "bearingRadians": 3.14159265358979
         }
       ]
@@ -150,9 +154,10 @@
       "expected": [
         {
           "id": "io",
-          "x": 210.8,
-          "y": 427.2,
+          "x": 227.485281374239,
+          "y": 410.514718625761,
           "clamped": false,
+          "detail": true,
           "bearingRadians": null
         }
       ]
@@ -186,9 +191,10 @@
       "expected": [
         {
           "id": "jupiter",
-          "x": 210.8,
-          "y": 427.2,
+          "x": 227.485281374239,
+          "y": 410.514718625761,
           "clamped": false,
+          "detail": true,
           "bearingRadians": null
         }
       ]
@@ -231,16 +237,202 @@
       "expected": [
         {
           "id": "embary",
-          "x": 210.8,
-          "y": 427.2,
+          "x": 227.485281374239,
+          "y": 410.514718625761,
           "clamped": false,
+          "detail": true,
           "bearingRadians": null
         },
         {
           "id": "moon",
-          "x": 358,
+          "x": 327,
           "y": 437,
           "clamped": true,
+          "detail": false,
+          "bearingRadians": 0
+        }
+      ]
+    },
+    {
+      "id": "crowded-system-view",
+      "input": {
+        "inputs": [
+          {
+            "ndcX": 0,
+            "ndcY": 0,
+            "radiusPx": 20.6,
+            "distance": 1100000000000,
+            "behindCamera": false,
+            "relevance": "focus",
+            "id": "sun"
+          },
+          {
+            "ndcX": -0.0488,
+            "ndcY": 0.0275,
+            "radiusPx": 3.47,
+            "distance": 1200000000000,
+            "behindCamera": false,
+            "relevance": "satellite-of-focus",
+            "id": "mercury"
+          },
+          {
+            "ndcX": 0.149,
+            "ndcY": 0.0442,
+            "radiusPx": 3.9,
+            "distance": 1300000000000,
+            "behindCamera": false,
+            "relevance": "satellite-of-focus",
+            "id": "venus"
+          },
+          {
+            "ndcX": 0.303,
+            "ndcY": 0.0547,
+            "radiusPx": 5.29,
+            "distance": 1400000000000,
+            "behindCamera": false,
+            "relevance": "satellite-of-focus",
+            "id": "embary"
+          },
+          {
+            "ndcX": 0.3037,
+            "ndcY": 0.0546,
+            "radiusPx": 2.76,
+            "distance": 1400000000000,
+            "behindCamera": false,
+            "relevance": "other",
+            "id": "moon"
+          },
+          {
+            "ndcX": -0.226,
+            "ndcY": 0.0968,
+            "radiusPx": 3.55,
+            "distance": 1500000000000,
+            "behindCamera": false,
+            "relevance": "satellite-of-focus",
+            "id": "mars"
+          },
+          {
+            "ndcX": -1.419,
+            "ndcY": 0.1712,
+            "radiusPx": 13.15,
+            "distance": 1900000000000,
+            "behindCamera": false,
+            "relevance": "satellite-of-focus",
+            "id": "jupiter"
+          },
+          {
+            "ndcX": 1.488,
+            "ndcY": 0.3987,
+            "radiusPx": 5.4,
+            "distance": 3200000000000,
+            "behindCamera": false,
+            "relevance": "satellite-of-focus",
+            "id": "uranus"
+          },
+          {
+            "ndcX": 13.6,
+            "ndcY": 0.0901,
+            "radiusPx": 5.2,
+            "distance": 4600000000000,
+            "behindCamera": false,
+            "relevance": "satellite-of-focus",
+            "id": "neptune"
+          }
+        ],
+        "viewportWidthPx": 402,
+        "viewportHeightPx": 874
+      },
+      "expected": [
+        {
+          "id": "sun",
+          "x": 231.723253941935,
+          "y": 467.723253941935,
+          "clamped": false,
+          "detail": false,
+          "bearingRadians": null
+        },
+        {
+          "id": "mercury",
+          "x": 191.1912,
+          "y": 403.0125,
+          "clamped": false,
+          "detail": false,
+          "bearingRadians": null
+        },
+        {
+          "id": "venus",
+          "x": 249.86357069612,
+          "y": 436.59917069612,
+          "clamped": false,
+          "detail": false,
+          "bearingRadians": null
+        },
+        {
+          "id": "embary",
+          "x": 281.800449121969,
+          "y": 393.198650878031,
+          "clamped": false,
+          "detail": false,
+          "bearingRadians": null
+        },
+        {
+          "id": "mars",
+          "x": 181.741083322705,
+          "y": 368.531316677295,
+          "clamped": false,
+          "detail": true,
+          "bearingRadians": null
+        },
+        {
+          "id": "jupiter",
+          "x": 72,
+          "y": 403.162641338761,
+          "clamped": true,
+          "detail": false,
+          "bearingRadians": -2.88506666227658
+        },
+        {
+          "id": "uranus",
+          "x": 333,
+          "y": 360.104200770342,
+          "clamped": true,
+          "detail": false,
+          "bearingRadians": -0.527485263850844
+        },
+        {
+          "id": "neptune",
+          "x": 330,
+          "y": 435.141934701493,
+          "clamped": true,
+          "detail": false,
+          "bearingRadians": -0.014402611013018
+        }
+      ]
+    },
+    {
+      "id": "narrow-viewport",
+      "input": {
+        "inputs": [
+          {
+            "ndcX": 4,
+            "ndcY": 0,
+            "radiusPx": 4,
+            "distance": 1000000000,
+            "behindCamera": false,
+            "relevance": "satellite-of-focus",
+            "id": "neptune"
+          }
+        ],
+        "viewportWidthPx": 160,
+        "viewportHeightPx": 320
+      },
+      "expected": [
+        {
+          "id": "neptune",
+          "x": 80,
+          "y": 160,
+          "clamped": true,
+          "detail": true,
           "bearingRadians": 0
         }
       ]

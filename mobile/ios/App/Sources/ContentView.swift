@@ -318,6 +318,18 @@ struct ContentView: View {
              from a screenshot whose clock had run months ahead, and no gate here had ever
              looked at the scene at anything but real time. Test hook.
              */
+            /**
+             `-paused` stops the clock at launch, which is what makes an overlay probe mean
+             anything.
+
+             The scene dump is written three seconds before the screenshot is taken, so at any
+             rate above real time the two describe different frames. An overlay built from
+             them showed label boxes sitting away from their text and was read, twice, as the
+             app placing labels wrongly. It was the instrument. Paused, the dump and the
+             picture are the same instant and a disagreement between them is real.
+             */
+            if CommandLine.arguments.contains("-paused") { clock.running = false }
+
             guard let i = CommandLine.arguments.firstIndex(of: "-rate"),
                   i + 1 < CommandLine.arguments.count,
                   let index = Int(CommandLine.arguments[i + 1]) else { return }

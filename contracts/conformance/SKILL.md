@@ -9,7 +9,7 @@ One set of test cases. Every client runs it. A client that disagrees with
 any case is wrong by definition.
 
 `contracts/conformance/` holds the cases as JSON, generated from the
-engine, which is the reference implementation. 487 cases across 11
+engine, which is the reference implementation. 779 cases across 21
 domains, committed, language-neutral.
 
 | Runner | Lives in |

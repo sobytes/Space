@@ -221,8 +221,16 @@ for (const { id: body, label, minimumLit, note, moons, extraArgs, orbitError } o
   execFileSync("xcrun", ["simctl", "io", udid, "screenshot", file], { stdio: "ignore" });
 
   const lit = await litFraction(file);
-  let ok = lit >= minimumLit;
-  if (!ok) failures += 1;
+  /**
+   * Kept apart from the other checks on purpose.
+   *
+   * These used to share one flag, so a body that was plainly lit and had a label missing was
+   * reported as "TOO DARK" next to its own 4.1% coverage and its own passing threshold. A
+   * probe that names the wrong cause sends the next reader to the wrong file.
+   */
+  const litEnough = lit >= minimumLit;
+  let ok = litEnough;
+  if (!litEnough) failures += 1;
 
   if (orbitError !== undefined) {
     /**
@@ -271,6 +279,40 @@ for (const { id: body, label, minimumLit, note, moons, extraArgs, orbitError } o
     if (wrong.length > 0) {
       failures += 1;
       ok = false;
+    }
+
+    if (body === "sun") {
+      /**
+       * Is every planet you can see actually named?
+       *
+       * This is the report, in one number. In the system view the four inner planets land
+       * inside a hundred points of the Sun, and the thinning rule was a circle round each
+       * label's anchor, so the Sun's label suppressed Mercury, Venus, Earth and Mars outright.
+       * What was left on screen was three edge pointers aimed at bodies that were not on it,
+       * which is exactly how it was described: "the labels are nowhere near the planets, look
+       * at Mars".
+       *
+       * Nothing could see it. The bearing check above passed, because the pointers that
+       * remained did point correctly. The coverage check passed, because the planets were
+       * drawn. A label count alone would have passed too, since seven labels were produced.
+       * The question that fails is which bodies they belong to.
+       */
+      const named = new Set(labels.map((l) => l.id));
+      const missing = Object.entries(scene?.bodyScreen ?? {})
+        .filter(([id, b]) => (
+          b.relevance <= 1 && !b.behind && Math.abs(b.ndcX) <= 1 && Math.abs(b.ndcY) <= 1
+          // A disc under a pixel is a speck, and a name for a speck names the space round it.
+          && b.radiusPx >= 1 && !named.has(id)
+        ))
+        .map(([id]) => id);
+      console.log(
+        `${"".padEnd(9)} every visible planet named: `
+          + `${missing.length === 0 ? "ok" : `${missing.join(", ")} UNNAMED`}`,
+      );
+      if (missing.length > 0) {
+        failures += 1;
+        ok = false;
+      }
     }
   }
 
@@ -431,12 +473,16 @@ for (const { id: body, label, minimumLit, note, moons, extraArgs, orbitError } o
   }
   console.log(
     `${name.padEnd(11)} ${lit.toFixed(1).padStart(5)}% lit  (needs ${minimumLit})  `
-      + `${ok ? "ok" : "TOO DARK"}${note ? `  ${note}` : ""}`,
+      + `${litEnough ? "ok" : "TOO DARK"}${note ? `  ${note}` : ""}`
+      + `${ok || !litEnough ? "" : "  (another check above failed)"}`,
   );
 }
 
+// Counted as checks rather than as bodies: this probe grew past framing a while ago, and
+// reporting a missing label as a body that would not frame points the next reader at the
+// camera code.
 if (failures > 0) {
-  console.log(`\n${failures} of ${BODIES.length} bodies do not frame when focused`);
+  console.log(`\n${failures} checks failed across ${BODIES.length} framings`);
   process.exit(1);
 }
-console.log(`\nall ${BODIES.length} bodies frame when focused`);
+console.log(`\nevery check passed across ${BODIES.length} framings`);
