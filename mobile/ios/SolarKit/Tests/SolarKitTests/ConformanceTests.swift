@@ -422,6 +422,10 @@ final class ConformanceTests: XCTestCase {
             ])
 
         /// Where a body's name is drawn, and where an off-screen pointer aims.
+        /// Whether an epoch sits on the edge of the range the element tables were fitted for.
+        case "supported-edge":
+            return .object(["atEdge": .bool(atSupportedEdge(JdTdb(number(input, "epoch"))))])
+
         /// Every preset the clock offers, in order, with the words used for it.
         case "clock-rates":
             let preset = ratePresets[Int(number(input, "index"))]

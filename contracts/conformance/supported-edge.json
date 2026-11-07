@@ -1,0 +1,62 @@
+{
+  "domain": "supported-edge",
+  "absoluteTolerance": 0,
+  "description": "Whether an epoch sits on the edge of the range the element tables were fitted for.",
+  "tolerance": 0,
+  "cases": [
+    {
+      "id": "today",
+      "input": {
+        "epoch": 2461041.5
+      },
+      "expected": {
+        "atEdge": false
+      }
+    },
+    {
+      "id": "inside-short-span",
+      "input": {
+        "epoch": 2396757.5
+      },
+      "expected": {
+        "atEdge": false
+      }
+    },
+    {
+      "id": "just-inside-upper",
+      "input": {
+        "epoch": 2816429.75
+      },
+      "expected": {
+        "atEdge": false
+      }
+    },
+    {
+      "id": "clamped-upper",
+      "input": {
+        "epoch": 2816795
+      },
+      "expected": {
+        "atEdge": true
+      }
+    },
+    {
+      "id": "clamped-lower",
+      "input": {
+        "epoch": 625295
+      },
+      "expected": {
+        "atEdge": true
+      }
+    },
+    {
+      "id": "just-inside-lower",
+      "input": {
+        "epoch": 625660.25
+      },
+      "expected": {
+        "atEdge": false
+      }
+    }
+  ]
+}

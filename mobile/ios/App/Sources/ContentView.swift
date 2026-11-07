@@ -893,6 +893,30 @@ private struct TimeBar: View {
         VStack(spacing: 8) {
             Text(clock.formattedEpoch).font(.system(.caption, design: .monospaced))
 
+            /**
+             Why the clock has stopped, said where it stopped.
+
+             The planetary positions come from element tables fitted for 3000 BC to 3000 AD,
+             and the clock halts at that edge rather than extrapolating a polynomial outside
+             its fit, which would keep producing smooth confident numbers that are not where
+             anything was. At a hundred years a second the edge is about ten seconds away.
+
+             Reported as "it stopped at the year 3000". The accuracy panel has always explained
+             which table is answering, and the panel is the first thing anyone hides to look at
+             the planets, so at the moment the question is asked there was nothing on screen
+             that answered it.
+             */
+            if atSupportedEdge(clock.displayEpoch) {
+                Text("The element tables are fitted to 3000 BC - 3000 AD. The clock stops here "
+                     + "rather than put the planets where they never were.")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.orange)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 24)
+                    .accessibilityIdentifier("time.atEdge")
+            }
+
             HStack(spacing: 8) {
                 Button(clock.running ? "Pause" : "Play") { clock.running.toggle() }
                 Button("Reverse") { clock.direction *= -1 }

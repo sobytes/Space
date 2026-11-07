@@ -16,6 +16,7 @@
     "when",
     "time-sense",
     "orbit-time",
+    "supported-edge",
     "clock-rates",
     "labels",
     "sample-cadence",
@@ -23,5 +24,5 @@
     "nbody-evolution",
     "tiles"
   ],
-  "totalCases": 779
+  "totalCases": 785
 }

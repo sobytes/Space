@@ -690,6 +690,44 @@ domains["orbit-time"] = {
  * already existed on the other client. Gated as cases because the labels are part of it;
  * two clients calling the same number different things is the same defect wearing a hat.
  */
+/**
+ * Whether the clock has reached the edge of the fitted tables, which is where it stops.
+ *
+ * Gated because the two clients each decide whether to say so, and a client that disagreed
+ * about where the edge is would either stay silent while the clock sat frozen or warn about a
+ * limit nobody had reached. Reported as "it stopped at the year 3000", which neither client
+ * was answering outside a panel.
+ */
+domains["supported-edge"] = {
+  absoluteTolerance: 0,
+  description: "Whether an epoch sits on the edge of the range the element tables were fitted for.",
+  tolerance: 0,
+  cases: [
+    { id: "today", year: 2026, expected: false },
+    { id: "inside-short-span", year: 1850, expected: false },
+    { id: "just-inside-upper", year: 2999, expected: false },
+    { id: "clamped-upper", year: 4000, expected: true },
+    { id: "clamped-lower", year: -4000, expected: true },
+    { id: "just-inside-lower", year: -2999, expected: false },
+  ].map(({ id, year, expected }) => {
+    const epoch = when.clampToSupported(time.jdTdb(2_451_545.0 + (year - 2000) * 365.25));
+    const atEdge = when.atSupportedEdge(epoch);
+    /**
+     * The expectation is the engine's answer, like every other domain here, but each case
+     * also carries what it was written to show. Generating from the engine is what keeps the
+     * suite honest about a change; stating the intent is what stops a case being generated
+     * green around a wrong answer, which is the one failure a generated suite can have.
+     */
+    if (atEdge !== expected) {
+      throw new Error(
+        `supported-edge case "${id}": year ${year} was written to be `
+          + `${expected ? "at the edge" : "inside the range"} and the engine says otherwise`,
+      );
+    }
+    return { id, input: { epoch }, expected: { atEdge } };
+  }),
+};
+
 domains["clock-rates"] = {
   absoluteTolerance: 0,
   description: "Every preset the clock offers, in order, with the words used for it.",

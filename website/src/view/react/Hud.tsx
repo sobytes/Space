@@ -16,6 +16,7 @@ import { AU_IN_METRES, SPEED_OF_LIGHT_M_S } from "@solar/engine/units";
 import { heliocentricPositionOf } from "@solar/engine/bodies/position";
 import { length, sub } from "@solar/engine/vec";
 import { RATE_PRESETS } from "../core/clock";
+import { atSupportedEdge } from "@solar/engine/when";
 import type { ViewportSnapshot } from "../core/viewport";
 import { useViewport, useViewportValue } from "./ViewportContext";
 import { ALL_MOONS, PLANETARY_SET } from "@solar/engine/nbody-tracker";
@@ -537,6 +538,27 @@ function TimeBar() {
   return (
     <div className="pointer-events-auto relative flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-black/70 px-4 py-3 backdrop-blur-md">
       <time className="font-mono text-sm tabular-nums text-zinc-100">{formatEpoch(epoch)}</time>
+      {/*
+        Why the clock has stopped, said where it stopped.
+
+        Positions come from element tables fitted for 3000 BC to 3000 AD, and the clock halts
+        at that edge rather than extrapolating a polynomial outside its fit, which would keep
+        producing smooth confident numbers that are not where anything was. At a hundred years
+        a second the edge is about ten seconds away.
+
+        Reported from the phone as "it stopped at the year 3000". The accuracy panel has always
+        named the table in use, and the panel is the first thing anyone hides to look at the
+        planets, so at the moment the question gets asked there was nothing answering it.
+      */}
+      {atSupportedEdge(epoch) ? (
+        <span
+          data-at-edge
+          className="max-w-[22rem] text-[11px] leading-tight text-amber-400/90"
+        >
+          The element tables are fitted to 3000 BC – 3000 AD. The clock stops here rather than
+          put the planets where they never were.
+        </span>
+      ) : null}
       <GoToDate epoch={epoch} onGo={(next) => viewport.send({ kind: "scrubTo", epoch: next })} />
 
       <div className="flex items-center gap-1.5">

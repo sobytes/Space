@@ -52,6 +52,7 @@ import {
 } from "@solar/engine/when";
 import { placeLabels, type LabelInput } from "@solar/engine/labels";
 import { RATE_PRESETS } from "@solar/engine/rates";
+import { atSupportedEdge } from "@solar/engine/when";
 import { levelFor, metresPerPixel, tileExtent, visibleCapAngle } from "./view/core/tiles";
 
 /**
@@ -383,6 +384,10 @@ function compute(domain: string, testCase: Case): unknown {
         lastEpoch: marks[marks.length - 1].epoch,
       };
     }
+
+    /** Whether an epoch sits on the edge of the range the element tables were fitted for. */
+    case "supported-edge":
+      return { atEdge: atSupportedEdge(jdTdb(input.epoch as number)) };
 
     /** Every preset the clock offers, in order, with the words used for it. */
     case "clock-rates": {
