@@ -81,6 +81,26 @@ const BODIES = [
     note: "satellite system framed",
     moons: { visible: ["io", "europa", "ganymede", "callisto"], mode: "any" },
   },
+  /**
+   * The system view again, with the clock running, which is the only way to see a frozen view.
+   *
+   * Placement is arithmetic and every gate here could already check it. What shipped was a
+   * SwiftUI layer that ran that arithmetic once at launch and never again, so the names sat
+   * where the planets had been while the planets went round. At real time the drift is a
+   * fraction of a pixel a second and every probe passed; at a year a second it is the whole
+   * sky, and it was reported three times.
+   *
+   * That fault is gated by `label-motion-probe.mjs`, which has to use pixels: every
+   * instrument that reaches inside the view perturbs it. This case is here for a different
+   * reason, which is that naming should hold at an arbitrary epoch and not just at today's.
+   */
+  {
+    id: "sun",
+    label: "sun-running",
+    minimumLit: 1.5,
+    extraArgs: ["-rate", "6"],
+    note: "system view, one year a second",
+  },
   { id: "mercury", minimumLit: 25 },
   { id: "embary", minimumLit: 25 },
   { id: "saturn", minimumLit: 25 },
@@ -184,7 +204,9 @@ try { execFileSync("xcrun", ["simctl", "boot", udid], { stdio: "ignore" }); } ca
 execFileSync("xcrun", ["simctl", "install", udid, app]);
 
 let failures = 0;
-for (const { id: body, label, minimumLit, note, moons, extraArgs, orbitError } of BODIES) {
+for (const {
+  id: body, label, minimumLit, note, moons, extraArgs, orbitError,
+} of BODIES) {
   // Two cases can share a body: Jupiter is checked both at its default framing and
   // pulled back to its satellite system, and they must not overwrite each other's
   // screenshot.
@@ -212,7 +234,8 @@ for (const { id: body, label, minimumLit, note, moons, extraArgs, orbitError } o
     || moons !== undefined
     || orbitError !== undefined;
   const args = body === "sun"
-    ? ["-focus", "embary", "-focusAfter", "sun", "-startHidden", "-dumpScene"]
+    ? ["-focus", "embary", "-focusAfter", "sun", "-startHidden",
+       ...(extraArgs ?? []), "-dumpScene"]
     : ["-focus", body, "-startHidden", ...(extraArgs ?? []), ...(needsScene ? ["-dumpScene"] : [])];
   execFileSync("xcrun", ["simctl", "launch", udid, BUNDLE, ...args], { stdio: "ignore" });
 

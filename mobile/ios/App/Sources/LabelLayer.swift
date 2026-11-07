@@ -16,27 +16,51 @@ import SolarKit
 struct LabelLayer: View {
     let scene: SolarScene
 
+    /// The size of this layer, reported by the measuring `GeometryReader` below.
+    @State private var viewport: CGSize = .zero
+
     var body: some View {
         /**
-         Read on purpose, and the whole subscription.
+         Placement is computed here, in `body`, and the viewport size comes from state.
 
-         This used to take the epoch as a parameter, which meant whoever built this view read
-         the clock in their own body and was themselves rebuilt sixty times a second. That was
-         `ContentView`, so the entire overlay went with it and a drag on the rate slider took
-         two seconds to land. Reading the scene's own counter here subscribes this layer, and
-         only this layer, to every frame.
+         It used to be computed inside a `GeometryReader`'s closure, with the frame counter
+         read out here to subscribe to it, and that arrangement silently stopped working. A
+         `GeometryReader` re-runs its content when its geometry changes or when something the
+         content itself reads changes. The content called `scene.labelInputs(...)`, which is a
+         method, and `placeLabels`, which is pure: neither touches an observable property, so
+         the closure had no dependency on the frame counter this body was carefully subscribing
+         to. It was evaluated once, at the first layout, and never again.
+
+         What that looked like was every label frozen where it had been at launch while the
+         planets went round, which at real time is a fraction of a pixel and at a year a second
+         is the whole sky. The names drifted away from the bodies and stayed there. Reported as
+         the labels being independent of the planets, and the times under them kept ticking the
+         whole while, because each `Text` reads `scene.localTimes` and had its own subscription.
+
+         Both halves now live in `body`, which does read the counter, so the positions and the
+         times are refreshed by the same thing. `mobile/ios/App/UITests/InteractionTests.swift`
+         gates it by reading where the labels actually landed with the clock running, which is
+         the only arrangement that can see this.
          */
         let _ = scene.frameCounter
-
-        GeometryReader { geometry in
-            let size = geometry.size
-            let placements = placeLabels(
-                scene.labelInputs(aspect: Double(size.width / max(size.height, 1))),
+        let placements = viewport.width > 1 && viewport.height > 1
+            ? placeLabels(
+                scene.labelInputs(aspect: Double(viewport.width / viewport.height)),
                 options: LabelOptions(
-                    viewportWidthPx: Double(size.width),
-                    viewportHeightPx: Double(size.height)
+                    viewportWidthPx: Double(viewport.width),
+                    viewportHeightPx: Double(viewport.height)
                 )
             )
+            : []
+
+        ZStack(alignment: .topLeading) {
+            // Measures the layer, and nothing else. Reporting the size into state keeps the
+            // placement itself in `body`, where the per-frame subscription lives.
+            GeometryReader { geometry in
+                Color.clear
+                    .onAppear { viewport = geometry.size }
+                    .onChange(of: geometry.size) { _, size in viewport = size }
+            }
             ForEach(placements) { placement in
                 label(for: placement)
                     .position(x: placement.x, y: placement.y)

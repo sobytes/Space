@@ -12,6 +12,7 @@
 #   ./build.sh ios device      build signed for a paired iPhone, and list what is paired
 #   ./build.sh ios test        SolarKit's gates against the JPL fixtures
 #   ./build.sh ios uitest      interaction gates: launch the app and touch the controls
+#   ./build.sh ios labels      do the labels track the planets with the clock running
 #   ./build.sh generate        regenerate the Swift tables from the TypeScript engine
 #   ./build.sh conformance     regenerate the cross-platform conformance suite
 #   ./build.sh citations       re-resolve every cited DOI and check it says what we say
@@ -147,6 +148,13 @@ case "${1:-}" in
       test)
         swift test -c release --package-path mobile/ios/SolarKit
         ;;
+      # Pixels, twice, six simulated years apart. Separate from every other gate because
+      # every other gate asks the engine, and the fault this catches is a view that stopped
+      # asking. See the script for why it cannot be done any other way.
+      labels)
+        node mobile/ios/scripts/label-motion-probe.mjs
+        ;;
+
       uitest)
         # Interaction gates, in the simulator. Separate from `test` because that one is the
         # physics and runs headless in half a second, while this one launches the app and

@@ -182,6 +182,49 @@ console.log(
 );
 if (collisions.length > 0) failures += 1;
 
+/**
+ * Do the labels still move once the clock is running fast?
+ *
+ * The iPhone client shipped a label layer that computed placement once, at launch, and never
+ * again. The names sat where the planets had been while the planets went round. At real time
+ * that is a fraction of a pixel a second, so every probe on both clients passed, because every
+ * probe ran at the default clock. This browser is structurally safe today, for a reason that
+ * is one `setFrame` call deep and could be removed by anyone tidying a render loop.
+ *
+ * Reading positions out of the DOM does not perturb React, which is the difference from the
+ * phone: there the same question needs pixels, because touching the view re-animates it.
+ */
+await page.evaluate(() => window.__solar?.send({ kind: "setRate", secondsPerSecond: 31_557_600 }));
+await page.waitForTimeout(1500);
+
+const where = () => page.evaluate(() =>
+  Object.fromEntries(
+    Array.from(document.querySelectorAll("div"))
+      .filter((d) => d.className.includes("-translate-x-1/2") && d.className.includes("rounded-lg"))
+      .map((d) => {
+        const r = d.getBoundingClientRect();
+        // Keyed by the name, not the whole text: the date underneath changes on its own and
+        // would make a frozen label look as though it had moved.
+        return [(d.textContent ?? "").replace(/[\d\u00b7:+\-\s].*$/, ""), [r.x, r.y]];
+      }),
+  ));
+
+const first = await where();
+await page.waitForTimeout(4000);
+const second = await where();
+
+const stuck = Object.keys(first)
+  .filter((name) => second[name])
+  // The focused body sits at the origin and its label legitimately never moves.
+  .filter((name) => name !== "TheSun" && name !== "The")
+  .filter((name) => Math.hypot(second[name][0] - first[name][0], second[name][1] - first[name][1]) < 2);
+const compared = Object.keys(first).filter((name) => second[name]).length;
+console.log(
+  `  ${"tracking".padEnd(9)} ${compared - stuck.length}/${compared} labels moved over four years  `
+    + `${stuck.length === 0 && compared > 1 ? "ok" : `${stuck.join(", ") || "nothing to compare"} FROZEN`}`,
+);
+if (stuck.length > 0 || compared < 2) failures += 1;
+
 console.log(`  ${"assets".padEnd(9)} ${notFound.size} requests returned 404  ${notFound.size === 0 ? "ok" : "MISSING"}`);
 if (notFound.size > 0) {
   failures += 1;

@@ -105,6 +105,13 @@ export interface LabelOptions {
    * to call that a collision takes the label off a planet anyone can plainly see.
    */
   readonly coincidencePx?: number;
+  /**
+   * How far a label carrying its second line may sit from the body it names.
+   *
+   * See the check in `fit`. Sixty points sits between a diagonal attachment at about 34 and
+   * the sideways and clamped-inwards cases at 75 to 95, with room on both sides.
+   */
+  readonly detailReachPx?: number;
 }
 
 const DEFAULTS = {
@@ -115,6 +122,7 @@ const DEFAULTS = {
   lineHeightPx: 15,
   detailWidthPx: 136,
   coincidencePx: 4,
+  detailReachPx: 60,
 };
 
 /**
@@ -226,6 +234,7 @@ export function placeLabels(
   const lineHeight = options.lineHeightPx ?? DEFAULTS.lineHeightPx;
   const detailWidth = options.detailWidthPx ?? DEFAULTS.detailWidthPx;
   const coincidence = options.coincidencePx ?? DEFAULTS.coincidencePx;
+  const detailReach = options.detailReachPx ?? DEFAULTS.detailReachPx;
   const width = options.viewportWidthPx;
   const height = options.viewportHeightPx;
 
@@ -296,6 +305,30 @@ export function placeLabels(
             height,
             edgeInset,
           );
+          /**
+           * A second line is only worth having where the label still reads as attached.
+           *
+           * The anchor puts the plate's nearest edge against the body, but the text inside it
+           * is centred, so a plate 136 points wide placed directly to one side leaves 68
+           * points of plate and then the words. Near the edge of the screen it is worse: the
+           * clamp pushes a wide plate inwards off its body entirely, and Mars came out 92
+           * points from its own name while Mercury beside it was fine.
+           *
+           * Measured against the centre rather than the edge, because the centre is where the
+           * words are. A diagonal or vertical attachment lands at about 34 and passes; a
+           * sideways or clamped-inwards one lands at 75 to 95 and does not, so the label
+           * drops to its name and attaches tightly instead. The clock is the part that can
+           * wait for a view with room; the name is what says which planet that is.
+           *
+           * Only for labels that are attached to something. An edge pointer is not: its body
+           * is off screen and an arrow carries the direction, so there is no gap to misread.
+           * Capping it there took the clock off the Moon while it was framed with Earth,
+           * which is the one comparison the second line exists for.
+           */
+          if (
+            size.detail && slot.point.onScreen
+            && Math.hypot(box.x - slot.point.x, box.y - slot.point.y) > detailReach
+          ) continue;
           if (taken.some((other) => overlaps(box, other))) continue;
           if (strict) {
             const blocked = inputs.some((other) => {

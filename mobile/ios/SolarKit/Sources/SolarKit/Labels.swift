@@ -113,6 +113,13 @@ public struct LabelOptions: Sendable {
      label off a planet anyone can plainly see.
      */
     public let coincidencePx: Double
+    /**
+     How far a label carrying its second line may sit from the body it names.
+
+     Sixty points sits between a diagonal attachment at about 34 and the sideways and
+     clamped-inwards cases at 75 to 95, with room on both sides.
+     */
+    public let detailReachPx: Double
 
     public init(
         viewportWidthPx: Double,
@@ -123,7 +130,8 @@ public struct LabelOptions: Sendable {
         platePaddingPx: Double = 14,
         lineHeightPx: Double = 15,
         detailWidthPx: Double = 136,
-        coincidencePx: Double = 4
+        coincidencePx: Double = 4,
+        detailReachPx: Double = 60
     ) {
         self.viewportWidthPx = viewportWidthPx
         self.viewportHeightPx = viewportHeightPx
@@ -134,6 +142,7 @@ public struct LabelOptions: Sendable {
         self.lineHeightPx = lineHeightPx
         self.detailWidthPx = detailWidthPx
         self.coincidencePx = coincidencePx
+        self.detailReachPx = detailReachPx
     }
 }
 
@@ -292,6 +301,7 @@ public func placeLabels(_ inputs: [LabelInput], options: LabelOptions) -> [Label
      */
     func fit(
         id: BodyId,
+        attachedTo: Point?,
         directions: [(Double, Double)],
         originX: Double,
         originY: Double,
@@ -311,6 +321,26 @@ public func placeLabels(_ inputs: [LabelInput], options: LabelOptions) -> [Label
                         ),
                         width, height, options.edgeInsetPx
                     )
+                    /**
+                     A second line is only worth having where the label still reads as attached.
+
+                     The anchor puts the plate's nearest edge against the body, but the text
+                     inside it is centred, so a plate 136 points wide placed directly to one
+                     side leaves 68 points of plate and then the words. Near the edge of the
+                     screen it is worse: the clamp pushes a wide plate inwards off its body
+                     entirely, and Mars came out 92 points from its own name while Mercury
+                     beside it was fine.
+
+                     Measured against the centre rather than the edge, because the centre is
+                     where the words are. Only for labels attached to something: an edge
+                     pointer's body is off screen and an arrow carries the direction, so there
+                     is no gap to misread. Capping it there took the clock off the Moon while
+                     it was framed with Earth, which is what the second line exists for.
+                     */
+                    if size.detail, attachedTo != nil,
+                       let p = attachedTo,
+                       ((box.x - p.x) * (box.x - p.x) + (box.y - p.y) * (box.y - p.y))
+                        .squareRoot() > options.detailReachPx { continue }
                     if taken.contains(where: { overlaps(box, $0) }) { continue }
                     if strict {
                         let blocked = inputs.contains { other in
@@ -419,8 +449,9 @@ public func placeLabels(_ inputs: [LabelInput], options: LabelOptions) -> [Label
         }
 
         guard let name = fit(
-            id: input.id, directions: directions, originX: originX, originY: originY,
-            reach: reach, sizes: [compact], taken: slots.map(\.box)
+            id: input.id, attachedTo: point.onScreen ? point : nil,
+            directions: directions, originX: originX,
+            originY: originY, reach: reach, sizes: [compact], taken: slots.map(\.box)
         ) else { continue }
 
         slots.append(
@@ -440,8 +471,10 @@ public func placeLabels(_ inputs: [LabelInput], options: LabelOptions) -> [Label
         if wider.isEmpty { continue }
         let others = slots.indices.filter { $0 != i }.map { slots[$0].box }
         guard let grown = fit(
-            id: slot.input.id, directions: slot.directions, originX: slot.originX,
-            originY: slot.originY, reach: slot.reach, sizes: wider, taken: others
+            id: slot.input.id, attachedTo: slot.point.onScreen ? slot.point : nil,
+            directions: slot.directions,
+            originX: slot.originX, originY: slot.originY, reach: slot.reach,
+            sizes: wider, taken: others
         ) else { continue }
         slots[i].box = grown.box
         slots[i].detail = true

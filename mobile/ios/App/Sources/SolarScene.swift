@@ -1371,6 +1371,29 @@ final class SolarScene {
             "displayNames": Dictionary(uniqueKeysWithValues: bodyIds.compactMap { id in
                 bodyContracts[id].map { (id.rawValue, $0.displayName) }
             }),
+            /**
+             The same projection taken from the model tree instead of the presentation tree.
+
+             Two numbers for one thing, because a label in the wrong place has two possible
+             causes and a screenshot cannot tell them apart: the positions fed to `placeLabels`
+             are stale, or the view holding the labels is not being rebuilt. If these two
+             agree, the projection is current and the fault is in the view.
+             */
+            "bodyScreenModel": Dictionary(uniqueKeysWithValues: bodyIds.compactMap {
+                id -> (String, [String: Double])? in
+                guard let node = nodes[id] else { return nil }
+                let view = simd_inverse(cameraNode.simdWorldTransform)
+                let p = node.simdWorldPosition
+                let eye = view * SIMD4<Float>(p.x, p.y, p.z, 1)
+                let depth = max(abs(-Double(eye.z)), 1e-9)
+                let fov = (cameraNode.camera?.fieldOfView ?? 55) * Double.pi / 180
+                let tanHalf = tan(fov / 2)
+                let aspect = viewportWidthPxForDebug / max(viewportHeightPx, 1)
+                return (id.rawValue, [
+                    "x": ((Double(eye.x) / (depth * tanHalf * aspect)) + 1) / 2 * viewportWidthPxForDebug,
+                    "y": (1 - (Double(eye.y) / (depth * tanHalf))) / 2 * viewportHeightPx,
+                ])
+            }),
             "markNodes": markNodes.count,
             "markVertices": markNodes.values.reduce(0) { total, node in
                 total + (node.geometry?.sources.first { $0.semantic == .vertex }?.vectorCount ?? 0)

@@ -24,8 +24,8 @@
       "expected": [
         {
           "id": "mars",
-          "x": 247.284271247462,
-          "y": 390.715728752538,
+          "x": 201,
+          "y": 379,
           "clamped": false,
           "detail": true,
           "bearingRadians": null

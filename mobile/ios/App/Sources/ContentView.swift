@@ -60,6 +60,17 @@ struct ContentView: View {
               let id = BodyId(rawValue: CommandLine.arguments[index + 1]) else { return .embary }
         return id
     }()
+    /// Parses `-at`. Gregorian and UTC explicitly, because the probe passes a year a
+    /// thousand out and a device calendar is nobody's idea of a stable test input.
+    private static let isoDay: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        return formatter
+    }()
+
     @State private var lastTick = Date()
     @State private var lastDrag: CGSize = .zero
     @State private var lastMagnification: CGFloat = 1
@@ -329,6 +340,21 @@ struct ContentView: View {
              picture are the same instant and a disagreement between them is real.
              */
             if CommandLine.arguments.contains("-paused") { clock.running = false }
+
+            /**
+             `-at <YYYY-MM-DD>` opens the clock on a chosen date.
+
+             Every probe this app has ever had looked at the scene at today's date, which is
+             one instant out of the ten thousand years the ephemeris covers and is the one
+             instant the element tables are most comfortable with. A defect that only appears
+             a thousand years out is invisible to all of them. Test hook, not a feature: the
+             app already has "Go to date" for a person.
+             */
+            if let i = CommandLine.arguments.firstIndex(of: "-at"),
+               i + 1 < CommandLine.arguments.count,
+               let parsed = Self.isoDay.date(from: CommandLine.arguments[i + 1]) {
+                clock.setEpoch(epochFromUnixTimestamp(parsed.timeIntervalSince1970))
+            }
 
             guard let i = CommandLine.arguments.firstIndex(of: "-rate"),
                   i + 1 < CommandLine.arguments.count,
