@@ -21,6 +21,7 @@ final class InteractionTests: XCTestCase {
 
     override func setUp() {
         continueAfterFailure = false
+        XCUIDevice.shared.orientation = .portrait
         app = XCUIApplication()
         // The scene animates continuously, so waiting for quiescence never returns.
         app.launchArguments = ["-uiTest"]
@@ -157,10 +158,12 @@ final class InteractionTests: XCTestCase {
         XCTAssertTrue(systemView.waitForExistence(timeout: 20), "the tool rail never appeared")
         systemView.tap()
 
-        let title = app.staticTexts["panel.title"]
+        // Focus read off the More info button, which names the body it would open. The panel
+        // that used to carry the title is a screen away now.
+        let opener = app.buttons["panel.open"]
         XCTAssertTrue(
-            settles(timeout: 10) { title.exists && title.label == "The Sun" },
-            "tapped Solar system and the panel reads \(title.label)"
+            settles(timeout: 10) { opener.exists && opener.label == "More info about The Sun" },
+            "tapped Solar system and More info says \(opener.label)"
         )
         // Still responding afterwards, not merely not yet reported dead.
         XCTAssertEqual(app.state, .runningForeground, "the app is not in the foreground")
@@ -208,10 +211,18 @@ final class InteractionTests: XCTestCase {
         XCTAssertTrue(venus.waitForExistence(timeout: 5), "the body picker never appeared")
         venus.tap()
 
-        let title = app.staticTexts["panel.title"]
+        /**
+         Focus is read off the More info button, which names the body it would open.
+
+         It used to be read off the body panel's title. The panel is a screen away now, so
+         the title is not on the scene to be read, and this is the observation that replaced
+         it rather than a weaker one: the button is the thing that knows which body is in
+         focus, and VoiceOver reads the same string.
+         */
+        let opener = app.buttons["panel.open"]
         XCTAssertTrue(
-            settles(timeout: 5) { title.exists && title.label == "Venus" },
-            "tapped Venus and the panel still reads \(title.label)"
+            settles(timeout: 5) { opener.exists && opener.label == "More info about Venus" },
+            "tapped Venus and More info still says \(opener.label)"
         )
     }
 
@@ -224,8 +235,7 @@ final class InteractionTests: XCTestCase {
      expand" look identical from the outside, and neither is what the code appears to do.
      */
     func testBodyPanelMoreTogglesBothWays() {
-        let more = app.buttons["panel.more"]
-        XCTAssertTrue(more.waitForExistence(timeout: 10), "the body panel never appeared")
+        let more = openBodyDetails()
         XCTAssertEqual(more.label, "More", "the panel should start collapsed")
 
         more.tap()
@@ -266,11 +276,18 @@ final class InteractionTests: XCTestCase {
      controls are added.
      */
     func testInteractiveOverlaysDoNotOverlap() {
-        let more = app.buttons["panel.more"]
-        XCTAssertTrue(more.waitForExistence(timeout: 10), "the body panel never appeared")
-        // Expanded is the state that caused this, so check it rather than the resting layout.
-        more.tap()
-        XCTAssertTrue(settles(timeout: 5) { more.label == "Less" }, "the panel did not expand")
+        /**
+         The resting overlay, which is now the whole of it.
+
+         This used to expand the body panel first, because the panel growing upwards into the
+         tool rail was the bug it was written for. The panel is not over the scene any more,
+         so the state worth checking is the one a person actually sees: the picker, the
+         summary line, the rail and the clock, all at once.
+         */
+        XCTAssertTrue(
+            app.buttons["panel.open"].waitForExistence(timeout: 15),
+            "the overlay never appeared"
+        )
 
         /**
          Filtered by frame, not by `isHittable`.
@@ -301,6 +318,65 @@ final class InteractionTests: XCTestCase {
             }
         }
         XCTAssertEqual(collisions, [], "controls are stacked on top of each other")
+    }
+
+    /**
+     The body picker survives a rotation into landscape.
+
+     Reported from a phone held sideways: the planet and moon buttons were not there at all.
+     They were drawn, and they were above the top of the window. The overlay stack of panels
+     is bottom-aligned inside the root `ZStack`, and in landscape the four of them came to
+     about 480 points against 402 of screen. A `ZStack` grows to fit its children, so the
+     root grew, and `.overlay(alignment: .top)` dutifully pinned the picker to the top of a
+     stack that now began off screen. The panel's own title was clipped by the same amount,
+     which is the other half of what the screenshot showed.
+
+     Checked by frame rather than by existence, because existence was never the problem: the
+     picker was present, hittable as far as accessibility was concerned, and invisible.
+     */
+    func testBodyPickerStaysVisibleInLandscape() {
+        XCUIDevice.shared.orientation = .landscapeLeft
+        // Back to portrait whatever happens, or every test after this one inherits it.
+        defer { XCUIDevice.shared.orientation = .portrait }
+
+        let picker = app.scrollViews["bodyPicker"]
+        XCTAssertTrue(picker.waitForExistence(timeout: 20), "the body picker never appeared")
+
+        let window = app.windows.firstMatch.frame
+        XCTAssertTrue(
+            settles(timeout: 5) { picker.frame.minY >= window.minY && picker.frame.height > 0 },
+            "the picker sits at y \(picker.frame.minY) with the window starting at "
+                + "\(window.minY), so it is above the top of the screen"
+        )
+        XCTAssertTrue(
+            window.contains(picker.frame.origin),
+            "the picker's origin \(picker.frame.origin) is outside the window \(window)"
+        )
+
+        // And the controls it was being pushed off by have to be on screen themselves.
+        let opener = app.buttons["panel.open"]
+        XCTAssertTrue(opener.waitForExistence(timeout: 10), "no controls in landscape")
+        XCTAssertTrue(
+            window.contains(opener.frame),
+            "the control row at \(opener.frame) is outside the window \(window)"
+        )
+    }
+
+    /**
+     Opens the focused body's page, which is where the panel's controls now live.
+
+     They used to be over the scene. The opening view carried the panel, the view controls and
+     the gravity switch stacked above the clock, which was reported as cluttered twice, so the
+     detail moved behind the summary line and the scene got its screen back.
+     */
+    @discardableResult
+    private func openBodyDetails() -> XCUIElement {
+        let summary = app.buttons["panel.open"]
+        XCTAssertTrue(summary.waitForExistence(timeout: 15), "no body summary line to open")
+        summary.tap()
+        let more = app.buttons["panel.more"]
+        XCTAssertTrue(more.waitForExistence(timeout: 10), "the body page never opened")
+        return more
     }
 
     private func describe(_ element: XCUIElement) -> String {

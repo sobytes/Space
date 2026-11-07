@@ -78,6 +78,16 @@ struct ContentView: View {
     @State private var dumpAt: Date? = CommandLine.arguments.contains("-dumpScene")
         ? Date().addingTimeInterval(8)
         : nil
+    /**
+     Compact when the window is short, which on a phone means landscape.
+
+     Read rather than measured: the only question here is whether there is room to stack
+     things down the side, and that is exactly what the size class answers.
+     */
+    @Environment(\.verticalSizeClass) private var verticalSize
+
+    /// Everything about the focused body, on its own screen. See `BodyDetails`.
+    @State private var showingDetails = false
     @State private var showingDemonstrations = false
     @State private var showingAsk = false
     /**
@@ -105,9 +115,111 @@ struct ContentView: View {
 
     private var anySheetPresented: Bool {
         showingDemonstrations || showingAsk || showingHabitability || showingSurface
-            || showingDeepTime
+            || showingDeepTime || showingDetails
     }
     @State private var overlayHidden = CommandLine.arguments.contains("-startHidden")
+
+    /**
+     One control in the tool rail.
+
+     A list rather than eight buttons written out twice, because the rail is drawn two ways
+     and the previous arrangement is exactly how it came to be inconsistent: buttons were
+     added over time, three picked up labels when somebody could not find them, and nothing
+     held the set together.
+     */
+    private struct RailItem: Identifiable {
+        let id: String
+        let title: String
+        let icon: String
+        let tint: Color
+        let action: () -> Void
+    }
+
+    private var railItems: [RailItem] {
+        var items: [RailItem] = [
+            // Always present. An overlay with no way back is a trap rather than a
+            // decluttered view, so the one control that returns it never goes away.
+            RailItem(
+                id: "tool.hide",
+                title: overlayHidden ? "Show panels" : "Hide panels",
+                icon: overlayHidden ? "eye" : "eye.slash",
+                tint: overlayHidden ? .orange : .secondary
+            ) { withAnimation(.easeInOut(duration: 0.2)) { overlayHidden.toggle() } }
+        ]
+        guard !overlayHidden else { return items }
+        items += [
+            /**
+             Back out to the whole solar system.
+
+             Focusing the Sun has always been the system view and nothing said so: someone
+             asked how to unfocus a planet, which is the only evidence that matters. "The
+             Sun" stays in the picker because it is also a body with its own data.
+             */
+            RailItem(
+                id: "tool.systemView", title: "Solar system", icon: "circle.hexagongrid",
+                tint: focus == .sun ? .orange : .secondary
+            ) { focus = .sun },
+            RailItem(
+                id: "tool.demonstrations", title: "Demonstrations", icon: "function",
+                tint: .secondary
+            ) { showingDemonstrations = true },
+            RailItem(id: "tool.ask", title: "Ask", icon: "sparkles", tint: .secondary) {
+                showingAsk = true
+            },
+            RailItem(
+                id: "tool.labels", title: "Labels", icon: showLabels ? "tag.fill" : "tag",
+                tint: showLabels ? .orange : .secondary
+            ) { withAnimation(.easeInOut(duration: 0.15)) { showLabels.toggle() } },
+            RailItem(
+                id: "tool.surface", title: "Surface", icon: "camera.viewfinder", tint: .cyan
+            ) { showingSurface = true },
+            RailItem(
+                id: "tool.habitability", title: "Habitability", icon: "leaf", tint: .green
+            ) { showingHabitability = true },
+            RailItem(id: "tool.deepTime", title: "Deep time", icon: "hourglass", tint: .orange) {
+                showingDeepTime = true
+            }
+        ]
+        return items
+    }
+
+    /**
+     A rail button, named or not depending on the room there is for it.
+
+     The name is attached either way. Dropping a label in landscape must not drop it for
+     VoiceOver too, where "button" and nothing else is the worst of both arrangements.
+     */
+    private func railButton(_ item: RailItem, showsTitle: Bool) -> some View {
+        Button(action: item.action) {
+            if showsTitle {
+                Label(item.title, systemImage: item.icon)
+                    .font(.system(size: 11))
+                    .lineLimit(1)
+                    // Shrink rather than truncate if the type size grows: a rail of names
+                    // where one reads "Demonstrati..." is worse than one a point smaller.
+                    .minimumScaleFactor(0.7)
+                    /**
+                     One width for all of them, so the rail has a straight edge.
+
+                     Set here rather than left to each button's own text, which is what made
+                     the rail ragged: three names and five icons produced eight different
+                     widths trailing down the right-hand side. A `Grid` sizing its column to
+                     the widest cell is the tidier answer and could not be used, because a
+                     cell asking for infinite width makes the whole grid greedy and it took
+                     the full screen, dragging the rail away from the edge it is aligned to.
+                     The number is the longest name, "Demonstrations", and no more: the rail
+                     is over the planet, and every point of it is a point of the thing the
+                     app is for. At 140 it took a third of the width of a phone.
+                     */
+                    .frame(width: 112, alignment: .leading)
+            } else {
+                Image(systemName: item.icon)
+            }
+        }
+        .tint(item.tint)
+        .accessibilityLabel(item.title)
+        .accessibilityIdentifier(item.id)
+    }
 
     private let tick = Timer.publish(every: 1.0 / 60.0, on: .main, in: .common).autoconnect()
 
@@ -175,13 +287,26 @@ struct ContentView: View {
             }
 
             if !overlayHidden {
-                VStack(spacing: 10) {
-                    BodyPanel(id: focus, clock: clock, scene: scene)
-                    ViewControls(focus: focus, scene: scene, clock: clock)
-                    GravityBar(gravity: gravity, clock: clock)
+                /**
+                 Controls over the scene, and nothing that reads.
+
+                 This carried the whole body panel for a long time: the facts, a paragraph,
+                 the lighting angles, the gravity switch and the clock, five rows deep across
+                 the planet they described. Reported as cluttered three times, the last with
+                 the design: strip it back to the buttons that change the view, plus one that
+                 opens everything else on its own screen.
+
+                 So what is left here is what acts on the scene. Anything that is read rather
+                 than pressed is in `BodyDetails`, behind More info.
+                 */
+                VStack(spacing: 8) {
+                    ViewControls(focus: focus, scene: scene, clock: clock) {
+                        showingDetails = true
+                    }
                     TimeBar(clock: clock)
                 }
-                .padding(14)
+                .padding(.horizontal, 12)
+                .padding(.bottom, 10)
                 .transition(.opacity.combined(with: .move(edge: .bottom)))
             }
         }
@@ -194,81 +319,56 @@ struct ContentView: View {
         }
         .overlay(alignment: .topTrailing) {
             /**
-             The tool rail sits above the body panel in z-order and the panel used to grow up
-             underneath it, so an expanded panel's own control ended up behind a rail button.
-             The panel is height-capped now and the rail keeps its own row, so neither can
-             reach the other.
+             A column when there is height for one, a row when there is not.
+
+             Eight buttons stacked down the right edge reach about 280 points, which is most
+             of the 402 a phone has in landscape: the rail ran from under the picker almost to
+             the clock, so the controls at the bottom right ended up beneath it. Measured by
+             the overlap gate rather than noticed, which reported `panel.open over
+             tool.surface by 26x11`. It was also sitting on top of the scene's own labels,
+             which is the clutter half of the same fact.
+
+             One list of buttons for both, so there is no way for the two to drift.
              */
-            VStack(alignment: .trailing, spacing: 6) {
-                // Labelled, not a bare icon. Someone asked where the hide control was, which
-                // is the only evidence that matters about whether an icon is discoverable.
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) { overlayHidden.toggle() }
-                } label: {
-                    Label(
-                        overlayHidden ? "Show panels" : "Hide panels",
-                        systemImage: overlayHidden ? "eye" : "eye.slash"
-                    )
-                    .font(.system(size: 11))
+            if verticalSize == .compact {
+                /**
+                 Icons only, and all of them.
+
+                 Eight names side by side come to about 900 points against the 874 a phone
+                 has sideways. Since they cannot all be named here, none is: a row where
+                 some have words and some do not is the thing that was asked about, and the
+                 answer has to hold in both orientations. Every one keeps its name for
+                 VoiceOver, and the column in portrait is where they are learned.
+                 */
+                HStack(spacing: 6) {
+                    ForEach(railItems) { item in railButton(item, showsTitle: false) }
                 }
-                .tint(overlayHidden ? .orange : .secondary)
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .padding(.trailing, 10)
+                .padding(.top, overlayHidden ? 8 : 54)
+            } else {
+                /**
+                 Named, equal width, flush left edge.
 
-                if !overlayHidden {
-                    /**
-                     Back out to the whole solar system.
-
-                     Focusing the Sun has always been the system view, and nothing said so:
-                     someone asked how to unfocus a planet, which is the only evidence that
-                     matters. "The Sun" stays in the picker because it is also a body with
-                     its own data; this is the obvious route to the same place.
-                     */
-                    Button { focus = .sun } label: {
-                        Label("Solar system", systemImage: "circle.hexagongrid")
-                            .font(.system(size: 11))
-                    }
-                    .tint(focus == .sun ? .orange : .secondary)
-                    .accessibilityIdentifier("tool.systemView")
-
-                    Button { showingDemonstrations = true } label: {
-                        Image(systemName: "function")
-                    }
-                    .accessibilityIdentifier("tool.demonstrations")
-                    Button { showingAsk = true } label: {
-                        Image(systemName: "sparkles")
-                    }
-                    // Labelled, like the hide control, because an unlabelled tag icon is
-                    // exactly the kind of thing someone asks about rather than finds.
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.15)) { showLabels.toggle() }
-                    } label: {
-                        Label("Labels", systemImage: showLabels ? "tag.fill" : "tag")
-                            .font(.system(size: 11))
-                    }
-                    .tint(showLabels ? .orange : .secondary)
-                    .accessibilityIdentifier("tool.labels")
-
-                    Button { showingSurface = true } label: {
-                        Image(systemName: "camera.viewfinder")
-                    }
-                    .tint(.cyan)
-                    .accessibilityIdentifier("tool.surface")
-
-                    Button { showingHabitability = true } label: {
-                        Image(systemName: "leaf")
-                    }
-                    .tint(.green)
-                    .accessibilityIdentifier("tool.habitability")
-                    Button { showingDeepTime = true } label: {
-                        Image(systemName: "hourglass")
-                    }
-                    .tint(.orange)
-                    .accessibilityIdentifier("tool.deepTime")
+                 Asked directly: why do some of these have labels and some do not. There was
+                 no reason. Three were given words one at a time, each after somebody could
+                 not find a control, and the other five never were, so the rail ended up with
+                 three wide buttons and five narrow ones trailing a ragged edge down the
+                 right. A `Grid` of one column sizes every cell to the widest, which is what
+                 makes the edge straight rather than a width guessed and kept in step by hand.
+                 */
+                VStack(alignment: .leading, spacing: 6) {
+                    ForEach(railItems) { item in railButton(item, showsTitle: true) }
                 }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .padding(.trailing, 10)
+                .padding(.top, overlayHidden ? 8 : 54)
             }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-            .padding(.trailing, 10)
-            .padding(.top, overlayHidden ? 8 : 54)
+        }
+        .sheet(isPresented: $showingDetails) {
+            BodyDetails(id: focus, clock: clock, scene: scene, gravity: gravity)
         }
         .sheet(isPresented: $showingDemonstrations) { DemonstrationsView() }
         .sheet(isPresented: $showingAsk) { AskView() }
@@ -437,6 +537,7 @@ private struct BodyPicker: View {
             }
             .padding(.horizontal, 14)
         }
+        .accessibilityIdentifier("bodyPicker")
     }
 }
 
@@ -473,12 +574,23 @@ private struct BodyPanel: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(contract.displayName).font(.headline)
-                .accessibilityIdentifier("panel.title")
-            Text(contract.education.oneLine)
-                .font(.caption)
-                .foregroundStyle(.orange.opacity(0.9))
+        // No scroll view and no ceiling of its own: this is inside the body's own screen,
+        // which scrolls, and a scroll view inside a scroll view fights every drag.
+        content
+    }
+
+    private var content: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(contract.displayName).font(.subheadline.weight(.semibold))
+                    .accessibilityIdentifier("panel.title")
+                // On the title's own line: it is one sentence and it was costing a whole row
+                // of its own above a panel that is mostly rows.
+                Text(contract.education.oneLine)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.orange.opacity(0.9))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
 
             /**
              Three rows collapsed. The panel used to show everything always and covered most
@@ -486,7 +598,7 @@ private struct BodyPanel: View {
              the planet. The rest is one tap away and scrolls, so it can never grow past half
              the screen however much a contract has to say.
              */
-            Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 4) {
+            Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 2) {
                 row("From the Sun", distance(fromSun),
                     simulated: orbitDays.map { $0 * Constants.secondsPerDay }, label: "one orbit",
                     // Only a planet's orbit carries marks, so only a planet's panel says so.
@@ -514,8 +626,8 @@ private struct BodyPanel: View {
                 .font(.system(size: 11))
                 .foregroundStyle(.white.opacity(0.75))
                 .fixedSize(horizontal: false, vertical: true)
-                .padding(8)
-                .background(Color.cyan.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+                .padding(6)
+                .background(Color.cyan.opacity(0.08), in: RoundedRectangle(cornerRadius: 7))
 
             if expanded {
                 ScrollView {
@@ -588,7 +700,10 @@ private struct BodyPanel: View {
                  on a device whose screen is a different height. `interactiveOverlaysDoNotOverlap`
                  in the UI tests is the gate; this number is just the fix.
                  */
-                .frame(maxHeight: max(120, UIScreen.main.bounds.height * 0.5 - 240))
+                // No cap of its own any more: the whole panel scrolls inside the ceiling
+                // the window gives it, and a second scroll view inside the first one
+                // fought the outer gesture for every drag.
+                
             }
 
             reliefNotice
@@ -615,8 +730,6 @@ private struct BodyPanel: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
-        .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 12))
     }
 
     /**
@@ -785,13 +898,19 @@ private struct ViewControls: View {
     let focus: BodyId
     let scene: SolarScene
     let clock: Clock
+    /// Opens the body's own screen. See `BodyDetails`.
+    let open: () -> Void
 
+    /**
+     Nothing to offer on the Sun, which has no terminator to stand at and no moons to fit.
+
+     The bar drew itself anyway, so the system view carried a labelled strip containing one
+     word and a stretch of empty plate. A heading with nothing under it is the clearest case
+     of clutter there is: it costs a row, and a reader has to look at it to find out it is
+     empty.
+     */
     var body: some View {
         HStack(spacing: 6) {
-            Text("VIEW")
-                .font(.system(size: 10))
-                .foregroundStyle(.secondary)
-
             if focus != .sun {
                 ForEach([("Day", 0.0), ("Terminator", 90.0), ("Night", 180.0)], id: \.0) { item in
                     Button(item.0) { scene.setSunAngle(item.1, at: clock.epoch) }
@@ -808,11 +927,96 @@ private struct ViewControls: View {
                     .controlSize(.mini)
                     .tint(.cyan)
             }
-            Spacer()
+            /**
+             Beside the view buttons, not pushed to the far edge.
+
+             A trailing `Spacer` reads fine on a narrow phone and falls apart on a wide one:
+             in landscape it left the four view buttons at one side of the window and More
+             info five hundred points away at the other, so they stopped looking like one row
+             of controls. Grouped left, the row is the same shape at any width.
+             */
+            /**
+             The way to everything that is read rather than pressed.
+
+             Named rather than an icon, and placed with the controls rather than in the tool
+             rail, because it is the answer to a question someone is already asking about the
+             body they just tapped. The rail is where the modes live; this is where the body
+             lives.
+             */
+            Button {
+                open()
+            } label: {
+                HStack(spacing: 3) {
+                    Text("More info")
+                    Image(systemName: "chevron.right").font(.system(size: 9, weight: .semibold))
+                }
+                .font(.system(size: 11, weight: .medium))
+                // Never wrapped. Squeezed between four view buttons on a narrow phone it
+                // broke across two lines and made the whole row twice as tall as the clock
+                // under it, which is the opposite of the point.
+                .fixedSize()
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.mini)
+            .tint(.orange)
+            /**
+             Named for the body it opens, not just "More info".
+
+             Correct for VoiceOver, where a button called "More info" on a screen of other
+             controls says nothing about what it will show. It is also how a test can tell
+             which body has focus now that the panel bearing that name is a screen away:
+             focus used to be observable through the panel's title, and moving the panel took
+             the observation with it.
+             */
+            .accessibilityLabel("More info about \(bodyContracts[focus]?.displayName ?? "")")
+            .accessibilityIdentifier("panel.open")
+            Spacer(minLength: 0)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(.black.opacity(0.72), in: RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+/**
+ Everything about the focused body, on its own screen.
+
+ Three things used to sit over the scene and now live here: the facts and the paragraph from
+ the body panel, and the gravity mode. They are together because they are all answers to "tell
+ me more about this", and away from the scene because none of them is needed while simply
+ looking at it. The lighting angles stayed behind, because those act on the view.
+
+ A sheet rather than a push, so the planet is still there behind it and a swipe down is the way
+ out. It opens at half height for the same reason: the paragraph about a body's day and year is
+ worth reading against the body it describes.
+ */
+private struct BodyDetails: View {
+    let id: BodyId
+    let clock: Clock
+    let scene: SolarScene
+    let gravity: Gravity
+
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 14) {
+                    BodyPanel(id: id, clock: clock, scene: scene)
+                    GravityBar(gravity: gravity, clock: clock)
+                }
+                .padding(14)
+            }
+            .navigationTitle(bodyContracts[id]?.displayName ?? "")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                        .accessibilityIdentifier("details.done")
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
     }
 }
 
@@ -866,15 +1070,17 @@ private struct GravityBar: View {
                     }
                 }
             } else {
-                Text("Planets follow the JPL Standish fits. Accurate and reversible, "
-                     + "but a mass you add cannot move them.")
+                // The two buttons give no hint that one of them cannot be perturbed by a
+                // mass you add, which is the whole reason the other exists.
+                Text("On rails: JPL Standish fits, reversible, but an added mass moves nothing.")
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(.black.opacity(0.68), in: RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(.black.opacity(0.72), in: RoundedRectangle(cornerRadius: 12))
     }
 
     private func label(_ name: String, _ value: String) -> some View {
