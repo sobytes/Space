@@ -148,6 +148,18 @@ final class SolarScene {
 
     init() {
         scene.background.contents = UIColor.black
+        /**
+         The real viewport before anything is framed.
+
+         These were a hardcoded 402 by 900, refreshed from the live screen on the first tick.
+         That was harmless while they only fed a debug projection and a marker threshold, and
+         stopped being harmless when the system view started solving its distance from the
+         aspect: `setFocus` runs here, in `init`, before any tick, so the opening view would be
+         framed for a phone nobody was holding and never corrected.
+         */
+        let bounds = UIScreen.main.bounds
+        viewportWidthPx = Double(bounds.width)
+        viewportHeightPx = Double(bounds.height)
         buildCamera()
         scene.rootNode.addChildNode(heliocentricRoot)
         buildStars()
@@ -935,8 +947,21 @@ final class SolarScene {
         if let requestedRadii {
             cameraDistanceM = radius * requestedRadii
         } else if focus == .sun {
-            // Far enough out to hold Jupiter's orbit, which is what reads on a phone.
-            cameraDistanceM = 7.5 * Constants.auInMetres
+            /**
+             Far enough out to hold Jupiter's orbit, which this now actually does.
+
+             It said so for a long time and held 7.5 au, which is a distance rather than a
+             framing: at a 55 degree vertical field that reached 1.80 au across the narrow axis
+             in portrait, 3.90 in landscape and 2.73 on an iPad. Rotating the phone changed how
+             much of the solar system the solar system view contained, and the browser framed a
+             third amount again. Solving from the radius fixes all of them at once.
+             */
+            cameraDistanceM = framingDistanceM(
+                radiusM: systemViewRadiusM,
+                verticalFovRadians: (cameraNode.camera?.fieldOfView ?? 55) * Double.pi / 180,
+                aspect: viewportWidthPx / Swift.max(viewportHeightPx, 1),
+                fill: 0.92
+            )
         } else {
             /**
              Six radii, for every body, moons or not.
@@ -1134,8 +1159,11 @@ final class SolarScene {
 
     /// The HUD reports the live viewport, because the marker threshold is in pixels and a
     /// hardcoded height puts the fade at the wrong distance on every device but one.
-    /// Width that goes with `viewportHeightPx`, for the debug projection above.
-    var viewportWidthPxForDebug: Double = 402
+    ///
+    /// The width went with it for the debug projection and was named for that. It is now what
+    /// the framing solves its aspect from, so a stale value crops the system view rather than
+    /// mislabelling a probe, and the name had to stop saying "for debug".
+    var viewportWidthPx: Double = 402
 
     func setViewportHeight(_ px: Double) {
         guard px > 0 else { return }
@@ -1347,10 +1375,10 @@ final class SolarScene {
              possible. These are the two numbers that answer it.
              */
             "bodyScreen": Dictionary(uniqueKeysWithValues: labelInputs(
-                aspect: viewportWidthPxForDebug / max(viewportHeightPx, 1)
+                aspect: viewportWidthPx / max(viewportHeightPx, 1)
             ).map { input -> (String, [String: Double]) in
                 (input.id.rawValue, [
-                    "x": ((input.ndcX + 1) / 2) * viewportWidthPxForDebug,
+                    "x": ((input.ndcX + 1) / 2) * viewportWidthPx,
                     "y": ((1 - input.ndcY) / 2) * viewportHeightPx,
                     "ndcX": input.ndcX,
                     "ndcY": input.ndcY,
@@ -1388,9 +1416,9 @@ final class SolarScene {
                 let depth = max(abs(-Double(eye.z)), 1e-9)
                 let fov = (cameraNode.camera?.fieldOfView ?? 55) * Double.pi / 180
                 let tanHalf = tan(fov / 2)
-                let aspect = viewportWidthPxForDebug / max(viewportHeightPx, 1)
+                let aspect = viewportWidthPx / max(viewportHeightPx, 1)
                 return (id.rawValue, [
-                    "x": ((Double(eye.x) / (depth * tanHalf * aspect)) + 1) / 2 * viewportWidthPxForDebug,
+                    "x": ((Double(eye.x) / (depth * tanHalf * aspect)) + 1) / 2 * viewportWidthPx,
                     "y": (1 - (Double(eye.y) / (depth * tanHalf))) / 2 * viewportHeightPx,
                 ])
             }),
@@ -1424,9 +1452,9 @@ final class SolarScene {
                 // The real viewport, not one device's numbers. This was hardcoded to
                 // 402x874, so the dumped label positions described a phone that may not be
                 // the one running, which is worse than no diagnostic at all.
-                labelInputs(aspect: viewportWidthPxForDebug / max(viewportHeightPx, 1)),
+                labelInputs(aspect: viewportWidthPx / max(viewportHeightPx, 1)),
                 options: LabelOptions(
-                    viewportWidthPx: viewportWidthPxForDebug,
+                    viewportWidthPx: viewportWidthPx,
                     viewportHeightPx: viewportHeightPx
                 )
             ).map { placement -> [String: Any] in
@@ -1567,7 +1595,7 @@ final class SolarScene {
     /// Above this apparent radius the real sphere is resolvable and the marker fades out.
     /// Seven pixels, the same threshold the website uses, so the two look alike at a glance.
     private static let markerFadePx = 7.0
-    private var viewportHeightPx: Double = 900
+    private(set) var viewportHeightPx: Double = 900
 
     // MARK: - View commands
 
@@ -1633,10 +1661,21 @@ final class SolarScene {
      */
     func frameMoons() {
         guard let systemRadius = satelliteSystemRadiusM(focus) else { return }
-        let fov = cameraNode.camera?.fieldOfView ?? 55
-        let halfFovRad = fov * Double.pi / 360
-        let fill = 0.72
-        cameraDistanceM = systemRadius / tan(halfFovRad * fill)
+        /**
+         Solved against the narrow axis, which in portrait is the horizontal one.
+
+         This used the vertical half-angle and said so, on the reasoning that vertical is the
+         shorter axis on a landscape window. True there, and false on a phone held upright,
+         where it is the longer one by more than two to one: the satellite system was cropped
+         left and right by the same factor the system view was. The same arithmetic now serves
+         both, so neither can drift from the other again.
+         */
+        cameraDistanceM = framingDistanceM(
+            radiusM: systemRadius,
+            verticalFovRadians: (cameraNode.camera?.fieldOfView ?? 55) * Double.pi / 180,
+            aspect: viewportWidthPx / Swift.max(viewportHeightPx, 1),
+            fill: 0.72
+        )
         applyCamera()
     }
 }

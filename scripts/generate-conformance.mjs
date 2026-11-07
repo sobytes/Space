@@ -39,6 +39,7 @@ const propagate = await import(`${ROOT}engine/src/propagate.ts`);
 const tiles = await import(`${ROOT}website/src/view/core/tiles.ts`);
 const labels = await import(`${ROOT}engine/src/labels.ts`);
 const rates = await import(`${ROOT}engine/src/rates.ts`);
+const framing = await import(`${ROOT}engine/src/framing.ts`);
 const orbitTime = await import(`${ROOT}engine/src/orbit-time.ts`);
 const timeSense = await import(`${ROOT}engine/src/time-sense.ts`);
 const when = await import(`${ROOT}engine/src/when.ts`);
@@ -691,40 +692,35 @@ domains["orbit-time"] = {
  * two clients calling the same number different things is the same defect wearing a hat.
  */
 /**
- * Whether the clock has reached the edge of the fitted tables, which is where it stops.
+ * Where the camera has to sit to hold something in frame.
  *
- * Gated because the two clients each decide whether to say so, and a client that disagreed
- * about where the edge is would either stay silent while the clock sat frozen or warn about a
- * limit nobody had reached. Reported as "it stopped at the year 3000", which neither client
- * was answering outside a panel.
+ * Gated because both clients were doing this with a constant distance and disagreeing about
+ * what the system view contained, and because the rule has one trap in it that both of them
+ * fell into independently: the vertical axis is the narrow one only while the window is wider
+ * than it is tall. Portrait is the case to check, and it is the case neither client checked.
  */
-domains["supported-edge"] = {
-  absoluteTolerance: 0,
-  description: "Whether an epoch sits on the edge of the range the element tables were fitted for.",
-  tolerance: 0,
+domains.framing = {
+  absoluteTolerance: 1e-6,
+  description: "Camera distance that holds a radius on the narrow axis of a given viewport.",
+  tolerance: 1e-12,
   cases: [
-    { id: "today", year: 2026, expected: false },
-    { id: "inside-short-span", year: 1850, expected: false },
-    { id: "just-inside-upper", year: 2999, expected: false },
-    { id: "clamped-upper", year: 4000, expected: true },
-    { id: "clamped-lower", year: -4000, expected: true },
-    { id: "just-inside-lower", year: -2999, expected: false },
-  ].map(({ id, year, expected }) => {
-    const epoch = when.clampToSupported(time.jdTdb(2_451_545.0 + (year - 2000) * 365.25));
-    const atEdge = when.atSupportedEdge(epoch);
-    /**
-     * The expectation is the engine's answer, like every other domain here, but each case
-     * also carries what it was written to show. Generating from the engine is what keeps the
-     * suite honest about a change; stating the intent is what stops a case being generated
-     * green around a wrong answer, which is the one failure a generated suite can have.
-     */
-    if (atEdge !== expected) {
-      throw new Error(
-        `supported-edge case "${id}": year ${year} was written to be `
-          + `${expected ? "at the edge" : "inside the range"} and the engine says otherwise`,
-      );
-    }
-    return { id, input: { epoch }, expected: { atEdge } };
+    { id: "iphone-portrait", w: 402, h: 874, fovDeg: 55, fill: 0.92 },
+    { id: "iphone-landscape", w: 874, h: 402, fovDeg: 55, fill: 0.92 },
+    { id: "ipad-portrait", w: 834, h: 1194, fovDeg: 55, fill: 0.92 },
+    { id: "desktop-wide", w: 1600, h: 900, fovDeg: 45, fill: 0.92 },
+    { id: "square", w: 800, h: 800, fovDeg: 45, fill: 0.92 },
+    { id: "moons-fill", w: 402, h: 874, fovDeg: 55, fill: 0.7 },
+  ].map(({ id, w, h, fovDeg, fill }) => {
+    const fov = (fovDeg * Math.PI) / 180;
+    const aspect = w / h;
+    return {
+      id,
+      input: { radiusM: framing.SYSTEM_VIEW_RADIUS_M, verticalFovRadians: fov, aspect, fill },
+      expected: {
+        narrowHalfAngle: framing.narrowHalfAngle(fov, aspect),
+        distanceM: framing.framingDistanceM(framing.SYSTEM_VIEW_RADIUS_M, fov, aspect, fill),
+      },
+    };
   }),
 };
 

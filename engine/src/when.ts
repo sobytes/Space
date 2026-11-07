@@ -16,7 +16,6 @@
  * epoch alongside it and the clients print it.
  */
 
-import { DAYS_PER_JULIAN_YEAR } from "./units";
 import { LONG_SPAN, SHORT_SPAN } from "./data/planets";
 import {
   jdTdb, jdUtcFromEpochMs, epochMsFromJdUtc, julianYearForModelSelection,
@@ -108,25 +107,6 @@ export const SUPPORTED_YEARS = {
   from: LONG_SPAN.validFromYear,
   to: LONG_SPAN.validToYear,
 } as const;
-
-/**
- * Is the clock sitting on the edge of the fitted range, which is where it stops?
- *
- * Separate from `ephemerisStandingAt`, which reports the epoch as inside the long span here,
- * because it is: the edge is the last instant any table was fitted for. What a viewer needs to
- * know is different and more immediate, that the clock has stopped and why. Reported as "it
- * stopped at the year 3000", which is a question about the app rather than about the tables,
- * and the app was answering it only inside a panel that is the first thing anyone hides.
- *
- * A day of tolerance. `clampToSupported` lands exactly on the boundary, so this only has to
- * survive the round trip through the time scales, and a date deliberately set to 2999 must
- * not claim the clock has stopped.
- */
-export function atSupportedEdge(epoch: JdTdb): boolean {
-  const year = julianYearForModelSelection(epoch);
-  const day = 1 / DAYS_PER_JULIAN_YEAR;
-  return year <= SUPPORTED_YEARS.from + day || year >= SUPPORTED_YEARS.to - day;
-}
 
 /** Clamp into the fitted range, for a control that should not offer a meaningless answer. */
 export function clampToSupported(epoch: JdTdb): JdTdb {

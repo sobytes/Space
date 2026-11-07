@@ -361,23 +361,23 @@
         },
         {
           "id": "venus",
-          "x": 249.86357069612,
-          "y": 436.59917069612,
+          "x": 230.949,
+          "y": 440.0846,
           "clamped": false,
           "detail": false,
           "bearingRadians": null
         },
         {
           "id": "embary",
-          "x": 281.800449121969,
-          "y": 393.198650878031,
+          "x": 261.903,
+          "y": 389.3061,
           "clamped": false,
           "detail": false,
           "bearingRadians": null
         },
         {
           "id": "mars",
-          "x": 181.741083322705,
+          "x": 129.406916677295,
           "y": 368.531316677295,
           "clamped": false,
           "detail": true,

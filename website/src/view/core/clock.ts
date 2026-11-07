@@ -13,7 +13,6 @@
  */
 
 import { jdTdb, tdbFromUtc, jdUtcFromEpochMs, type JdTdb } from "@solar/engine/time";
-import { clampToSupported } from "@solar/engine/when";
 
 export { RATE_PRESETS, type ClockRate } from "@solar/engine/rates";
 
@@ -65,13 +64,21 @@ export function reduceClock(state: ClockState, command: ClockCommand): ClockStat
 /**
  * A paused tick returns the state unchanged, so a paused frame is a genuine no-op.
  *
- * Clamped to the fitted range of the element tables. At a hundred years a second that edge is
- * about ten real seconds away, and beyond it the planets are drawn by extrapolating a polynomial
- * outside its fit: still smooth, still confident, and not where anything was. A clock that
- * halts at 3000 AD is telling the truth about what this simulation knows.
+ * Unbounded, and the HUD says so once the element tables stop covering the date.
+ *
+ * It did halt at 3000 AD, because past the fitted range the planets are drawn by extrapolating
+ * a polynomial outside its fit: still smooth, still confident, and not where anything was. A
+ * clock that stops is one way to be honest about that. Being told is another, and it is the
+ * better one here, because a simulation that refuses to show you the far future teaches less
+ * than one that shows you and says how much to trust it.
+ *
+ * Safe to run, which was measured rather than assumed: every body's position stays finite and
+ * bounded out to year 50,000 in both directions, and every local clock and sub-solar point
+ * with it. That matters because a NaN reaching the iOS client is not a wrong number, it is a
+ * trap and a crash, which this project has already had once.
  */
 export function tickClock(state: ClockState, realDeltaSeconds: number): ClockState {
   if (!state.running || realDeltaSeconds === 0) return state;
   const days = (realDeltaSeconds * state.secondsPerSecond) / SECONDS_PER_DAY;
-  return { ...state, epoch: clampToSupported(jdTdb(state.epoch + days)) };
+  return { ...state, epoch: jdTdb(state.epoch + days) };
 }

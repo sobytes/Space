@@ -1,0 +1,86 @@
+{
+  "domain": "framing",
+  "absoluteTolerance": 0.000001,
+  "description": "Camera distance that holds a radius on the narrow axis of a given viewport.",
+  "tolerance": 1e-12,
+  "cases": [
+    {
+      "id": "iphone-portrait",
+      "input": {
+        "radiusM": 299078916688.50726,
+        "verticalFovRadians": 0.9599310885968813,
+        "aspect": 0.459954233409611,
+        "fill": 0.92
+      },
+      "expected": {
+        "narrowHalfAngle": 0.23501259304516733,
+        "distanceM": 1361647363142.5952
+      }
+    },
+    {
+      "id": "iphone-landscape",
+      "input": {
+        "radiusM": 299078916688.50726,
+        "verticalFovRadians": 0.9599310885968813,
+        "aspect": 2.174129353233831,
+        "fill": 0.92
+      },
+      "expected": {
+        "narrowHalfAngle": 0.4799655442984406,
+        "distanceM": 632706339849.3035
+      }
+    },
+    {
+      "id": "ipad-portrait",
+      "input": {
+        "radiusM": 299078916688.50726,
+        "verticalFovRadians": 0.9599310885968813,
+        "aspect": 0.6984924623115578,
+        "fill": 0.92
+      },
+      "expected": {
+        "narrowHalfAngle": 0.3487496273120321,
+        "distanceM": 899938446443.4196
+      }
+    },
+    {
+      "id": "desktop-wide",
+      "input": {
+        "radiusM": 299078916688.50726,
+        "verticalFovRadians": 0.7853981633974483,
+        "aspect": 1.7777777777777777,
+        "fill": 0.92
+      },
+      "expected": {
+        "narrowHalfAngle": 0.39269908169872414,
+        "distanceM": 791489386831.8475
+      }
+    },
+    {
+      "id": "square",
+      "input": {
+        "radiusM": 299078916688.50726,
+        "verticalFovRadians": 0.7853981633974483,
+        "aspect": 1,
+        "fill": 0.92
+      },
+      "expected": {
+        "narrowHalfAngle": 0.39269908169872414,
+        "distanceM": 791489386831.8475
+      }
+    },
+    {
+      "id": "moons-fill",
+      "input": {
+        "radiusM": 299078916688.50726,
+        "verticalFovRadians": 0.9599310885968813,
+        "aspect": 0.459954233409611,
+        "fill": 0.7
+      },
+      "expected": {
+        "narrowHalfAngle": 0.23501259304516733,
+        "distanceM": 1801581454554.7673
+      }
+    }
+  ]
+}

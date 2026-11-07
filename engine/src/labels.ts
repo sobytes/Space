@@ -329,6 +329,34 @@ export function placeLabels(
             size.detail && slot.point.onScreen
             && Math.hypot(box.x - slot.point.x, box.y - slot.point.y) > detailReach
           ) continue;
+          /**
+           * A label nearer another planet than its own names that planet, whatever it says.
+           *
+           * The strict sweep below already refuses to drop a plate across another body, and
+           * the relaxed sweep that follows accepts it rather than leave a visible planet
+           * unnamed. That trade is right for a plate that merely overlaps a disc and wrong
+           * once the label is closer to the other body than to its own: measured in the
+           * system view, Venus's name landed 34 points from Venus and 13 from Earth, which is
+           * not a label with a cosmetic problem, it is a label that says the wrong thing.
+           * Reported once already, as the times being attached to the wrong bodies.
+           *
+           * So this one holds in both sweeps, and a label with nowhere satisfying it is not
+           * drawn. Silence is recoverable by tapping the planet; a confident wrong name is not.
+           *
+           * Clamped labels are exempt, as ever: their body is off screen, so "nearer its own
+           * body" is a comparison with something a thousand points away and the arrow is what
+           * carries the meaning.
+           */
+          if (slot.point.onScreen) {
+            const own = Math.hypot(box.x - slot.point.x, box.y - slot.point.y);
+            const stolen = inputs.some((other) => {
+              if (other.id === slot.input.id) return false;
+              const p = points.get(other.id)!;
+              if (!p.onScreen || p.radiusPx < 1) return false;
+              return Math.hypot(box.x - p.x, box.y - p.y) < own;
+            });
+            if (stolen) continue;
+          }
           if (taken.some((other) => overlaps(box, other))) continue;
           if (strict) {
             const blocked = inputs.some((other) => {

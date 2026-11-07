@@ -91,20 +91,3 @@ public func clampToSupported(_ epoch: JdTdb) -> JdTdb {
     let target = year < Double(supportedYears.from) ? supportedYears.from : supportedYears.to
     return JdTdb(2_451_545.0 + (Double(target) - 2_000) * 365.25)
 }
-
-/**
- Is the clock sitting on the edge of the fitted range, which is where it stops?
-
- Separate from `ephemerisStandingAt`, which reports the epoch as inside the long span here,
- because it is: the edge is the last instant any table was fitted for. What a viewer needs to
- know is different and more immediate, that the clock has stopped and why. Reported as "it
- stopped at the year 3000", which is a question about the app rather than about the tables, and
- the app was answering it only inside a panel that is the first thing anyone hides.
-
- A day of tolerance, so a date deliberately set to 2999 does not claim the clock has stopped.
- */
-public func atSupportedEdge(_ epoch: JdTdb) -> Bool {
-    let year = julianYearForModelSelection(epoch)
-    let day = 1 / Constants.daysPerJulianYear
-    return year <= Double(supportedYears.from) + day || year >= Double(supportedYears.to) - day
-}

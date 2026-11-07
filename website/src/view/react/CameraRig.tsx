@@ -6,6 +6,7 @@ import { CameraControls } from "@react-three/drei";
 import type CameraControlsImpl from "camera-controls";
 import type { PerspectiveCamera } from "three";
 import { BODY_CONTRACTS, satelliteSystemRadiusM } from "@solar/engine/bodies/registry";
+import { SYSTEM_VIEW_RADIUS_M, framingDistanceM } from "@solar/engine/framing";
 import type { ViewCommand, ViewportSnapshot } from "../core/viewport";
 import { useViewport, useViewportValue } from "./ViewportContext";
 
@@ -67,7 +68,27 @@ export function CameraRig() {
      * terminator is visible rather than edge-on.
      */
     const sunDirection = viewport.sunDirectionFor(focus);
-    const distance = isSystemView ? 1.6e12 : radius * 6;
+    /**
+     * The system view is solved from a radius, not set as a distance.
+     *
+     * It was 1.6e12 metres, which is a distance and therefore frames a different amount of sky
+     * in every window: on a wide desktop the narrow axis is the vertical one and reaches 4.4
+     * au, and in a tall window it is the horizontal one and reaches far less. The iPhone had
+     * the same arrangement with a different constant, so the two clients disagreed about what
+     * "the whole system" meant and neither of them said what it meant.
+     *
+     * `SYSTEM_VIEW_RADIUS_M` is now that decision, written down once, and both clients solve
+     * their own distance from their own field of view and aspect.
+     */
+    // Read off the camera rather than type-tested against it: `PerspectiveCamera` is imported
+    // here as a type only, so an `instanceof` would be a compile-time name with no runtime
+    // value behind it.
+    const lens = instance.camera as Partial<PerspectiveCamera>;
+    const aspect = lens.aspect ?? window.innerWidth / Math.max(window.innerHeight, 1);
+    const verticalFov = ((lens.fov ?? 45) * Math.PI) / 180;
+    const distance = isSystemView
+      ? framingDistanceM(SYSTEM_VIEW_RADIUS_M, verticalFov, aspect, 0.92)
+      : radius * 6;
 
     if (isSystemView) {
       /**
@@ -141,12 +162,20 @@ export function CameraRig() {
            * Solving for the distance that puts the apoapsis at a set fraction of the vertical
            * half-frame holds regardless:  d = r / tan(fov/2 * fill).
            *
-           * Vertical rather than horizontal because that is the shorter axis on every window
-           * wider than it is tall, so it is the one that crops.
+           * Against the narrow axis, which is the vertical one only while the window is wider
+           * than it is tall. It is not on a phone held upright, where the horizontal is
+           * narrower by more than two to one, and this cropped the satellite system by that
+           * factor there while reading as correct in every landscape screenshot. The iOS
+           * client had the identical rule with the identical hole in it; both now call the
+           * same function, so neither can drift from the other again.
            */
-          const halfFovRad = ((instance.camera as PerspectiveCamera).fov * Math.PI) / 360;
-          const fill = 0.7;
-          const distance = systemRadius / Math.tan(halfFovRad * fill);
+          const lens = instance.camera as Partial<PerspectiveCamera>;
+          const distance = framingDistanceM(
+            systemRadius,
+            ((lens.fov ?? 45) * Math.PI) / 180,
+            lens.aspect ?? window.innerWidth / Math.max(window.innerHeight, 1),
+            0.7,
+          );
           void instance.dollyTo(Math.min(distance, instance.maxDistance), true);
           return;
         }

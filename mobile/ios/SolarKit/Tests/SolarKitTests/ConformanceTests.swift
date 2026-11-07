@@ -422,9 +422,20 @@ final class ConformanceTests: XCTestCase {
             ])
 
         /// Where a body's name is drawn, and where an off-screen pointer aims.
-        /// Whether an epoch sits on the edge of the range the element tables were fitted for.
-        case "supported-edge":
-            return .object(["atEdge": .bool(atSupportedEdge(JdTdb(number(input, "epoch"))))])
+        /// Camera distance that holds a radius on the narrow axis of a given viewport.
+        case "framing":
+            return .object([
+                "narrowHalfAngle": .number(narrowHalfAngle(
+                    verticalFovRadians: number(input, "verticalFovRadians"),
+                    aspect: number(input, "aspect")
+                )),
+                "distanceM": .number(framingDistanceM(
+                    radiusM: number(input, "radiusM"),
+                    verticalFovRadians: number(input, "verticalFovRadians"),
+                    aspect: number(input, "aspect"),
+                    fill: number(input, "fill")
+                )),
+            ])
 
         /// Every preset the clock offers, in order, with the words used for it.
         case "clock-rates":

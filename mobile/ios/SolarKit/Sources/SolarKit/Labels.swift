@@ -341,6 +341,34 @@ public func placeLabels(_ inputs: [LabelInput], options: LabelOptions) -> [Label
                        let p = attachedTo,
                        ((box.x - p.x) * (box.x - p.x) + (box.y - p.y) * (box.y - p.y))
                         .squareRoot() > options.detailReachPx { continue }
+                    /**
+                     A label nearer another planet than its own names that planet, whatever it
+                     says.
+
+                     The strict sweep refuses to drop a plate across another body and the
+                     relaxed sweep accepts it rather than leave a visible planet unnamed. That
+                     trade is right for a plate that merely overlaps a disc and wrong once the
+                     label is closer to the other body than to its own: measured in the system
+                     view, Venus's name landed 34 points from Venus and 13 from Earth, which
+                     is not a cosmetic problem, it is a label that says the wrong thing.
+                     Reported once already, as the times being attached to the wrong bodies.
+
+                     So this holds in both sweeps, and a label with nowhere satisfying it is
+                     not drawn. Silence is recoverable by tapping the planet; a confident wrong
+                     name is not. Clamped labels are exempt: their body is off screen and the
+                     arrow is what carries the meaning.
+                     */
+                    if let own = attachedTo {
+                        let mine = ((box.x - own.x) * (box.x - own.x)
+                            + (box.y - own.y) * (box.y - own.y)).squareRoot()
+                        let stolen = inputs.contains { other in
+                            guard other.id != id, let p = points[other.id],
+                                  p.onScreen, p.radiusPx >= 1 else { return false }
+                            return ((box.x - p.x) * (box.x - p.x)
+                                + (box.y - p.y) * (box.y - p.y)).squareRoot() < mine
+                        }
+                        if stolen { continue }
+                    }
                     if taken.contains(where: { overlaps(box, $0) }) { continue }
                     if strict {
                         let blocked = inputs.contains { other in

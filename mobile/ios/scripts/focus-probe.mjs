@@ -320,6 +320,33 @@ for (const {
        * drawn. A label count alone would have passed too, since seven labels were produced.
        * The question that fails is which bodies they belong to.
        */
+      /**
+       * Is any label nearer a planet it does not name than the one it does?
+       *
+       * Measured, not eyeballed, because at this scale the two readings are a dozen points
+       * apart and a screenshot cannot separate them. Venus's name once landed 34 points from
+       * Venus and 13 from Earth, which reads as Earth being called Venus. Reported once as
+       * the times being attached to the wrong bodies, and the arrangement that produced it
+       * came back the moment the system view was framed wider.
+       */
+      const visible = Object.entries(scene?.bodyScreen ?? {}).filter(([, b]) => (
+        !b.behind && Math.abs(b.ndcX) <= 1 && Math.abs(b.ndcY) <= 1 && b.radiusPx >= 1
+      ));
+      const stolen = labels.filter((l) => {
+        if (l.clamped) return false;
+        const own = scene.bodyScreen[l.id];
+        const mine = Math.hypot(l.x - own.x, l.y - own.y);
+        return visible.some(([id, b]) => id !== l.id && Math.hypot(l.x - b.x, l.y - b.y) < mine);
+      });
+      console.log(
+        `${"".padEnd(9)} every label nearest its own planet: `
+          + `${stolen.length === 0 ? "ok" : `${stolen.map((l) => l.id).join(", ")} NEARER ANOTHER`}`,
+      );
+      if (stolen.length > 0) {
+        failures += 1;
+        ok = false;
+      }
+
       const named = new Set(labels.map((l) => l.id));
       const missing = Object.entries(scene?.bodyScreen ?? {})
         .filter(([id, b]) => (

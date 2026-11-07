@@ -67,15 +67,20 @@ final class Clock {
         guard running else { return }
         let days = realSeconds * rate.secondsPerSecond * direction / Constants.secondsPerDay
         /**
-         Stop at the edge of the fitted tables rather than run past them.
+         Unbounded, with the time bar saying so once the tables stop covering the date.
 
-         At a hundred years a second the long-span table's range is about ten real seconds
-         away, and beyond it the planets are drawn by extrapolating a polynomial outside its
-         fit: still smooth, still confident, and not where anything was. A clock that halts at
-         3000 AD is telling the truth about what this simulation knows, and the accuracy panel
-         says which table is answering and what its errors are.
+         It did halt at 3000 AD, because past the fitted range the planets are drawn by
+         extrapolating a polynomial outside its fit: still smooth, still confident, and not
+         where anything was. A clock that stops is one way to be honest about that. Being told
+         is another, and it is the better one here, because a simulation that refuses to show
+         the far future teaches less than one that shows it and says how much to trust it.
+
+         Safe to run, measured rather than assumed: every body's position stays finite and
+         bounded out to year 50,000 either way, and every local clock and sub-solar point with
+         it. That matters here more than on the web, because a NaN arriving in Swift is not a
+         wrong number, it is a trap and a crash, which this app has already had once.
          */
-        epoch = clampToSupported(JdTdb(epoch.value + days))
+        epoch = JdTdb(epoch.value + days)
 
         sincePublish += realSeconds
         if sincePublish >= Self.publishInterval {

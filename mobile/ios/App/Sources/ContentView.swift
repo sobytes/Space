@@ -407,7 +407,7 @@ struct ContentView: View {
             scene.update(to: clock.epoch, gravity: gravity)
             let heightPx = Double(UIScreen.main.bounds.height)
             scene.setViewportHeight(heightPx)
-            scene.viewportWidthPxForDebug = Double(UIScreen.main.bounds.width)
+            scene.viewportWidthPx = Double(UIScreen.main.bounds.width)
             scene.refreshTiles(viewportHeightPx: heightPx)
         }
     }
@@ -894,21 +894,35 @@ private struct TimeBar: View {
             Text(clock.formattedEpoch).font(.system(.caption, design: .monospaced))
 
             /**
-             Why the clock has stopped, said where it stopped.
+             How much to trust what is on screen, said where the planets are.
 
-             The planetary positions come from element tables fitted for 3000 BC to 3000 AD,
-             and the clock halts at that edge rather than extrapolating a polynomial outside
-             its fit, which would keep producing smooth confident numbers that are not where
-             anything was. At a hundred years a second the edge is about ten seconds away.
+             Positions come from element tables fitted for 3000 BC to 3000 AD. The clock used
+             to stop at that edge; it now runs on, and the honesty has to come from saying so
+             instead. At a hundred years a second the edge is about ten seconds away.
 
-             Reported as "it stopped at the year 3000". The accuracy panel has always explained
-             which table is answering, and the panel is the first thing anyone hides to look at
-             the planets, so at the moment the question is asked there was nothing on screen
-             that answered it.
+             The wording is the engine's own, not a second copy written here. `ephemerisStanding`
+             already explains which table is answering and what that costs, it is already gated
+             by the conformance suite, and prose duplicated across two clients is how they come
+             to disagree. The accuracy panel says the same thing, and the panel is the first
+             thing anyone hides to look at the planets, which is why this line exists.
              */
-            if atSupportedEdge(clock.displayEpoch) {
-                Text("The element tables are fitted to 3000 BC - 3000 AD. The clock stops here "
-                     + "rather than put the planets where they never were.")
+            let standing = ephemerisStandingAt(clock.displayEpoch)
+            if !standing.inside {
+                /**
+                 And where to go for the timescales this clock cannot reach.
+
+                 Asked directly, on seeing the clock run past the tables: "what will happen if
+                 it runs for ages, should the sun swallow the other planets". It will not, and
+                 that is worth saying plainly. At a hundred years a second the end of the Sun's
+                 main sequence is 1.7 years of real running away and the red giant tip 2.4, and
+                 this clock does not model the Sun's life in any case.
+
+                 Deep time does, and it is a different model rather than a faster clock: out
+                 there the element tables mean nothing and the orbits come from the Sun's mass
+                 loss instead. Two models, because one would be a lie at one end or the other.
+                 */
+                Text(standing.note + " The Sun's own life is in Deep time, which models those "
+                     + "orbits from its mass loss rather than from these tables.")
                     .font(.system(size: 10))
                     .foregroundStyle(.orange)
                     .multilineTextAlignment(.center)
