@@ -8,7 +8,6 @@ import { Body } from "./Body";
 import { BodyMarkers } from "./BodyMarkers";
 import { CameraRig } from "./CameraRig";
 import { Hud } from "./Hud";
-import { AskPanel } from "./AskPanel";
 import { HeliocentricRoot } from "./HeliocentricRoot";
 import { MoonOrbits, OrbitPaths } from "./OrbitPaths";
 import { PickLayer } from "./PickLayer";
@@ -56,7 +55,6 @@ export function Scene() {
           <PickLayer />
         </Canvas>
         <Hud />
-        <AskPanel />
       </div>
     </ViewportProvider>
   );

@@ -525,33 +525,6 @@
       }
     },
     {
-      "id": "ai-assistant",
-      "title": "Ask about the solar system, answered through engine-backed tools",
-      "why": "contracts/numbers-come-from-the-engine. The model narrates; the engine owns every figure.",
-      "web": {
-        "status": "shipped",
-        "paths": [
-          "website/src/ai/tools.ts",
-          "website/src/view/react/AskPanel.tsx"
-        ]
-      },
-      "ios": {
-        "status": "shipped",
-        "paths": [
-          "mobile/ios/App/Sources/AskView.swift"
-        ]
-      },
-      "android": {
-        "status": "planned"
-      },
-      "tvos": {
-        "status": "planned"
-      },
-      "androidtv": {
-        "status": "planned"
-      }
-    },
-    {
       "id": "starfield",
       "title": "Star background",
       "why": "Depth cue, and it should be the real sky.",
@@ -828,7 +801,7 @@
     {
       "id": "deep-time",
       "title": "Deep time: the Sun's whole life, applied to the scene itself",
-      "why": "A separate mode because it is a separate scale. The rest of the app runs on element tables fitted for a few thousand years either side of now; here positions are irrelevant and the star is the variable, and driving it from the ordinary clock would mean extrapolating those tables ten billion years. The point it makes is that the Sun is not a fixed lamp: it shone at 71 per cent of today's brightness when Earth formed, has brightened about forty per cent since, and the habitable zone has been sweeping outwards the whole time. Earth's deadline is set by that drift, roughly a billion years, and not by the red giant five billion years later. Luminosity is a closed form from Gough 1981, the giant branch is interpolated between published waypoints from Schröder and Connon Smith 2008 and says so, and the phases after the helium flash are reported as an end state rather than invented. The scene is drawn at the chosen age rather than only described: every orbit expands by the mass-loss factor, the Sun is drawn at its radius for that age, and a body the star has swallowed stops being drawn and stops being labelled. The clock keeps running, so planets still go round; what changes is the scale of the system and the size of the star in the middle of it.",
+      "why": "A separate mode because it is a separate scale. The rest of the app runs on element tables fitted for a few thousand years either side of now; here positions are irrelevant and the star is the variable, and driving it from the ordinary clock would mean extrapolating those tables ten billion years. The point it makes is that the Sun is not a fixed lamp: it shone at 71 per cent of today's brightness when Earth formed, has brightened about forty per cent since, and the habitable zone has been sweeping outwards the whole time. Earth's deadline is set by that drift, roughly a billion years, and not by the red giant five billion years later. Luminosity is a closed form from Gough 1981, the giant branch is interpolated between published waypoints from Schr\u00f6der and Connon Smith 2008 and says so, and the phases after the helium flash are reported as an end state rather than invented. The scene is drawn at the chosen age rather than only described: every orbit expands by the mass-loss factor, the Sun is drawn at its radius for that age, and a body the star has swallowed stops being drawn and stops being labelled. The clock keeps running, so planets still go round; what changes is the scale of the system and the size of the star in the middle of it.",
       "web": {
         "status": "shipped",
         "paths": [

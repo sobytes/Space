@@ -89,7 +89,6 @@ struct ContentView: View {
     /// Everything about the focused body, on its own screen. See `BodyDetails`.
     @State private var showingDetails = false
     @State private var showingDemonstrations = false
-    @State private var showingAsk = false
     /**
      Hides every panel so the scene is unobstructed.
 
@@ -114,7 +113,7 @@ struct ContentView: View {
     @State private var showLabels = !CommandLine.arguments.contains("-noLabels")
 
     private var anySheetPresented: Bool {
-        showingDemonstrations || showingAsk || showingHabitability || showingSurface
+        showingDemonstrations || showingHabitability || showingSurface
             || showingDeepTime || showingDetails
     }
     @State private var overlayHidden = CommandLine.arguments.contains("-startHidden")
@@ -163,9 +162,6 @@ struct ContentView: View {
                 id: "tool.demonstrations", title: "Demonstrations", icon: "function",
                 tint: .secondary
             ) { showingDemonstrations = true },
-            RailItem(id: "tool.ask", title: "Ask", icon: "sparkles", tint: .secondary) {
-                showingAsk = true
-            },
             RailItem(
                 id: "tool.labels", title: "Labels", icon: showLabels ? "tag.fill" : "tag",
                 tint: showLabels ? .orange : .secondary
@@ -371,7 +367,6 @@ struct ContentView: View {
             BodyDetails(id: focus, clock: clock, scene: scene, gravity: gravity)
         }
         .sheet(isPresented: $showingDemonstrations) { DemonstrationsView() }
-        .sheet(isPresented: $showingAsk) { AskView() }
         // `focus`, not `clock`: the assessment is a pure function of the body and does
         // not move with time, so the sheet is rebuilt only when the focus changes.
         .sheet(isPresented: $showingHabitability) { HabitabilityView(body_: focus) }

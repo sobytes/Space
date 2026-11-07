@@ -32,9 +32,7 @@ npm run dev          # the site, on port 3000
 ./build.sh ios run   # the iPhone app, on a simulator
 ```
 
-The simulation needs no configuration. Only the AI panel wants an API key: copy
-`.env.local.example` to `.env.local` and fill it in, or leave it and that one panel will say
-so politely.
+The simulation needs no configuration and no keys. Nothing here calls out to a paid service.
 
 The planet imagery is already here, as the WebP files under `website/public/textures`: 2048
 across for every body, 4096 for whichever one the camera is focused on, 12 MB in total. You

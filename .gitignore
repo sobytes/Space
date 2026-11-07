@@ -41,9 +41,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# but the template must be committed, since .env* above would hide it
-!.env.local.example
-
 # secrets beyond env files
 *.key
 *.p12
