@@ -422,6 +422,20 @@ final class ConformanceTests: XCTestCase {
             ])
 
         /// Where a body's name is drawn, and where an off-screen pointer aims.
+        /// Sun altitude and apparent solar time at a point on a body.
+        case "solar-position":
+            return .object([
+                "altitudeDeg": .number(solarAltitudeDeg(
+                    .embary, at: JdTdb(number(input, "epoch")),
+                    latitudeDeg: number(input, "latitudeDeg"),
+                    longitudeDeg: number(input, "longitudeDeg")
+                ) ?? .nan),
+                "solarTimeHours": .number(solarTimeHoursAt(
+                    .embary, at: JdTdb(number(input, "epoch")),
+                    longitudeDeg: number(input, "longitudeDeg")
+                ) ?? .nan),
+            ])
+
         /// Camera distance that holds a radius on the narrow axis of a given viewport.
         case "framing":
             return .object([

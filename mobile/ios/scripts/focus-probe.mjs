@@ -101,6 +101,43 @@ const BODIES = [
     extraArgs: ["-rate", "6"],
     note: "system view, one year a second",
   },
+  /**
+   * Is the Earth turned to the right place for the Sun that is lighting it?
+   *
+   * The pole and the spin rate were right and the texture was ninety degrees out, so every
+   * continent sat a quarter turn from where the Sun thought it was. Six hours of rotation.
+   * Reported from a phone as Chicago being listed in daylight while North America was drawn
+   * in darkness, and the list was the half that was right.
+   *
+   * Nothing could see it. The coverage checks count lit pixels and do not care which pixels.
+   * The orbit checks are about where the body is, not which way it faces. Conformance gates
+   * the engine, and the engine was never wrong. What was wrong lived between the engine's
+   * prime meridian and SceneKit's idea of where a sphere's texture starts.
+   *
+   * So: an instant when the Sun is over the mid Atlantic, approached from the lit side, which
+   * puts open water in the middle of the frame. The quarter turn that was actually shipped
+   * puts the western United States there instead, and the half turn puts Arabia; both read as
+   * land by a wide margin. Asking whether the middle of the Earth is blue is a crude question
+   * that happens to have one right answer here.
+   *
+   * The first instant chosen for this was the South Pacific, and it passed on the bug: a
+   * quarter turn from there is the Indonesian archipelago, which is as blue as open ocean.
+   * A gate has to be tried against the defect it names, and that one was not discriminating.
+   *
+   * Tried against all four orientations at this instant. The one that shipped reads
+   * rgb(226, 221, 207) against rgb(51, 94, 180) for the correct one, which is most of two
+   * channels. The other two quarter turns happen to land on water here and are not caught:
+   * they are not plausible regressions, since what would go is the constant itself, and
+   * saying so is better than implying this covers more than it does.
+   */
+  {
+    id: "embary",
+    label: "earth-sub-solar",
+    minimumLit: 25,
+    extraArgs: ["-at", "2026-11-07T13:44", "-noLabels"],
+    oceanCentre: true,
+    note: "Sun over the mid Atlantic at 30W",
+  },
   { id: "mercury", minimumLit: 25 },
   { id: "embary", minimumLit: 25 },
   { id: "saturn", minimumLit: 25 },
@@ -177,6 +214,39 @@ function sceneDebug(udid) {
   return JSON.parse(readFileSync(file, "utf8"));
 }
 
+/**
+ * Mean colour of the middle of the frame, where the focused body's sub-solar point sits.
+ *
+ * A twelfth of the width, which is well inside the disc at every framing this probe uses and
+ * small enough that a coastline at the edge of it cannot swing the average.
+ */
+async function centreColour(file) {
+  const image = sharp(file);
+  const { width, height } = await image.metadata();
+  const side = Math.floor(width / 12);
+  const { data, info } = await image
+    .extract({
+      left: Math.floor((width - side) / 2),
+      top: Math.floor((height - side) / 2),
+      width: side,
+      height: side,
+    })
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  let n = 0;
+  for (let i = 0; i < data.length; i += info.channels) {
+    r += data[i];
+    g += data[i + 1];
+    b += data[i + 2];
+    n += 1;
+  }
+  return { r: Math.round(r / n), g: Math.round(g / n), b: Math.round(b / n) };
+}
+
 async function litFraction(file) {
   const image = sharp(file);
   const { width, height } = await image.metadata();
@@ -205,7 +275,7 @@ execFileSync("xcrun", ["simctl", "install", udid, app]);
 
 let failures = 0;
 for (const {
-  id: body, label, minimumLit, note, moons, extraArgs, orbitError,
+  id: body, label, minimumLit, note, moons, extraArgs, orbitError, oceanCentre,
 } of BODIES) {
   // Two cases can share a body: Jupiter is checked both at its default framing and
   // pulled back to its satellite system, and they must not overwrite each other's
@@ -380,7 +450,38 @@ for (const {
     }
   }
 
-  if (body === "embary") {
+  if (oceanCentre) {
+    /**
+     * The middle of the disc, as a colour.
+     *
+     * Ocean under this light reads strongly blue; every landmass a quarter or half turn would
+     * put here reads brown, green or white. The margin is most of a channel, so the threshold
+     * does not have to be delicate.
+     */
+    const centre = await centreColour(file);
+    /**
+     * Lit as well as blue.
+     *
+     * The first version of this asked only for blue and passed on rgb(20, 19, 41), which is
+     * the night side: dark, and incidentally blue. It was reporting the Earth correctly
+     * oriented while looking at the half of it the Sun was not on. A sub-solar point is by
+     * definition the brightest spot on the body, so the brightness is the half of the
+     * question that makes the colour mean anything.
+     */
+    const lit = centre.b > 70;
+    const oceanic = lit && centre.b > centre.r * 1.35 && centre.b > centre.g * 1.2;
+    console.log(
+      `${"".padEnd(9)} sub-solar point is lit ocean: `
+        + `rgb(${centre.r}, ${centre.g}, ${centre.b})  `
+        + `${oceanic ? "ok" : lit ? "LAND AT 30W, SO THE EARTH IS TURNED WRONG" : "NOT LIT"}`,
+    );
+    if (!oceanic) {
+      failures += 1;
+      ok = false;
+    }
+  }
+
+  if (body === "embary" && label === undefined) {
     /**
      * Is the overlay rebuilding itself at frame rate?
      *

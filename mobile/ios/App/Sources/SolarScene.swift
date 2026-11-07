@@ -244,6 +244,24 @@ final class SolarScene {
 
     // MARK: - Construction
 
+    /**
+     Where SceneKit starts a sphere's texture, against where the prime meridian is.
+
+     An equirectangular map has longitude zero down the middle of the image, and `SCNSphere`
+     puts that column a quarter turn from the axis the IAU spin angle is measured against. The
+     elements were right, the pole was right, the rate was right, and every continent sat
+     ninety degrees from where the Sun thought it was: six hours of rotation, so the lit half
+     of the Earth was the wrong half.
+
+     Reported from a phone as Chicago being listed in daylight while North America was drawn in
+     darkness. The list was the half that was right.
+
+     Measured rather than looked up, because Apple does not document the convention: at the
+     instant the Sun is over Greenwich the view arrives centred on India, and a quarter turn
+     brings west Africa back under it. `focus-probe.mjs` holds that measurement as a gate.
+     */
+    private static let textureMeridianOffset: Float = .pi / 2
+
     private func buildCamera() {
         let camera = SCNCamera()
         camera.fieldOfView = 55
@@ -1088,6 +1106,8 @@ final class SolarScene {
              The pole fixes which way the axis points and the prime meridian fixes where the
              surface has got to. A rate alone turns the body at the right speed about the wrong
              axis, which looks plausible and puts every surface feature in the wrong place.
+
+             The spin then gets a quarter turn added. See `textureMeridianOffset`.
              */
             let o = orientationOf(id, at: epoch)
             let pole = SCNVector3(Float(o.poleEcliptic.x), Float(o.poleEcliptic.z), Float(-o.poleEcliptic.y))
@@ -1099,7 +1119,7 @@ final class SolarScene {
             // Swing the axis to the pole, then spin about it.
             node.eulerAngles = SCNVector3(0, 0, 0)
             let spinNode = node.childNodes.first
-            spinNode?.eulerAngles = SCNVector3(0, Float(o.spin), 0)
+            spinNode?.eulerAngles = SCNVector3(0, Float(o.spin) + Self.textureMeridianOffset, 0)
             node.rotation = SCNVector4(0, 0, 0, 0)
             node.simdOrientation = simd_quatf(angle: -azimuth, axis: SIMD3<Float>(0, 1, 0))
                 * simd_quatf(angle: tilt, axis: SIMD3<Float>(0, 0, 1))

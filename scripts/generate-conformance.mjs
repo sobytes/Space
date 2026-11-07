@@ -40,6 +40,7 @@ const tiles = await import(`${ROOT}website/src/view/core/tiles.ts`);
 const labels = await import(`${ROOT}engine/src/labels.ts`);
 const rates = await import(`${ROOT}engine/src/rates.ts`);
 const framing = await import(`${ROOT}engine/src/framing.ts`);
+const earthPlaces = await import(`${ROOT}engine/src/data/earth-places.ts`);
 const orbitTime = await import(`${ROOT}engine/src/orbit-time.ts`);
 const timeSense = await import(`${ROOT}engine/src/time-sense.ts`);
 const when = await import(`${ROOT}engine/src/when.ts`);
@@ -722,6 +723,44 @@ domains.framing = {
       },
     };
   }),
+};
+
+/**
+ * Where the Sun is in the sky at a place, and what the Sun says the time is there.
+ *
+ * Gated because the time-zone list reads both on every row, and because the interesting cases
+ * are the ones a longitude-only guess gets wrong: McMurdo in the southern winter, where the
+ * Sun is thirty-five degrees under the horizon at local midday, and Madrid, whose clock runs
+ * more than two hours ahead of its own Sun.
+ */
+domains["solar-position"] = {
+  absoluteTolerance: 1e-9,
+  description: "Sun altitude and apparent solar time at a point on a body.",
+  tolerance: 1e-10,
+  cases: (() => {
+    // Two instants six months apart, so each place is sampled in both of its seasons.
+    const instants = [
+      { id: "june", ms: Date.UTC(2026, 5, 21, 12, 0, 0) },
+      { id: "december", ms: Date.UTC(2026, 11, 21, 12, 0, 0) },
+    ];
+    const chosen = ["London", "Reykjav\u00edk", "McMurdo Station", "Tokyo", "Madrid", "Sydney"];
+    const places = earthPlaces.EARTH_PLACES.filter((p) => chosen.includes(p.city));
+    return instants.flatMap(({ id, ms }) => {
+      const epoch = time.tdbFromUtc(time.jdUtcFromEpochMs(ms));
+      return places.map((place) => ({
+        id: `${id}-${place.city.toLowerCase().replace(/[^a-z]/g, "")}`,
+        input: {
+          epoch,
+          latitudeDeg: place.latitudeDeg,
+          longitudeDeg: place.longitudeDeg,
+        },
+        expected: {
+          altitudeDeg: solarTime.solarAltitudeDeg("embary", epoch, place.latitudeDeg, place.longitudeDeg),
+          solarTimeHours: solarTime.solarTimeHoursAt("embary", epoch, place.longitudeDeg),
+        },
+      }));
+    });
+  })(),
 };
 
 domains["clock-rates"] = {

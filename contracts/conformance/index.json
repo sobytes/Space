@@ -17,6 +17,7 @@
     "time-sense",
     "orbit-time",
     "framing",
+    "solar-position",
     "clock-rates",
     "labels",
     "sample-cadence",
@@ -24,5 +25,5 @@
     "nbody-evolution",
     "tiles"
   ],
-  "totalCases": 785
+  "totalCases": 797
 }

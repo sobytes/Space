@@ -284,3 +284,56 @@ export function localTimeLabel(
   const hhmm = clock.formatted.slice(0, 5);
   return `day ${clock.dayNumber.toLocaleString()} · ${hhmm}`;
 }
+
+/**
+ * How high the Sun is above the horizon at a point on a body, in degrees.
+ *
+ * Negative means below it, so this is the whole answer to "is it night there" rather than an
+ * approximation of one. Computed from the sub-solar point, which carries the Sun's declination
+ * as well as its longitude, so it is right at the poles and right in winter: a guess made from
+ * longitude alone says the Sun is up over Tromsø at midday in December, and it is not.
+ *
+ * Geometric, with no correction for refraction or for the Sun's half-degree width, which
+ * together lift the apparent sunrise about 0.83 degrees earlier than this reports. That
+ * matters within a few minutes of sunrise and nowhere else, and naming the limit is better
+ * than pretending to a precision the question does not have.
+ */
+export function solarAltitudeDeg(
+  body: BodyId,
+  epoch: JdTdb,
+  latitudeDeg: number,
+  longitudeDeg: number,
+): number | null {
+  const subSolar = subSolarPoint(body, epoch);
+  if (subSolar === null) return null;
+
+  const toRad = Math.PI / 180;
+  const lat = latitudeDeg * toRad;
+  const dec = subSolar.latitudeDeg * toRad;
+  // The hour angle is how far round the body you are from the point the Sun is over.
+  const hourAngle = (longitudeDeg - subSolar.longitudeDeg) * toRad;
+
+  const sinAltitude =
+    Math.sin(lat) * Math.sin(dec) + Math.cos(lat) * Math.cos(dec) * Math.cos(hourAngle);
+  return Math.asin(Math.max(-1, Math.min(1, sinAltitude))) / toRad;
+}
+
+/**
+ * Apparent solar time at a point, in hours, or null where there is no sunrise to count from.
+ *
+ * The reason a time zone is worth explaining. Civil time is a decision taken by a government
+ * for a whole country at once; this is what the Sun is actually doing at that spot. Madrid
+ * keeps the same clock as Warsaw and sits nineteen degrees west of it, so its noon arrives an
+ * hour and a quarter after the clock says so, which is the whole lesson in one row.
+ */
+export function solarTimeHoursAt(
+  body: BodyId,
+  epoch: JdTdb,
+  longitudeDeg: number,
+): number | null {
+  const clock = solarClock(body, epoch);
+  if (clock === null) return null;
+  const sense = BODY_CONTRACTS[body].rotation.rotationRateDegPerDay < 0 ? -1 : 1;
+  const hours = clock.hours + (sense * longitudeDeg * 24) / 360;
+  return ((hours % 24) + 24) % 24;
+}

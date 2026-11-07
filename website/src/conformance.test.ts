@@ -53,6 +53,7 @@ import {
 import { placeLabels, type LabelInput } from "@solar/engine/labels";
 import { RATE_PRESETS } from "@solar/engine/rates";
 import { framingDistanceM, narrowHalfAngle } from "@solar/engine/framing";
+import { solarAltitudeDeg, solarTimeHoursAt } from "@solar/engine/solar-time";
 import { levelFor, metresPerPixel, tileExtent, visibleCapAngle } from "./view/core/tiles";
 
 /**
@@ -384,6 +385,18 @@ function compute(domain: string, testCase: Case): unknown {
         lastEpoch: marks[marks.length - 1].epoch,
       };
     }
+
+    /** Sun altitude and apparent solar time at a point on a body. */
+    case "solar-position":
+      return {
+        altitudeDeg: solarAltitudeDeg(
+          "embary", jdTdb(input.epoch as number),
+          input.latitudeDeg as number, input.longitudeDeg as number,
+        ),
+        solarTimeHours: solarTimeHoursAt(
+          "embary", jdTdb(input.epoch as number), input.longitudeDeg as number,
+        ),
+      };
 
     /** Camera distance that holds a radius on the narrow axis of a given viewport. */
     case "framing":

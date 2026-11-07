@@ -379,6 +379,87 @@ final class InteractionTests: XCTestCase {
         return more
     }
 
+    /**
+     Earth's time zones open, and read against the Sun rather than against the device.
+
+     Asked for as a learning tool: spin the Earth, see which countries are in night, then
+     check a zone against its country. So the check is not that a list appeared but that it
+     is tied to the simulation: at an instant chosen in advance, a known number of the places
+     in it are in daylight, and that number has to come out of the sub-solar point rather
+     than out of whatever time the simulator's clock happens to hold.
+
+     The instant is the June solstice at noon UTC, where the answer is lopsided and therefore
+     worth asserting: Europe and Africa are lit, the Pacific is dark, and McMurdo is in
+     polar night. A list that silently fell back to the device clock would give a different
+     count at every run of the suite, which is exactly the failure worth catching.
+     */
+    func testTimeZonesListReadsFromTheSimulatedSun() {
+        app.terminate()
+        app = XCUIApplication()
+        app.launchArguments = ["-uiTest", "-focus", "embary", "-at", "2026-06-21", "-paused"]
+        app.launch()
+
+        let zones = app.buttons["tool.zones"]
+        XCTAssertTrue(zones.waitForExistence(timeout: 20), "no Time zones button on Earth")
+        zones.tap()
+
+        let count = app.staticTexts["zones.daylightCount"]
+        XCTAssertTrue(count.waitForExistence(timeout: 10), "the time zone list never opened")
+
+        /**
+         Read off the row rather than recomputed here.
+
+         A test that worked out the expected count itself would be running the same arithmetic
+         as the app and agreeing with it by construction. What it can check is that the count
+         is neither nothing nor everything, which is what a list wired to a broken clock or to
+         no clock at all would produce.
+         */
+        let text = count.label
+        XCTAssertTrue(
+            text.contains(" of "),
+            "expected a daylight count like \"23 of 49\", got \(text)"
+        )
+        let parts = text.components(separatedBy: " of ").compactMap { Int($0.filter(\.isNumber)) }
+        XCTAssertEqual(parts.count, 2, "could not read the daylight count from \(text)")
+        XCTAssertGreaterThan(parts[0], 0, "no place on Earth is in daylight, which cannot be")
+        XCTAssertLessThan(
+            parts[0], parts[1],
+            "every place is in daylight at once, so the Sun is not being consulted"
+        )
+
+        // The places themselves, and a zone that is the reason the screen exists.
+        /**
+         Scrolled to, because a list of forty-nine does not exist all at once.
+
+         Two mistakes in one assertion before this. `matching(identifier:)` compares against
+         the identifier and these rows carry their text as a label, so it matched nothing
+         whatever was on screen. And Kathmandu is at UTC+5:45, most of the way down: rows
+         below the fold are not in the accessibility tree at all, so even the right query
+         would have found nothing until the list had been moved.
+         */
+        XCTAssertTrue(scrollToText("Kathmandu"), "no Kathmandu in the zone list")
+        XCTAssertTrue(
+            scrollToText("UTC+5:45"), "the three-quarter-hour zone is missing"
+        )
+    }
+
+    /**
+     Swipes down a list until a piece of text appears, or gives up.
+
+     `firstMatch` throughout: a row and the cell holding it report the same text, and a plain
+     subscript on a query with two hits throws rather than returning either of them.
+     */
+    private func scrollToText(_ text: String, swipes: Int = 12) -> Bool {
+        let match = app.staticTexts.matching(
+            NSPredicate(format: "label == %@", text)
+        ).firstMatch
+        for _ in 0 ... swipes {
+            if match.exists { return true }
+            app.swipeUp()
+        }
+        return match.exists
+    }
+
     private func describe(_ element: XCUIElement) -> String {
         let id = element.identifier
         return id.isEmpty ? "\"\(element.label)\"" : id

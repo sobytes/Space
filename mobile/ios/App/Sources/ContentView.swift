@@ -71,6 +71,16 @@ struct ContentView: View {
         return formatter
     }()
 
+    /// Parses `-at` with a time. See `isoDay` for why the calendar is pinned.
+    private static let isoInstant: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm"
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        return formatter
+    }()
+
     @State private var lastTick = Date()
     @State private var lastDrag: CGSize = .zero
     @State private var lastMagnification: CGFloat = 1
@@ -88,6 +98,9 @@ struct ContentView: View {
 
     /// Everything about the focused body, on its own screen. See `BodyDetails`.
     @State private var showingDetails = false
+    /// Earth's time zones against where the Sun actually is. See `TimeZonesView`.
+    /// `-showZones` opens it at launch for a screenshot probe, like the other sheets.
+    @State private var showingZones = CommandLine.arguments.contains("-showZones")
     @State private var showingDemonstrations = false
     /**
      Hides every panel so the scene is unobstructed.
@@ -114,7 +127,7 @@ struct ContentView: View {
 
     private var anySheetPresented: Bool {
         showingDemonstrations || showingHabitability || showingSurface
-            || showingDeepTime || showingDetails
+            || showingDeepTime || showingDetails || showingZones
     }
     @State private var overlayHidden = CommandLine.arguments.contains("-startHidden")
 
@@ -176,6 +189,20 @@ struct ContentView: View {
                 showingDeepTime = true
             }
         ]
+        /**
+         Earth only, and at the end.
+
+         Every other body in the registry has exactly one time zone, because nobody lives
+         there to disagree about it. A button offering to break down the time zones of Mars
+         would be a joke at the expense of a child trying to learn what one is.
+         */
+        if focus == .embary {
+            items.append(
+                RailItem(id: "tool.zones", title: "Time zones", icon: "globe", tint: .cyan) {
+                    showingZones = true
+                }
+            )
+        }
         return items
     }
 
@@ -363,6 +390,7 @@ struct ContentView: View {
                 .padding(.top, overlayHidden ? 8 : 54)
             }
         }
+        .sheet(isPresented: $showingZones) { TimeZonesView(clock: clock) }
         .sheet(isPresented: $showingDetails) {
             BodyDetails(id: focus, clock: clock, scene: scene, gravity: gravity)
         }
@@ -446,9 +474,24 @@ struct ContentView: View {
              app already has "Go to date" for a person.
              */
             if let i = CommandLine.arguments.firstIndex(of: "-at"),
-               i + 1 < CommandLine.arguments.count,
-               let parsed = Self.isoDay.date(from: CommandLine.arguments[i + 1]) {
-                clock.setEpoch(epochFromUnixTimestamp(parsed.timeIntervalSince1970))
+               i + 1 < CommandLine.arguments.count {
+                let text = CommandLine.arguments[i + 1]
+                // A time as well as a date, because the sub-solar longitude moves fifteen
+                // degrees an hour and a probe checking where the Sun is has to pin both.
+                let parsed = Self.isoInstant.date(from: text) ?? Self.isoDay.date(from: text)
+                if let parsed {
+                    clock.setEpoch(epochFromUnixTimestamp(parsed.timeIntervalSince1970))
+                    /**
+                     Re-frame for the instant, not for launch.
+
+                     The camera is placed on the lit side when focus is set, and focus is set
+                     while the scene is built, which is before this runs. Without this the
+                     scene draws a date months away through a camera aimed at where the Sun
+                     was when the app started, and a probe checking which way the Earth faces
+                     measures the night side.
+                     */
+                    scene.setFocus(focus, at: clock.epoch)
+                }
             }
 
             guard let i = CommandLine.arguments.firstIndex(of: "-rate"),

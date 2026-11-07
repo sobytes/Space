@@ -6,7 +6,7 @@ is produced by the shared engine rather than typed into a view. Where two source
 the body contract says so out loud instead of hiding it in a tolerance.
 
 Two clients, one physics engine: a Next.js site and a native iPhone app. A conformance suite
-of **785 cases across 22 domains** runs against both, so the TypeScript and the Swift port
+of **797 cases across 23 domains** runs against both, so the TypeScript and the Swift port
 cannot quietly drift apart.
 
 ## What it does

@@ -1,0 +1,152 @@
+{
+  "domain": "solar-position",
+  "absoluteTolerance": 1e-9,
+  "description": "Sun altitude and apparent solar time at a point on a body.",
+  "tolerance": 1e-10,
+  "cases": [
+    {
+      "id": "june-reykjavk",
+      "input": {
+        "epoch": 2461213.0008007456,
+        "latitudeDeg": 64.15,
+        "longitudeDeg": -21.94
+      },
+      "expected": {
+        "altitudeDeg": 46.68168666244115,
+        "solarTimeHours": 10.500828131855911
+      }
+    },
+    {
+      "id": "june-london",
+      "input": {
+        "epoch": 2461213.0008007456,
+        "latitudeDeg": 51.51,
+        "longitudeDeg": -0.13
+      },
+      "expected": {
+        "altitudeDeg": 61.920893572326435,
+        "solarTimeHours": 11.954828131855919
+      }
+    },
+    {
+      "id": "june-madrid",
+      "input": {
+        "epoch": 2461213.0008007456,
+        "latitudeDeg": 40.42,
+        "longitudeDeg": -3.7
+      },
+      "expected": {
+        "altitudeDeg": 72.64339241339405,
+        "solarTimeHours": 11.71682813185592
+      }
+    },
+    {
+      "id": "june-tokyo",
+      "input": {
+        "epoch": 2461213.0008007456,
+        "latitudeDeg": 35.68,
+        "longitudeDeg": 139.69
+      },
+      "expected": {
+        "altitudeDeg": -19.372548720093192,
+        "solarTimeHours": 21.276161465189247
+      }
+    },
+    {
+      "id": "june-sydney",
+      "input": {
+        "epoch": 2461213.0008007456,
+        "latitudeDeg": -33.87,
+        "longitudeDeg": 151.21
+      },
+      "expected": {
+        "altitudeDeg": -62.34517853544217,
+        "solarTimeHours": 22.044161465189248
+      }
+    },
+    {
+      "id": "june-mcmurdostation",
+      "input": {
+        "epoch": 2461213.0008007456,
+        "latitudeDeg": -77.85,
+        "longitudeDeg": 166.67
+      },
+      "expected": {
+        "altitudeDeg": -35.18960209312795,
+        "solarTimeHours": 23.074828131855917
+      }
+    },
+    {
+      "id": "december-reykjavk",
+      "input": {
+        "epoch": 2461396.0008007362,
+        "latitudeDeg": 64.15,
+        "longitudeDeg": -21.94
+      },
+      "expected": {
+        "altitudeDeg": 0.8121157865470575,
+        "solarTimeHours": 10.56347067827366
+      }
+    },
+    {
+      "id": "december-london",
+      "input": {
+        "epoch": 2461396.0008007362,
+        "latitudeDeg": 51.51,
+        "longitudeDeg": -0.13
+      },
+      "expected": {
+        "altitudeDeg": 15.054395148389982,
+        "solarTimeHours": 12.017470678273668
+      }
+    },
+    {
+      "id": "december-madrid",
+      "input": {
+        "epoch": 2461396.0008007362,
+        "latitudeDeg": 40.42,
+        "longitudeDeg": -3.7
+      },
+      "expected": {
+        "altitudeDeg": 26.070489675588824,
+        "solarTimeHours": 11.779470678273668
+      }
+    },
+    {
+      "id": "december-tokyo",
+      "input": {
+        "epoch": 2461396.0008007362,
+        "latitudeDeg": 35.68,
+        "longitudeDeg": 139.69
+      },
+      "expected": {
+        "altitudeDeg": -53.47269339640536,
+        "solarTimeHours": 21.338804011606996
+      }
+    },
+    {
+      "id": "december-sydney",
+      "input": {
+        "epoch": 2461396.0008007362,
+        "latitudeDeg": -33.87,
+        "longitudeDeg": 151.21
+      },
+      "expected": {
+        "altitudeDeg": -26.646909852316597,
+        "solarTimeHours": 22.106804011606997
+      }
+    },
+    {
+      "id": "december-mcmurdostation",
+      "input": {
+        "epoch": 2461396.0008007362,
+        "latitudeDeg": -77.85,
+        "longitudeDeg": 166.67
+      },
+      "expected": {
+        "altitudeDeg": 11.57182264637888,
+        "solarTimeHours": 23.137470678273665
+      }
+    }
+  ]
+}

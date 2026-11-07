@@ -249,3 +249,46 @@ public func deviceZone(at epoch: JdTdb) -> EarthZone {
         label: zone.abbreviation(for: date) ?? "UTC"
     )
 }
+
+/**
+ How high the Sun is above the horizon at a point on a body, in degrees.
+
+ Ported from `engine/src/solar-time.ts` and gated by the conformance suite. Negative means
+ below it, so this is the whole answer to "is it night there" rather than an approximation of
+ one: it reads the Sun's declination off the sub-solar point as well as its longitude, so it is
+ right at the poles and right in winter. A guess made from longitude alone puts the Sun over
+ McMurdo at midday in June, and it is thirty-five degrees under the horizon.
+
+ Geometric. No refraction and no allowance for the Sun's half-degree width, which together lift
+ apparent sunrise about 0.83 degrees earlier than this reports.
+ */
+public func solarAltitudeDeg(
+    _ body: BodyId, at epoch: JdTdb, latitudeDeg: Double, longitudeDeg: Double
+) -> Double? {
+    guard let subSolar = subSolarPoint(body, at: epoch) else { return nil }
+    let lat = latitudeDeg * degrees
+    let dec = subSolar.latitudeDeg * degrees
+    // The hour angle is how far round the body you are from the point the Sun is over.
+    let hourAngle = (longitudeDeg - subSolar.longitudeDeg) * degrees
+    let sinAltitude = sin(lat) * sin(dec) + cos(lat) * cos(dec) * cos(hourAngle)
+    return asin(Swift.max(-1, Swift.min(1, sinAltitude))) / degrees
+}
+
+/**
+ Apparent solar time at a point, in hours, or nil where there is no sunrise to count from.
+
+ The reason a time zone is worth explaining. Civil time is a decision taken for a whole country
+ at once; this is what the Sun is doing at that spot. Madrid keeps the same clock as Warsaw and
+ sits nineteen degrees west of it, so its noon arrives an hour and a quarter after the clock
+ says, which is the whole lesson in one row.
+ */
+public func solarTimeHoursAt(
+    _ body: BodyId, at epoch: JdTdb, longitudeDeg: Double
+) -> Double? {
+    guard let clock = solarClock(body, at: epoch) else { return nil }
+    let sense: Double = bodyContracts[body]!.rotation.rotationRateDegPerDay < 0 ? -1 : 1
+    let hours = clock.hours + (sense * longitudeDeg * 24) / 360
+    return hours.truncatingRemainder(dividingBy: 24) < 0
+        ? hours.truncatingRemainder(dividingBy: 24) + 24
+        : hours.truncatingRemainder(dividingBy: 24)
+}
