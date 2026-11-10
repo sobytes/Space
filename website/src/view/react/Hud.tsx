@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ephemerisStandingAt, epochFromIsoUtc, epochFromUnixTimestamp, unixSecondsFromEpoch,
 } from "@solar/engine/when";
@@ -181,11 +181,53 @@ const SURFACE_DATA = {
   },
 } as const;
 
+/**
+ * Whether a scrolling box has anything left below the fold.
+ *
+ * Needed because the scrollbar cannot be relied on to say so. macOS and Chrome default to
+ * overlay scrollbars, which are invisible until you are already scrolling, and a panel clipped
+ * mid-sentence with no bar beside it reads as the end of the panel rather than the middle of
+ * one. Styling `::-webkit-scrollbar` is the usual answer and it does not survive a headless
+ * Chromium, which is to say it is not something to verify a fix against.
+ *
+ * So the fix is a fade the panel draws itself: measured from the element, re-measured when the
+ * focused body changes the content under it, and gone the moment you reach the bottom.
+ */
+function useHasMoreBelow(
+  key: string,
+): [React.RefObject<HTMLDivElement | null>, boolean, () => void] {
+  const ref = useRef<HTMLDivElement>(null);
+  const [more, setMore] = useState(false);
+
+  const measure = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    // A pixel of slack: fractional layout can leave scrollTop a hair short of the true end.
+    setMore(el.scrollHeight - el.scrollTop - el.clientHeight > 1);
+  }, []);
+
+  // Keyed on the focused body, because switching to Mercury replaces every row in the panel
+  // and the old answer is about content that is no longer there. The window can resize too,
+  // which changes the height available without touching the content at all.
+  useEffect(() => {
+    // Back to the top on a new body. Reading halfway down Earth and clicking Mercury otherwise
+    // lands you halfway down Mercury, past its name and its one-line headline.
+    ref.current?.scrollTo({ top: 0 });
+    measure();
+    const observer = new ResizeObserver(measure);
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [key, measure]);
+
+  return [ref, more, measure];
+}
+
 function BodyPanel({ epoch }: { epoch: JdTdb }) {
   const focus = useViewportValue(selectFocus);
   const altitudeM = useViewportValue(selectAltitude);
   const rate = useViewportValue(selectRate);
   const contract = BODY_CONTRACTS[focus];
+  const [scroller, hasMore, onScroll] = useHasMoreBelow(focus);
   // Pure in the body id, so it costs one memo rather than a recompute per published epoch.
   const time = useMemo(() => timeSense(focus), [focus]);
   // Recomputed on the viewport's 10 Hz publish rather than per frame, like every other
@@ -225,7 +267,25 @@ function BodyPanel({ epoch }: { epoch: JdTdb }) {
       : null;
 
   return (
-    <aside className="pointer-events-auto w-[22rem] max-w-[calc(100vw-2rem)] rounded-xl border border-white/10 bg-black/70 p-4 backdrop-blur-md">
+    /**
+     * Scrolls rather than grows.
+     *
+     * Earth's panel is 1,045 pixels tall. In a 900 pixel window that is not a long panel, it is
+     * a panel that shoves the clock 273 pixels below the bottom of the screen, and the clock is
+     * the one control the whole simulator is about. Reported as "i can control or click the
+     * time i am not even sure where it is?", which is exactly right: it was not on screen.
+     *
+     * `max-h-full` resolves against the HUD's top row, which is `flex-1` of a column with a
+     * definite height, so the panel takes whatever is left once the bars at the bottom have had
+     * theirs, and scrolls the remainder. `overscroll-contain` keeps a flick at the end of the
+     * panel from scrolling the page behind it.
+     */
+    <aside className="pointer-events-auto relative flex max-h-full w-[22rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border border-white/10 bg-black/70 backdrop-blur-md">
+      <div
+        ref={scroller}
+        onScroll={onScroll}
+        className="scroll-cue min-h-0 flex-1 overflow-y-auto overscroll-contain p-4"
+      >
       <h2 className="text-lg font-semibold tracking-tight text-zinc-50">{contract.displayName}</h2>
       <p className="mt-1 text-sm leading-snug text-amber-200/90">{contract.education.oneLine}</p>
 
@@ -402,6 +462,18 @@ function BodyPanel({ epoch }: { epoch: JdTdb }) {
           ? ` Heliocentric longitude is good to about ${accuracy.arcsec.toFixed(0)} arcseconds${accuracy.widened ? ", wider than JPL's nominal for this body and declared in the source" : ""}.`
           : " Moon position is from mean elements, good to roughly a degree, not an eclipse-grade theory."}
       </Provenance>
+      </div>
+      {/*
+        There is more below. Drawn by the panel rather than left to the scrollbar, for the
+        reason in `useHasMoreBelow`, and taking no pointer events so a drag that starts over it
+        still reaches the scroller underneath.
+      */}
+      <div
+        aria-hidden
+        className={`pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/95 via-black/60 to-transparent transition-opacity duration-200 ${
+          hasMore ? "opacity-100" : "opacity-0"
+        }`}
+      />
     </aside>
   );
 }
@@ -621,7 +693,7 @@ function BodyList() {
   const focus = useViewportValue(selectFocus);
 
   return (
-    <nav className="pointer-events-auto flex max-w-[min(62vw,52rem)] flex-wrap gap-1.5 overflow-y-auto rounded-xl border border-white/10 bg-black/70 px-3 py-2 backdrop-blur-md">
+    <nav className="scroll-cue pointer-events-auto flex max-h-full max-w-[min(62vw,52rem)] flex-wrap gap-1.5 overflow-y-auto overscroll-contain rounded-xl border border-white/10 bg-black/70 px-3 py-2 backdrop-blur-md">
       {BODY_IDS.map((id) => (
         <button
           key={id}
@@ -845,11 +917,19 @@ export function Hud() {
   }
 
   return (
-    <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-4">
+    /**
+     * The panels give way to the clock, not the other way round.
+     *
+     * This was `justify-between` over an unbounded top row, which only looks like a two-ended
+     * layout while the panels happen to fit. They do not: the top row is as tall as whichever
+     * body is focused, and a tall one simply pushed the gravity and time bars off the bottom
+     * edge. `flex-1 min-h-0` on the top row and `shrink-0` on the bars reverses who yields.
+     */
+    <div className="pointer-events-none absolute inset-0 flex flex-col gap-3 p-4">
       <LabelLayer visible={labels} />
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex min-h-0 flex-1 items-start justify-between gap-3">
         <BodyList />
-        <div className="flex items-start gap-2">
+        <div className="flex h-full min-h-0 items-start gap-2">
           <BodyPanel epoch={epoch} />
           <div className="pointer-events-auto flex shrink-0 flex-col gap-1.5">
             <SystemViewButton />
@@ -906,7 +986,7 @@ export function Hud() {
           </div>
         </div>
       </div>
-      <div className="flex flex-col items-center gap-2">
+      <div className="flex shrink-0 flex-col items-center gap-2">
         <GravityBar />
         <TimeBar />
       </div>
