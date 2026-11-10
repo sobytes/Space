@@ -21,7 +21,7 @@ import { engulfedAt, orbitExpansionAt, solarRadiusMetresAt } from "@solar/engine
 import { createNBodyTracker, type NBodyTracker } from "@solar/engine/nbody-tracker";
 import type { MassiveBody } from "@solar/engine/nbody";
 import { BODY_CONTRACTS, BODY_IDS, type BodyId } from "@solar/engine/bodies/registry";
-import { orientationOf } from "@solar/engine/rotation";
+import { bodyFrameOf } from "@solar/engine/rotation";
 import type { JdTdb } from "@solar/engine/time";
 import { length, type Vec3 } from "@solar/engine/vec";
 import { placeAnchor, relativeTo } from "./internal/place";
@@ -357,7 +357,6 @@ export function createViewport(init: ViewportInit = {}): Viewport {
       if (!node || !worldPosition) continue;
 
       const contract = BODY_CONTRACTS[id];
-      const orientation = orientationOf(id, clock.epoch);
 
       /**
        * What the star has swallowed stops being drawn.
@@ -377,9 +376,9 @@ export function createViewport(init: ViewportInit = {}): Viewport {
           id === "sun" && deepTimeAgeGyr !== null
             ? solarRadiusMetresAt(deepTimeAgeGyr)
             : contract.equatorialRadiusM,
-        spinRadians: orientation.spin,
-        tiltRadians: orientation.tilt,
-        poleAzimuthRadians: orientation.poleAzimuth,
+        // The pole and the prime meridian as vectors, not as angles to be reassembled. See
+        // `placeAnchor` for what reassembling them cost.
+        frame: bodyFrameOf(id, clock.epoch),
       });
     }
 

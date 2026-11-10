@@ -17,7 +17,7 @@ import { BODY_CONTRACTS, type BodyId } from "./bodies/registry";
 import type { RotationalElements } from "./bodies/contract";
 import { J2000_JD, type JdTdb } from "./time";
 import { DAYS_PER_JULIAN_CENTURY, normalizeAngle, toRadians } from "./units";
-import { rotateX, vec3, type Vec3 } from "./vec";
+import { cross, rotateX, vec3, type Vec3 } from "./vec";
 
 /**
  * Obliquity of the ecliptic at J2000.0, in degrees.
@@ -81,6 +81,76 @@ export function orientationFromElements(
 
 export function orientationOf(body: BodyId, epoch: JdTdb): Orientation {
   return orientationFromElements(BODY_CONTRACTS[body].rotation, epoch);
+}
+
+/**
+ * A body's three axes, as a renderer or a sundial needs them.
+ *
+ * `Orientation` above gives the pole plus two angles, which is enough to say which way the axis
+ * points and nothing at all about which face is turned towards you. Reconstructing that from
+ * the angles means picking an Euler sequence, and the sequence is where this goes wrong: the
+ * website drew every body from `tilt` and `poleAzimuth` through a y-up sequence while render
+ * space is z-up, which put every spin axis between 52 and 96 degrees from the IAU pole. Earth
+ * was 68 degrees out, far enough that the camera looked almost down a pole and the planet
+ * appeared to turn the wrong way. Reported exactly that way: "earth is spining on the wrong
+ * direction?".
+ *
+ * So the frame is built here, once, as vectors. There is no sequence to choose and nothing for
+ * a client to reconstruct, and `subSolarPoint` and the drawn globe now come from the same three
+ * lines of arithmetic, which is what stops a lit hemisphere and a clock disagreeing.
+ */
+export interface BodyFrame {
+  /** Unit vector along the body's north pole. */
+  readonly pole: Vec3;
+  /** Unit vector through the point where the prime meridian crosses the equator. */
+  readonly primeMeridian: Vec3;
+  /** Unit vector through the equator a quarter turn east of the prime meridian. */
+  readonly east: Vec3;
+}
+
+/**
+ * The standard IAU construction, in the J2000 equatorial frame the elements are published in.
+ *
+ * The pole comes straight from the published right ascension and declination. The node, where
+ * the body's equator crosses the ICRF equator, is 90 degrees of right ascension ahead of the
+ * pole. The prime meridian is that node carried round the pole by W.
+ */
+export function bodyFrameEquatorial(rotation: RotationalElements, epoch: JdTdb): BodyFrame {
+  const daysSinceJ2000 = epoch - J2000_JD;
+  const centuries = daysSinceJ2000 / DAYS_PER_JULIAN_CENTURY;
+
+  const ra = toRadians((rotation.poleRaDeg
+    + rotation.poleRaRateDegPerCentury * centuries) as never);
+  const dec = toRadians((rotation.poleDecDeg
+    + rotation.poleDecRateDegPerCentury * centuries) as never);
+  const w = toRadians((rotation.primeMeridianDeg
+    + rotation.rotationRateDegPerDay * daysSinceJ2000) as never);
+
+  const pole = directionFrom(ra, dec);
+  const node = vec3(-Math.sin(ra), Math.cos(ra), 0);
+  const nodeCrossPole = cross(pole, node);
+
+  // Rodrigues about the pole by W. The node is perpendicular to the pole, so the third term
+  // vanishes and this is a plain rotation in the plane the two vectors span.
+  const cw = Math.cos(w);
+  const sw = Math.sin(w);
+  const primeMeridian = vec3(
+    node.x * cw + nodeCrossPole.x * sw,
+    node.y * cw + nodeCrossPole.y * sw,
+    node.z * cw + nodeCrossPole.z * sw,
+  );
+
+  return { pole, primeMeridian, east: cross(pole, primeMeridian) };
+}
+
+/** The same frame in the J2000 ecliptic, which is the frame every position here is in. */
+export function bodyFrameOf(body: BodyId, epoch: JdTdb): BodyFrame {
+  const frame = bodyFrameEquatorial(BODY_CONTRACTS[body].rotation, epoch);
+  return {
+    pole: equatorialToEcliptic(frame.pole),
+    primeMeridian: equatorialToEcliptic(frame.primeMeridian),
+    east: equatorialToEcliptic(frame.east),
+  };
 }
 
 /** Sidereal rotation period in days, signed. Negative is retrograde. */

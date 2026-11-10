@@ -43,10 +43,9 @@
 
 import { BODY_CONTRACTS, type BodyId } from "./bodies/registry";
 import { heliocentricPositionOf } from "./bodies/position";
-import { OBLIQUITY_J2000_DEG } from "./rotation";
+import { OBLIQUITY_J2000_DEG, bodyFrameEquatorial } from "./rotation";
 import { timeSense } from "./time-sense";
 import { J2000_JD, epochMsFromJdUtc, utcFromTdb, type JdTdb } from "./time";
-import { DAYS_PER_JULIAN_CENTURY } from "./units";
 import type { Vec3 } from "./vec";
 
 const DEG = Math.PI / 180;
@@ -65,48 +64,19 @@ function eclipticToEquatorial(v: Vec3): Vec3 {
 }
 
 const dot = (a: Vec3, b: Vec3) => a.x * b.x + a.y * b.y + a.z * b.z;
-const cross = (a: Vec3, b: Vec3): Vec3 => ({
-  x: a.y * b.z - a.z * b.y,
-  y: a.z * b.x - a.x * b.z,
-  z: a.x * b.y - a.y * b.x,
-});
 
 /**
  * The body's own axes at this epoch, in the J2000 equatorial frame.
  *
- * The standard IAU construction. The pole comes straight from the published right ascension
- * and declination. The node, where the body's equator crosses the ICRF equator, is 90 degrees
- * of right ascension ahead of the pole. The prime meridian is that node carried round the pole
- * by W, which is the angle the engine already evaluates to draw the body's rotation.
+ * This used to be a second copy of the IAU construction, written here because the renderer did
+ * not need it. The renderer turned out to need it very much: drawing the globe from Euler
+ * angles instead put every spin axis tens of degrees off the pole this function uses, so the
+ * lit half of the drawn planet and the lit half this clock reports were two different halves.
+ * One construction, in `rotation.ts`, is what makes that disagreement impossible rather than
+ * merely unlikely.
  */
 function bodyFrame(body: BodyId, epoch: JdTdb) {
-  const rotation = BODY_CONTRACTS[body].rotation;
-  const days = epoch - J2000_JD;
-  const centuries = days / DAYS_PER_JULIAN_CENTURY;
-
-  const ra = (rotation.poleRaDeg + rotation.poleRaRateDegPerCentury * centuries) * DEG;
-  const dec = (rotation.poleDecDeg + rotation.poleDecRateDegPerCentury * centuries) * DEG;
-  const w = (rotation.primeMeridianDeg + rotation.rotationRateDegPerDay * days) * DEG;
-
-  const pole: Vec3 = {
-    x: Math.cos(dec) * Math.cos(ra),
-    y: Math.cos(dec) * Math.sin(ra),
-    z: Math.sin(dec),
-  };
-  // Ascending node of the body equator on the ICRF equator, at right ascension ra + 90.
-  const node: Vec3 = { x: -Math.sin(ra), y: Math.cos(ra), z: 0 };
-  const nodeCrossPole = cross(pole, node);
-
-  // Rodrigues about the pole by W, which for a unit axis perpendicular to the node is just a
-  // rotation in the plane the two span.
-  const cw = Math.cos(w);
-  const sw = Math.sin(w);
-  const primeMeridian: Vec3 = {
-    x: node.x * cw + nodeCrossPole.x * sw,
-    y: node.y * cw + nodeCrossPole.y * sw,
-    z: node.z * cw + nodeCrossPole.z * sw,
-  };
-  return { pole, primeMeridian, east: cross(pole, primeMeridian) };
+  return bodyFrameEquatorial(BODY_CONTRACTS[body].rotation, epoch);
 }
 
 export interface SubSolarPoint {

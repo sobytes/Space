@@ -257,13 +257,30 @@ async function exerciseCraters() {
     .greyscale()
     .toFile(patch);
 
-  const { data, info } = await sharp(patch).raw().toBuffer({ resolveWithObject: true });
+  /**
+   * Greyscaled in the same pipeline the bytes come out of, not read back off the file.
+   *
+   * This re-read the patch it had just written, with `sharp(patch).raw()` and no `greyscale`
+   * on that second pipeline. `.greyscale()` sets the output colourspace but sharp still writes
+   * the PNG with three channels, so the buffer came back interleaved while the loop indexed it
+   * as if it held one value per pixel: it walked a third of the image and differenced
+   * neighbouring channels of the same pixel, which for a grey pixel is zero.
+   *
+   * The result was a gate that reported about 1.0 whatever the Moon looked like. It read 1.36
+   * on a frame measuring 2.48, so it had been failing on main against its own 1.5 bar, for a
+   * reason that had nothing to do with the Moon. The authoritative sweep in `relief-sweep.mjs`
+   * does the extract, the greyscale and the raw read as one pipeline and was never wrong.
+   *
+   * The patch file is still written, because being able to look at what was measured is the
+   * point of a visual harness.
+   */
+  const { data, info } = await sharp(patch).greyscale().raw().toBuffer({ resolveWithObject: true });
   let differences = 0;
   let count = 0;
   for (let y = 0; y < info.height; y++) {
     for (let x = 1; x < info.width; x++) {
-      const i = y * info.width + x;
-      differences += Math.abs(data[i] - data[i - 1]);
+      const i = (y * info.width + x) * info.channels;
+      differences += Math.abs(data[i] - data[i - info.channels]);
       count += 1;
     }
   }
