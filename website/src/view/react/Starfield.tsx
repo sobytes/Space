@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { AdditiveBlending, BufferAttribute, BufferGeometry, Points } from "three";
+import {
+  AdditiveBlending, BufferAttribute, BufferGeometry, Points, ShaderMaterial,
+} from "three";
 
 /**
  * The real sky, from the Yale Bright Star Catalogue.
@@ -44,6 +46,7 @@ export function Starfield() {
   const camera = useThree((s) => s.camera);
   const points = useRef<Points>(null);
   const [geometry, setGeometry] = useState<BufferGeometry | null>(null);
+  const material = useStarMaterial();
 
   useEffect(() => {
     let cancelled = false;
@@ -106,19 +109,77 @@ export function Starfield() {
     points.current.scale.setScalar(radius);
   });
 
+  useEffect(() => () => material.dispose(), [material]);
+
   if (!geometry) return null;
 
   return (
-    <points ref={points} geometry={geometry} frustumCulled={false} renderOrder={-1}>
-      <pointsMaterial
-        vertexColors
-        size={2.2}
-        sizeAttenuation={false}
-        transparent
-        depthWrite={false}
-        blending={AdditiveBlending}
-        toneMapped={false}
-      />
-    </points>
+    <points
+      ref={points}
+      geometry={geometry}
+      material={material}
+      frustumCulled={false}
+      renderOrder={-1}
+    />
+  );
+}
+
+/**
+ * A sky, rather than a field of identical squares.
+ *
+ * `aSize` has been computed from each star's magnitude since the catalogue was first loaded and
+ * nothing read it: a `PointsMaterial` takes one size for every point, so all 9,096 stars were
+ * drawn the same 2.2 pixels and only their colour carried the magnitude. Untextured points are
+ * also hard squares. The result was a uniform grid of little white squares at one size, which
+ * is what the eye reads as noise rather than as depth, and in the system view it competed with
+ * the planets: reported as "its super hard to even see the planet on the axis live with all
+ * the dots?".
+ *
+ * Magnitude now drives the size as well as the brightness, which is what it does in the sky:
+ * Sirius is a point you cannot miss and a seventh-magnitude star is barely there. The falloff
+ * makes them round. Neither changes a single catalogue position, and the count is unchanged at
+ * 9,096 stars, because the fix for a crowded sky is not to throw away stars.
+ *
+ * The floor on the size matters as much as the range. An earlier pass set it at 0.8 pixels and
+ * the sky emptied out at a device pixel ratio of 1: most of a bright star catalogue is faint,
+ * and a sub-pixel round point is nothing at all. Thinning the sky was never the fix either.
+ */
+function useStarMaterial(): ShaderMaterial {
+  return useMemo(
+    () =>
+      new ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        blending: AdditiveBlending,
+        // Matching three's own points shader, which folds the device pixel ratio into the size
+        // uniform. Without it every star is half size on a retina display.
+        uniforms: { uPixelRatio: { value: Math.min(2, window.devicePixelRatio || 1) } },
+        vertexShader: `
+          attribute float aSize;
+          attribute vec3 color;
+          varying vec3 vColour;
+          uniform float uPixelRatio;
+          void main() {
+            vColour = color;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            // The catalogue's own range, not an invented one: aSize is the brightness term,
+            // which runs from about 0.28 at seventh magnitude to 1 at first and brighter, so
+            // this is 2.0 pixels for the faintest star in the sky and 3.7 for Sirius.
+            gl_PointSize = (1.4 + 2.3 * aSize) * uPixelRatio;
+          }
+        `,
+        fragmentShader: `
+          varying vec3 vColour;
+          void main() {
+            float d = length(gl_PointCoord - vec2(0.5));
+            // Wide enough that a two-pixel star still has a solid centre. A falloff tuned on
+            // the bright ones alone makes the faint half of the catalogue disappear.
+            float alpha = smoothstep(0.5, 0.24, d);
+            if (alpha <= 0.002) discard;
+            gl_FragColor = vec4(vColour, alpha);
+          }
+        `,
+      }),
+    [],
   );
 }

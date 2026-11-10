@@ -60,7 +60,7 @@ export function BodyMarkers() {
           vColour = aColour;
           vec4 viewPosition = modelViewMatrix * vec4(position, 1.0);
           gl_Position = projectionMatrix * viewPosition;
-          gl_PointSize = (4.0 + 7.0 * aSize) * uPixelRatio;
+          gl_PointSize = (4.0 + 9.0 * aSize) * uPixelRatio;
         }
       `,
       fragmentShader: `
@@ -68,10 +68,19 @@ export function BodyMarkers() {
         varying vec3 vColour;
         void main() {
           if (vFade <= 0.001) discard;
-          // A soft radial falloff reads as a glow rather than a hard square sprite.
           float d = length(gl_PointCoord - vec2(0.5));
-          float alpha = smoothstep(0.5, 0.08, d) * vFade;
-          gl_FragColor = vec4(vColour, alpha);
+          /**
+           * A core inside a glow, rather than a glow alone.
+           *
+           * One smoothstep across the whole sprite is a blob whose brightest pixel is only a
+           * little brighter than its edge, and next to the time marks strung along the same
+           * orbit in the same tint that is not enough to pick out: reported as not being able
+           * to see the planet for the dots. A small saturated centre is what the eye lands on,
+           * and the halo around it is what keeps the body findable where it is under a pixel.
+           */
+          float core = smoothstep(0.30, 0.10, d);
+          float halo = smoothstep(0.5, 0.18, d) * 0.4;
+          gl_FragColor = vec4(vColour, min(1.0, core + halo) * vFade);
         }
       `,
     });

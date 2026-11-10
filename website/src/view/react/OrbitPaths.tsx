@@ -107,12 +107,27 @@ function TimeMarks({ orbit, colour }: { orbit: Orbit; colour: string }) {
     geometry.setAttribute("position", new BufferAttribute(new Float32Array(MAX_MARKS * 3), 3));
     const material = new PointsMaterial({
       color: colour,
-      // Screen-space pixels, so a mark stays legible whether the orbit is an astronomical
-      // unit or four hundred thousand kilometres across.
-      size: 4.5,
+      /**
+       * A tick on a line, not an object in the scene.
+       *
+       * These were 4.5 pixels at 0.9 opacity in the body's own tint, which is the same colour
+       * and very nearly the same size as the body's own marker. In the system view that put
+       * Earth among two dozen identical blue squares strung along its own orbit, and the
+       * planet was no longer the thing your eye found: reported as "its super hard to even
+       * see the planet on the axis live with all the dots?".
+       *
+       * Two and a half pixels at 0.38 still reads as a trail of marks at this scale, and the
+       * marker it sits next to is now unambiguously brighter and larger. Dimming the marks
+       * rather than dropping them keeps what they are for, which is Kepler's second law shown
+       * by the crowding near periapsis rather than asserted.
+       *
+       * Screen-space pixels, so a mark stays legible whether the orbit is an astronomical unit
+       * or four hundred thousand kilometres across.
+       */
+      size: 2.5,
       sizeAttenuation: false,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.38,
       depthWrite: false,
     });
     const object = new Points(geometry, material);
